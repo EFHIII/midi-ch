@@ -56,7 +56,7 @@ function toggleTrack(track){
   settings.tracks[track] = !settings.tracks[track];
 }
 function loadHTMLcontent(){
-  htmlContent.innerHTML='';
+  htmlContent.innerHTML='<button id="blob" class="btn btn-primary">click to download</button><br>';
   settings = {
     tracks:[]
   };
@@ -67,6 +67,17 @@ function loadHTMLcontent(){
 
   preview.ppq=currentMidi.header.ppq;
   preview.speed=((4/30)*currentMidi.header.ppq)>>0;
+
+  var zip = new JSZip();
+  zip.file("notes.chart", "Hello world\n");
+
+  document.getElementById("blob").addEventListener("click", function () {
+      zip.generateAsync({type:"blob"}).then(function (blob) { // 1) generate the zip file
+          saveAs(blob, currentMidi.name+".zip");                          // 2) trigger the download
+      }, function (err) {
+          jQuery("#blob").text(err);
+      });
+  });
 }
 
 var colors;

@@ -170,7 +170,7 @@ function draw() {
   var timeSignature=0;
   while(Y>0){
     //while(tempo<currentMidi.header.tempos.length-1&&)
-    Y-=ticksPerNote/8*preview.scale/height;
+    Y-=ticksPerNote/8*(preview.scale/height);
     if(Y<height){
       line(0,Y,width,Y);
     }

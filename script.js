@@ -12,6 +12,13 @@ TODO:
 - export notes.chart,song.ini,song.ogg as .zip
   - https://stuk.github.io/jszip/
 
+
+  after another note:
+  tick = N 5 0 //hopo
+  tick = N 6 0 //tap
+
+  independent:
+  tick = N 7 0 //open
 */
 if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
   document.querySelector("#FileDrop #Text").textContent = "Reading files not supported by this browser";
@@ -57,6 +64,9 @@ function loadHTMLcontent(){
     settings.tracks[i]=true;
     htmlContent.innerHTML+='<input type="checkbox" checked="true" onClick="toggleTrack('+i+')"><label>track '+currentMidi.tracks[i].name+'<br>'+currentMidi.tracks[i].instrument.family+': '+currentMidi.tracks[i].instrument.name+'</label><br>';
   }
+
+  preview.ppq=currentMidi.ppq;
+  preview.speed=(4/30)*currentMidi.ppq>>0;
 }
 
 var colors;
@@ -103,7 +113,7 @@ function drawNote(note,y,type){
 var preview={
   scale:4000,
   time:0,
-  speed:50
+  speed:30
 };
 
 function findNotes(track,from,to){
@@ -148,14 +158,14 @@ function draw() {
   for(var i=0;i<currentMidi.tracks.length;i++){
     if(settings.tracks[i]){
       var note=findNotes(currentMidi.tracks[i],last,last+preview.scale);
-  while(note<currentMidi.tracks[i].notes.length-1&&currentMidi.tracks[i].notes[note].ticks<=last+preview.scale){
-        if(!lastNote[i]||note>lastNote[i]){
+      while(note<currentMidi.tracks[i].notes.length-1&&currentMidi.tracks[i].notes[note].ticks<=last+preview.scale){
+      if(!lastNote[i]||note>lastNote[i]){
           drawNote(currentMidi.tracks[i].notes[note].midi%5,height-(currentMidi.tracks[i].notes[note].ticks-preview.time)/preview.scale*height);
           lastNote[i]=note;
         }
         note++;
       }
-   }
+    }
   }
 }
 

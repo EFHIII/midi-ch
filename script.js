@@ -66,7 +66,7 @@ function loadHTMLcontent(){
   }
 
   preview.ppq=currentMidi.header.ppq;
-  preview.speed=(4/30)*currentMidi.header.ppq>>0;
+  preview.speed=((4/30)*currentMidi.header.ppq)>>0;
 }
 
 var colors;
@@ -113,7 +113,8 @@ function drawNote(note,y,type){
 var preview={
   scale:4000,
   time:0,
-  speed:30
+  speed:30,
+  ppq:100
 };
 
 function findNotes(track,from,to){
@@ -139,6 +140,9 @@ function findNotes(track,from,to){
   return bottom;
 };
 
+var lastFrameTime=Date.now();
+var currentFrameTime=Date.now();
+
 function draw() {
   background(0);
   stroke(200);
@@ -149,11 +153,29 @@ function draw() {
   if(!currentMidi){
     return;
   }
-  preview.time+=preview.speed;
+  lastFrameTime=currentFrameTime;
+  currentFrameTime=Date.now();
+  preview.time+=preview.speed*((currentFrameTime-lastFrameTime)/(1000/30));
   if(preview.time>currentMidi.durationTicks){
     preview.time=0;
   }
   var last=preview.time;
+
+  var Y=height+last;
+  strokeWeight(2);
+  stroke(255);//   7/12
+  var notesPerMeasuer=currentMidi.header.timeSignatures[0].timeSignatures[0];
+  var ticksPerNote=preview.ppq*currentMidi.header.tempos[0].bbm*currentMidi.header.timeSignatures[0].timeSignatures[0]/currentMidi.header.timeSignatures[0].timeSignatures[1];
+  var tempo=0;
+  var timeSignature=0;
+  while(Y>0){
+    //while(tempo<currentMidi.header.tempos.length-1&&)
+    if(Y<height){
+      Y-=ticksPerNote/8*preview.scale/height;
+      line(0,Y,width,Y);
+    }
+  }
+
   var lastNote=[];
   for(var i=0;i<currentMidi.tracks.length;i++){
     if(settings.tracks[i]){

@@ -65,8 +65,8 @@ function loadHTMLcontent(){
     htmlContent.innerHTML+='<input type="checkbox" checked="true" onClick="toggleTrack('+i+')"><label>track '+currentMidi.tracks[i].name+'<br>'+currentMidi.tracks[i].instrument.family+': '+currentMidi.tracks[i].instrument.name+'</label><br>';
   }
 
-  preview.ppq=currentMidi.ppq;
-  preview.speed=(4/30)*currentMidi.ppq>>0;
+  preview.ppq=currentMidi.header.ppq;
+  preview.speed=(4/30)*currentMidi.header.ppq>>0;
 }
 
 var colors;

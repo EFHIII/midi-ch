@@ -164,8 +164,8 @@ function draw() {
   var Y=height+last;
   strokeWeight(2);
   stroke(255);//   7/12
-  var notesPerMeasuer=currentMidi.header.timeSignatures[0].timeSignatures[0];
-  var ticksPerNote=preview.ppq*currentMidi.header.tempos[0].bbm*currentMidi.header.timeSignatures[0].timeSignatures[0]/currentMidi.header.timeSignatures[0].timeSignatures[1];
+  var notesPerMeasuer=currentMidi.header.timeSignatures[0].timeSignature[0];
+  var ticksPerNote=preview.ppq*currentMidi.header.tempos[0].bbm*currentMidi.header.timeSignatures[0].timeSignature[0]/currentMidi.header.timeSignatures[0].timeSignature[1];
   var tempo=0;
   var timeSignature=0;
   while(Y>0){

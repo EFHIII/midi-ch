@@ -20,6 +20,20 @@ TODO:
   independent:
   tick = N 7 0 //open
 */
+var albumpng='';
+$.ajax({
+  url: 'album.png',
+  type: 'GET',
+  success: function(data) {
+    albumpng=data;
+    if(!data){
+      console.log("There was an error, please view your logs");
+    }
+  },
+  error: function(error){
+    console.log(error);
+  }
+});
 if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
   document.querySelector("#FileDrop #Text").textContent = "Reading files not supported by this browser";
 }
@@ -69,7 +83,7 @@ function loadHTMLcontent(){
   preview.speed=((4/30)*currentMidi.header.ppq)>>0;
 
   var zip = new JSZip();
-  zip.file("album.png", document.getElementById('alb').innerHTML);
+  zip.file("album.png", albumpng);
   zip.file("song.ini", `[Song]
 name = "`+currentMidi.name+`"
 artist = `+currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="artist").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="artist")[0].text:'Unknown'+`

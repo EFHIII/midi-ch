@@ -69,7 +69,51 @@ function loadHTMLcontent(){
   preview.speed=((4/30)*currentMidi.header.ppq)>>0;
 
   var zip = new JSZip();
-  zip.file("notes.chart", "Hello world\n");
+  zip.file("song.ini", `[Song]
+name = "`+currentMidi.name+`"
+artist = `+currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="artist").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="artist")[0].text:'Unknown'+`
+album = `+currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="album").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="album")[0].text:'Unknown'+`
+genre = `+currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre")[0].text:'rock'+`
+year = `+currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year")[0].text:'Unknown'+`
+song_length = 161542
+count = 0
+diff_band = -1
+diff_guitar = -1
+diff_bass = -1
+diff_drums = -1
+diff_keys = -1
+diff_guitarghl = -1
+diff_bassghl = -1
+preview_start_time = 0
+frets = 0
+charter = Edward Haas
+icon = 0
+
+`);
+  zip.file("notes.chart", `[Song]
+{
+  Name = "`+currentMidi.name+`"
+  Charter = "Edward Haas"
+  Year = "`+currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year")[0].text:'Unknown'+`"
+  Offset = 0
+  Resolution = 5
+  Player2 = bass
+  Difficulty = 4
+  PreviewStart = 0
+  PreviewEnd = 0
+  Genre = "`+currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre")[0].text:'rock'+`"
+  MediaType = "cd"
+  MusicStream = "song.mp3"
+}
+[ExpertSingle]
+{
+  5 = N 0 0
+  10 = N 1 0
+  15 = N 2 0
+  20 = N 3 0
+  25 = N 6 0
+}
+`);
 
   document.getElementById("blob").addEventListener("click", function () {
       zip.generateAsync({type:"blob"}).then(function (blob) { // 1) generate the zip file

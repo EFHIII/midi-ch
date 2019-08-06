@@ -69,6 +69,7 @@ function loadHTMLcontent(){
   preview.speed=((4/30)*currentMidi.header.ppq)>>0;
 
   var zip = new JSZip();
+  zip.file("album.png", document.getElementById('alb').innerHTML);
   zip.file("song.ini", `[Song]
 name = "`+currentMidi.name+`"
 artist = `+currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="artist").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="artist")[0].text:'Unknown'+`

@@ -57,8 +57,12 @@ function parseFile(file){
 var htmlContent=document.getElementById('htmlContent');
 var unChartedNotes=[];
 var chartedNotes=[];
+var measureShift=true;
 function toggleTrack(track){
   settings.tracks[track] = !settings.tracks[track];
+}
+function toggleMeasureShift(){
+  measureShift = !measureShift;
 }
 
 function loadSettings(){
@@ -98,8 +102,6 @@ function loadSettings(){
   }
   distinctNotes.sort();
 
-  console.log(distinctNotes);
-
   unChartedNotes=[];
 
   var notesString='';
@@ -117,8 +119,62 @@ function loadSettings(){
   unChartedNotes.sort((a,b)=>a[0]-b[0]);
   chartedNotes=[];
 
+  var measure=[];
+  var onMeasure=-1;
+  var shiftMeasure=0;
   for(var i=0;i<unChartedNotes.length;i++){
-    chartedNotes[i]=unChartedNotes[i][1]%5;
+    if(measureShift){
+      if(i>0&&unChartedNotes[i-1][1]===unChartedNotes[i][1]){
+        chartedNotes[i]=chartedNotes[i-1];
+      }
+      else{
+        if((unChartedNotes[i][0]/(preview.ppq*4))>>0!=onMeasure){
+          var lastMeasure=measure.slice();
+          measure=[];
+          onMeasure=(unChartedNotes[i][0]/(preview.ppq*4))>>0;
+          var j=0;
+          while(i+j<unChartedNotes.length&&(unChartedNotes[i+j][0]/(preview.ppq*4))>>0==onMeasure){
+            if(measure.indexOf(unChartedNotes[i+j][1])<0){
+              measure.push(unChartedNotes[i+j][1]);
+            }
+            j++;
+          }
+          measure.sort((a,b)=>a-b);
+          console.log('measures');
+          console.log(lastMeasure);
+          console.log(measure);
+          if(measure.length<5&&onMeasure>0){
+            if(lastMeasure[0]<measure[0]){
+              shiftMeasure++;
+              if(measure.length<4&&lastMeasure[1]<measure[0]){
+                shiftMeasure++;
+              }
+            }
+            else if(lastMeasure[min(lastMeasure.length-1,measure.length-1)]>measure[min(lastMeasure.length-1,measure.length-1)]){
+              shiftMeasure--;
+              if(measure.length<4&&lastMeasure[min(lastMeasure.length-1,measure.length-1)]>measure[min(lastMeasure.length-1,measure.length-1)]){
+                shiftMeasure--;
+              }
+            }
+          }
+          else{
+            shiftMeasure=0;
+          }
+          while(shiftMeasure+measure.length>4){
+            shiftMeasure--;
+          }
+          if(shiftMeasure<0){
+            shiftMeasure=0;
+          }
+          console.log('shift: '+shiftMeasure);
+          console.log(measure);
+        }
+        chartedNotes[i]=(measure.indexOf(unChartedNotes[i][1])+shiftMeasure)%5;
+      }
+    }
+    else{
+      chartedNotes[i]=unChartedNotes[i][1]%5;
+    }
   }
 
   for(var i=0;i<chartedNotes.length;i++){
@@ -181,7 +237,14 @@ icon = efhiii
 }
 
 function loadHTMLcontent(){
-  htmlContent.innerHTML='<button id="blob" class="btn btn-primary">click to download</button><br><button class="btn btn-primary" onclick="loadSettings()">Load New Settings</button><br>';
+  measureShift=true;
+  htmlContent.innerHTML=
+  `<button id="blob" class="btn btn-primary">click to download</button><br>
+  <button class="btn btn-primary" onclick="loadSettings()">Load New Settings</button><br>
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" checked="true" class="custom-control-input" onClick="toggleMeasureShift()" id="measureToggle">
+      <label class="custom-control-label" for="measureToggle">Shift per measure</label>
+    </div`;
   settings = {
     tracks:[]
   };
@@ -209,6 +272,7 @@ function setup() {
 
 function drawNote(note,y,type,duration){
   noStroke();
+
   colors[note].setAlpha(150);
   fill(colors[note]);
   if(duration){
@@ -249,31 +313,6 @@ var preview={
   speed:30,
   ppq:100
 };
-
-/*
-function findNotes(track,from,to){
-  var interval=Math.ceil(track.notes.length/4);
-  var at=interval*2;
-  var pls=2;
-  while(interval>=1&&pls&&track.notes[at].ticks!=from){
-    if(interval == 1){pls--;}
-    if(track.notes[at].ticks>=from){
-      at-=interval;
-      if(at<0){at=0;}
-    }
-    else{
-      at+=interval;
-      if(at>track.notes.length-1){at=track.notes.length-1;}
-    }
-    interval=Math.ceil(interval/2);
-  }
-  var bottom=at;
-  while(bottom>0&&track.notes[bottom-1].ticks>=from){
-    bottom--;
-  }
-  return bottom;
-};
-*/
 
 function findNotes(from,to){
   var interval=Math.ceil(chartedNotes.length/4);
@@ -343,19 +382,7 @@ function draw() {
   }
 
   var lastNote=0;
-  /*
-  for(var i=0;i<currentMidi.tracks.length;i++){
-    if(settings.tracks[i]){
-      var note=findNotes(currentMidi.tracks[i],last,last+preview.scale);
-      while(note<currentMidi.tracks[i].notes.length-1&&currentMidi.tracks[i].notes[note].ticks<=last+preview.scale){
-      if(!lastNote[i]||note>lastNote[i]){
-          drawNote(currentMidi.tracks[i].notes[note].midi%5,height-(currentMidi.tracks[i].notes[note].ticks-preview.time)/preview.scale*height);
-          lastNote[i]=note;
-        }
-        note++;
-      }
-    }
-  }*/
+
   var note=findNotes(last,last+preview.scale);
   if(note<0){note=0;}
   while(note<chartedNotes.length&&unChartedNotes[i][0]<=last+preview.scale){

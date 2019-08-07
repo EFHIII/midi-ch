@@ -125,7 +125,7 @@ icon = efhiii
 }
 [ExpertSingle]
 {
-`+noteString+`}
+`+notesString+`}
 `);
 
   document.getElementById("blob").addEventListener("click", function () {

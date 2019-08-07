@@ -58,6 +58,11 @@ var htmlContent=document.getElementById('htmlContent');
 var unChartedNotes=[];
 var chartedNotes=[];
 var measureShift=true;
+var stripSustain=0;
+var patternLength=0;
+
+var quality=[0,0,0];
+
 function toggleTrack(track){
   settings.tracks[track] = !settings.tracks[track];
 }
@@ -66,6 +71,7 @@ function toggleMeasureShift(){
 }
 
 function loadSettings(){
+  patternLength = document.getElementById("patternLength").value;
   var old_element = document.getElementById("blob");
   var new_element = old_element.cloneNode(true);
   old_element.parentNode.replaceChild(new_element, old_element);
@@ -108,7 +114,7 @@ function loadSettings(){
   for(var i=0;i<currentMidi.tracks.length;i++){
     if(settings.tracks[i]){
       for(var note=0;note<currentMidi.tracks[i].notes.length;note++){
-        unChartedNotes.push([currentMidi.tracks[i].notes[note].ticks,distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi),currentMidi.tracks[i].notes[note].durationTicks<preview.ppq?0:currentMidi.tracks[i].notes[note].durationTicks]);
+        unChartedNotes.push([currentMidi.tracks[i].notes[note].ticks,distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi),currentMidi.tracks[i].notes[note].durationTicks<preview.ppq?0:max(0,currentMidi.tracks[i].notes[note].durationTicks-stripSustain)]);
         if(currentMidi.tracks[i].notes[note].ticks>songLength){
           songLength=currentMidi.tracks[i].notes[note].ticks;
         }
@@ -122,26 +128,25 @@ function loadSettings(){
   var measure=[];
   var onMeasure=-1;
   var shiftMeasure=0;
+  quality=[0,0,0,0];
   for(var i=0;i<unChartedNotes.length;i++){
     if(measureShift){
       if(i>0&&unChartedNotes[i-1][1]===unChartedNotes[i][1]){
         chartedNotes[i]=chartedNotes[i-1];
       }
       else{
-        if((unChartedNotes[i][0]/(preview.ppq*4))>>0!=onMeasure){
+        if((unChartedNotes[i][0]/(preview.ppq*patternLength))>>0!=onMeasure){
           var lastMeasure=measure.slice();
           measure=[];
-          onMeasure=(unChartedNotes[i][0]/(preview.ppq*4))>>0;
+          onMeasure=(unChartedNotes[i][0]/(preview.ppq*patternLength))>>0;
           var j=0;
-          while(i+j<unChartedNotes.length&&(unChartedNotes[i+j][0]/(preview.ppq*4))>>0==onMeasure){
+          while(i+j<unChartedNotes.length&&(unChartedNotes[i+j][0]/(preview.ppq*patternLength))>>0==onMeasure){
             if(measure.indexOf(unChartedNotes[i+j][1])<0){
               measure.push(unChartedNotes[i+j][1]);
             }
             j++;
           }
           measure.sort((a,b)=>a-b);
-          console.log('measures');
-          console.log(lastMeasure);
           console.log(measure);
           if(measure.length<5&&onMeasure>0){
             if(lastMeasure[0]<measure[0]){
@@ -166,8 +171,17 @@ function loadSettings(){
           if(shiftMeasure<0){
             shiftMeasure=0;
           }
+          quality[0]++;
+          if(measure.length>5){
+            quality[1]++;
+          }
+          else if (measure.length<3) {
+            quality[2]++;
+          }
+          else {
+            quality[3]++;
+          }
           console.log('shift: '+shiftMeasure);
-          console.log(measure);
         }
         chartedNotes[i]=(measure.indexOf(unChartedNotes[i][1])+shiftMeasure)%5;
       }
@@ -241,10 +255,14 @@ function loadHTMLcontent(){
   htmlContent.innerHTML=
   `<button id="blob" class="btn btn-primary">click to download</button><br>
   <button class="btn btn-primary" onclick="loadSettings()">Load New Settings</button><br>
+    <div>
+      <input type="number" value=8 class="input" id="patternLength">
+      <label for="patternLength"><span  data-toggle="tooltip" title="within the specified unit range, (if Shift notes enabled) it will try and keep the note pattern preserved, and every period it will shift to try and recenter so as to avoid wrapping too much.">Pattern Length (in quarter notes)</span></label>
+    </div>
     <div class="custom-control custom-checkbox">
       <input type="checkbox" checked="true" class="custom-control-input" onClick="toggleMeasureShift()" id="measureToggle">
-      <label class="custom-control-label" for="measureToggle">Shift per measure</label>
-    </div`;
+      <label class="custom-control-label" for="measureToggle"><span  data-toggle="tooltip" title="When enabled, the program will try and keep the the patterns within the 5 lanes rather than wraping">Shift notes</span></label>
+    </div>`;
   settings = {
     tracks:[]
   };
@@ -259,6 +277,7 @@ function loadHTMLcontent(){
 
   preview.ppq=currentMidi.header.ppq;
   preview.speed=((4/60)*currentMidi.header.ppq)>>0;
+  stripSustain=preview.ppq/4;
 
   loadSettings();
 }
@@ -391,6 +410,16 @@ function draw() {
       lastNote[i]=note;
     }
     note++;
+  }
+
+  if(quality[0]){
+    noStroke();
+    fill(255,0,0);
+    rect(0,0,width,10);
+    fill(0,200,0);
+    rect(0,0,width*quality[3]/quality[0],10);
+    fill(255,255,0);
+    rect(width*quality[3]/quality[0],0,width*quality[2]/quality[0],10);
   }
 
 }

@@ -54,12 +54,119 @@ function parseFile(file){
   }
   reader.readAsArrayBuffer(file)
 }
-var htmlContent=document.getElementById('htmlContent')
+var htmlContent=document.getElementById('htmlContent');
+var chartedNotes=[];
 function toggleTrack(track){
   settings.tracks[track] = !settings.tracks[track];
 }
+function loadSettings(){
+  var old_element = document.getElementById("blob");
+  var new_element = old_element.cloneNode(true);
+  old_element.parentNode.replaceChild(new_element, old_element);
+
+  //sync track events
+  var syncTrackString='';
+  var syncEvents=[];
+  for(var i=0;i<currentMidi.header.timeSignatures.length;i++){
+    syncEvents.push([currentMidi.header.timeSignatures[i].ticks,'  '+currentMidi.header.timeSignatures[i].ticks+' = TS '+(currentMidi.header.timeSignatures[i].timeSignature[0]*4/currentMidi.header.timeSignatures[i].timeSignature[1])+'\n']);
+  }
+  for(var i=0;i<currentMidi.header.tempos.length;i++){
+    syncEvents.push([currentMidi.header.tempos[i].ticks,'  '+currentMidi.header.tempos[i].ticks+' = B '+(currentMidi.header.tempos[i].bpm*1000>>0)+'\n']);
+  }
+  //sort in cronological order
+  syncEvents.sort((a,b)=>a[0]-b[0]);
+  //add all to string
+  for(var i=0;i<syncEvents.length;i++){
+    syncTrackString+=syncEvents[i][1];
+  }
+
+  var distinctNotes=[];
+  var songLength=0;
+  for(var i=0;i<currentMidi.tracks.length;i++){
+    if(settings.tracks[i]){
+      for(var note=0;note<currentMidi.tracks[i].notes.length;note++){
+        if(distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi)<0){
+          distinctNotes.push(currentMidi.tracks[i].notes[note].midi);
+        }
+        if(currentMidi.tracks[i].notes[note].ticks>songLength){
+          songLength=currentMidi.tracks[i].notes[note].ticks;
+        }
+      }
+    }
+  }
+  distinctNotes.sort();
+
+  console.log(distinctNotes);
+
+  var notesString='';
+  for(var i=0;i<currentMidi.tracks.length;i++){
+    if(settings.tracks[i]){
+      for(var note=0;note<currentMidi.tracks[i].notes.length;note++){
+        notesString+='  '+currentMidi.tracks[i].notes[note].ticks+' = N '+(distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi)%5)+' '+(currentMidi.tracks[i].notes[note].durationTicks<preview.ppq?0:currentMidi.tracks[i].notes[note].durationTicks)+'\n';
+        if(currentMidi.tracks[i].notes[note].ticks>songLength){
+          songLength=currentMidi.tracks[i].notes[note].ticks;
+        }
+      }
+    }
+  }
+
+  var zip = new JSZip();
+  zip.file("album.png", albumpng, {base64: true});
+  zip.file("song.ini", `[Song]
+name = `+currentMidi.name+`
+artist = `+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="artist").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="artist")[0].text:'Unknown')+`
+album = `+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="album").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="album")[0].text:'Unknown')+`
+genre = `+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre")[0].text:'rock')+`
+year = `+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year")[0].text:'Unknown')+`
+song_length = `+songLength+`
+count = 0
+diff_band = -1
+diff_guitar = -1
+diff_bass = -1
+diff_drums = -1
+diff_keys = -1
+diff_guitarghl = -1
+diff_bassghl = -1
+preview_start_time = 0
+frets = 0
+charter = Edward Haas
+icon = efhiii
+
+`);
+  zip.file("notes.chart", `[Song]
+{
+  Name = "`+currentMidi.name+`"
+  Charter = "Edward Haas"
+  Year = "`+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year")[0].text:'Unknown')+`"
+  Offset = 0
+  Resolution = `+preview.ppq+`
+  Player2 = bass
+  Difficulty = 4
+  PreviewStart = 0
+  PreviewEnd = 0
+  Genre = "`+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre")[0].text:'rock')+`"
+  MediaType = "cd"
+  MusicStream = "song.mp3"
+}
+[SyncTrack]
+{
+`+syncTrackString+`}
+[ExpertSingle]
+{
+`+notesString+`}
+`);
+
+  document.getElementById("blob").addEventListener("click", function () {
+      zip.generateAsync({type:"blob"}).then(function (blob) { // 1) generate the zip file
+          saveAs(blob, currentMidi.name+".zip");                          // 2) trigger the download
+      }, function (err) {
+          jQuery("#blob").text(err);
+      });
+  });
+}
+
 function loadHTMLcontent(){
-  htmlContent.innerHTML='<button id="blob" class="btn btn-primary">click to download</button><br>';
+  htmlContent.innerHTML='<button id="blob" class="btn btn-primary">click to download</button><br><button class="btn btn-primary" onclick="loadSettings()">Load New Settings</button><br>';
   settings = {
     tracks:[]
   };

@@ -55,10 +55,12 @@ function parseFile(file){
   reader.readAsArrayBuffer(file)
 }
 var htmlContent=document.getElementById('htmlContent');
+var unChartedNotes=[];
 var chartedNotes=[];
 function toggleTrack(track){
   settings.tracks[track] = !settings.tracks[track];
 }
+
 function loadSettings(){
   var old_element = document.getElementById("blob");
   var new_element = old_element.cloneNode(true);
@@ -98,16 +100,29 @@ function loadSettings(){
 
   console.log(distinctNotes);
 
+  unChartedNotes=[];
+
   var notesString='';
   for(var i=0;i<currentMidi.tracks.length;i++){
     if(settings.tracks[i]){
       for(var note=0;note<currentMidi.tracks[i].notes.length;note++){
-        notesString+='  '+currentMidi.tracks[i].notes[note].ticks+' = N '+(distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi)%5)+' '+(currentMidi.tracks[i].notes[note].durationTicks<preview.ppq?0:currentMidi.tracks[i].notes[note].durationTicks)+'\n';
+        unChartedNotes.push([currentMidi.tracks[i].notes[note].ticks,distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi),currentMidi.tracks[i].notes[note].durationTicks<preview.ppq?0:currentMidi.tracks[i].notes[note].durationTicks]);
         if(currentMidi.tracks[i].notes[note].ticks>songLength){
           songLength=currentMidi.tracks[i].notes[note].ticks;
         }
       }
     }
+  }
+
+  unChartedNotes.sort((a,b)=>a[0]-b[0]);
+  chartedNotes=[];
+
+  for(var i=0;i<unChartedNotes.length;i++){
+    chartedNotes[i]=unChartedNotes[i][1]%5;
+  }
+
+  for(var i=0;i<chartedNotes.length;i++){
+    notesString+='  '+unChartedNotes[i][0]+' = N '+chartedNotes[i]+' '+unChartedNotes[i][2]+'\n';
   }
 
   var zip = new JSZip();
@@ -172,76 +187,17 @@ function loadHTMLcontent(){
   };
   for(var i=0;i<currentMidi.tracks.length;i++){
     settings.tracks[i]=true;
-    htmlContent.innerHTML+='<input type="checkbox" checked="true" onClick="toggleTrack('+i+')"><label>track '+currentMidi.tracks[i].name+'<br>'+currentMidi.tracks[i].instrument.family+': '+currentMidi.tracks[i].instrument.name+'</label><br>';
+    htmlContent.innerHTML+=`<div class="custom-control custom-checkbox">
+      <input type="checkbox" checked="true" class="custom-control-input" onClick="toggleTrack(`+i+`)" id='customCheck`+i+`'>
+      <label class="custom-control-label" for="customCheck`+i+`">`+currentMidi.tracks[i].name+' - '+currentMidi.tracks[i].instrument.family+': '+currentMidi.tracks[i].instrument.name+`</label>
+    </div>`;
+    //htmlContent.innerHTML+='<input type="checkbox" checked="true" onClick="toggleTrack('+i+')"><label>track '+currentMidi.tracks[i].name+'<br>'+currentMidi.tracks[i].instrument.family+': '+currentMidi.tracks[i].instrument.name+'</label><br>';
   }
 
   preview.ppq=currentMidi.header.ppq;
-  preview.speed=((4/30)*currentMidi.header.ppq)>>0;
+  preview.speed=((4/60)*currentMidi.header.ppq)>>0;
 
-  var notesString='';
-  var songLength=0;
-  for(var i=0;i<currentMidi.tracks.length;i++){
-    for(var note=0;note<currentMidi.tracks[i].notes.length;note++){
-      notesString+='  '+currentMidi.tracks[i].notes[note].ticks+' = N '+(currentMidi.tracks[i].notes[note].midi%5)+' 0\n';
-      if(currentMidi.tracks[i].notes[note].ticks>songLength){
-        songLength=currentMidi.tracks[i].notes[note].ticks;
-      }
-    }
-  }
-  /*
-  drawNote(currentMidi.tracks[i].notes[note].midi%5,height-(currentMidi.tracks[i].notes[note].ticks-preview.time)/preview.scale*height);
-  */
-
-  var zip = new JSZip();
-  zip.file("album.png", albumpng, {base64: true});
-  zip.file("song.ini", `[Song]
-name = `+currentMidi.name+`
-artist = `+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="artist").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="artist")[0].text:'Unknown')+`
-album = `+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="album").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="album")[0].text:'Unknown')+`
-genre = `+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre")[0].text:'rock')+`
-year = `+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year")[0].text:'Unknown')+`
-song_length = `+songLength+`
-count = 0
-diff_band = -1
-diff_guitar = -1
-diff_bass = -1
-diff_drums = -1
-diff_keys = -1
-diff_guitarghl = -1
-diff_bassghl = -1
-preview_start_time = 0
-frets = 0
-charter = Edward Haas
-icon = efhiii
-
-`);
-  zip.file("notes.chart", `[Song]
-{
-  Name = "`+currentMidi.name+`"
-  Charter = "Edward Haas"
-  Year = "`+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year")[0].text:'Unknown')+`"
-  Offset = 0
-  Resolution = `+preview.ppq+`
-  Player2 = bass
-  Difficulty = 4
-  PreviewStart = 0
-  PreviewEnd = 0
-  Genre = "`+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre")[0].text:'rock')+`"
-  MediaType = "cd"
-  MusicStream = "song.mp3"
-}
-[ExpertSingle]
-{
-`+notesString+`}
-`);
-
-  document.getElementById("blob").addEventListener("click", function () {
-      zip.generateAsync({type:"blob"}).then(function (blob) { // 1) generate the zip file
-          saveAs(blob, currentMidi.name+".zip");                          // 2) trigger the download
-      }, function (err) {
-          jQuery("#blob").text(err);
-      });
-  });
+  loadSettings();
 }
 
 var colors;
@@ -251,21 +207,25 @@ function setup() {
   colors=[color(0,200,0),color(255,0,0),color(255,255,0),color(0,50,200),color(255,128,0)];
 }
 
-function drawNote(note,y,type){
+function drawNote(note,y,type,duration){
+  noStroke();
+  colors[note].setAlpha(150);
+  fill(colors[note]);
+  if(duration){
+    rect(note*width/6+width/6-width/40,y-duration,width/20,duration,width/40);
+  }
+  colors[note].setAlpha(255);
+  fill(colors[note]);
   switch(type){
     case('hopo'):
-      noStroke();
       strokeWeight(width/32);
-      fill(colors[note]);
       ellipse(note*width/6+width/6,y,width/8,width/8);
       stroke(255,150);
       fill(255);
       ellipse(note*width/6+width/6,y,width/16,width/16);
       break;
     case('tap'):
-      noStroke();
       strokeWeight(width/32);
-      fill(colors[note]);
       ellipse(note*width/6+width/6,y,width/8,width/8);
       fill(0,150);
       noStroke();
@@ -275,8 +235,6 @@ function drawNote(note,y,type){
       ellipse(note*width/6+width/6,y,width/12,width/12);
       break;
     default:
-      noStroke();
-      fill(colors[note]);
       ellipse(note*width/6+width/6,y,width/8,width/8);
       strokeWeight(width/128);
       stroke(0);
@@ -292,6 +250,7 @@ var preview={
   ppq:100
 };
 
+/*
 function findNotes(track,from,to){
   var interval=Math.ceil(track.notes.length/4);
   var at=interval*2;
@@ -310,6 +269,30 @@ function findNotes(track,from,to){
   }
   var bottom=at;
   while(bottom>0&&track.notes[bottom-1].ticks>=from){
+    bottom--;
+  }
+  return bottom;
+};
+*/
+
+function findNotes(from,to){
+  var interval=Math.ceil(chartedNotes.length/4);
+  var at=interval*2;
+  var pls=2;
+  while(interval>=1&&pls&&unChartedNotes[at][0]!=from){
+    if(interval == 1){pls--;}
+    if(unChartedNotes[at][0]>=from){
+      at-=interval;
+      if(at<0){at=0;}
+    }
+    else{
+      at+=interval;
+      if(at>chartedNotes.length-1){at=chartedNotes.length-1;}
+    }
+    interval=Math.ceil(interval/2);
+  }
+  var bottom=at-10;
+  while(bottom>0&&unChartedNotes[bottom-1][0]>=from){
     bottom--;
   }
   return bottom;
@@ -336,22 +319,31 @@ function draw() {
   }
   var last=preview.time;
 
-  var Y=height+last;
+  var Y=height+last*(height/preview.scale);
   strokeWeight(2);
   stroke(255);//   7/12
   var notesPerMeasuer=currentMidi.header.timeSignatures[0].timeSignature[0];
-  var ticksPerNote=preview.ppq*currentMidi.header.tempos[0].bbm*currentMidi.header.timeSignatures[0].timeSignature[0]/currentMidi.header.timeSignatures[0].timeSignature[1];
+  var ticksPerNote=preview.ppq*currentMidi.header.tempos[0].bpm*currentMidi.header.timeSignatures[0].timeSignature[0]/currentMidi.header.timeSignatures[0].timeSignature[1];
   var tempo=0;
   var timeSignature=0;
+  var t=0;
   while(Y>0){
     //while(tempo<currentMidi.header.tempos.length-1&&)
-    Y-=ticksPerNote/8*(preview.scale/height);
+    Y-=preview.ppq*(height/preview.scale);
+    if(t%4===0){
+      strokeWeight(2);
+    }
+    else{
+      strokeWeight(0.5);
+    }
+    t++;
     if(Y<height){
       line(0,Y,width,Y);
     }
   }
 
-  var lastNote=[];
+  var lastNote=0;
+  /*
   for(var i=0;i<currentMidi.tracks.length;i++){
     if(settings.tracks[i]){
       var note=findNotes(currentMidi.tracks[i],last,last+preview.scale);
@@ -363,7 +355,17 @@ function draw() {
         note++;
       }
     }
+  }*/
+  var note=findNotes(last,last+preview.scale);
+  if(note<0){note=0;}
+  while(note<chartedNotes.length&&unChartedNotes[i][0]<=last+preview.scale){
+    if(!lastNote[i]||note>lastNote[i]){
+      drawNote(chartedNotes[note],height-(unChartedNotes[note][0]-preview.time)/preview.scale*height,'',unChartedNotes[note][2]/preview.scale*height);
+      lastNote[i]=note;
+    }
+    note++;
   }
+
 }
 
 /* full screening will change the size of the canvas */

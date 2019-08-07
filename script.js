@@ -75,9 +75,9 @@ function loadHTMLcontent(){
   var songLength=0;
   for(var i=0;i<currentMidi.tracks.length;i++){
     for(var note=0;note<currentMidi.tracks[i].notes.length;note++){
-      notesString+='  '+currentMidi.tracks[i].notes[note].ticks/preview.ppq+' = N '+(currentMidi.tracks[i].notes[note].midi%5)+' 0\n';
-      if(currentMidi.tracks[i].notes[note].ticks/preview.ppq>songLength){
-        songLength=currentMidi.tracks[i].notes[note].ticks/preview.ppq;
+      notesString+='  '+currentMidi.tracks[i].notes[note].ticks*4/preview.ppq+' = N '+(currentMidi.tracks[i].notes[note].midi%5)+' 0\n';
+      if(currentMidi.tracks[i].notes[note].ticks*4/preview.ppq>songLength){
+        songLength=currentMidi.tracks[i].notes[note].ticks*4/preview.ppq;
       }
     }
   }

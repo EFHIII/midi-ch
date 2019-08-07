@@ -60,7 +60,7 @@ var chartedNotes=[];
 var measureShift=true;
 var stripSustain=0;
 var patternLength=0;
-
+var openNotes=1;
 var quality=[0,0,0];
 
 function toggleTrack(track){
@@ -71,6 +71,7 @@ function toggleMeasureShift(){
 }
 
 function loadSettings(){
+  openNotes = document.getElementById("openNotes").checked?1:0;
   patternLength = document.getElementById("patternLength").value;
   var old_element = document.getElementById("blob");
   var new_element = old_element.cloneNode(true);
@@ -148,16 +149,16 @@ function loadSettings(){
           }
           measure.sort((a,b)=>a-b);
           console.log(measure);
-          if(measure.length<5&&onMeasure>0){
+          if(measure.length<5+openNotes&&onMeasure>0){
             if(lastMeasure[0]<measure[0]){
               shiftMeasure++;
-              if(measure.length<4&&lastMeasure[1]<measure[0]){
+              if(measure.length<4+openNotes&&lastMeasure[1]<measure[0]){
                 shiftMeasure++;
               }
             }
             else if(lastMeasure[min(lastMeasure.length-1,measure.length-1)]>measure[min(lastMeasure.length-1,measure.length-1)]){
               shiftMeasure--;
-              if(measure.length<4&&lastMeasure[min(lastMeasure.length-1,measure.length-1)]>measure[min(lastMeasure.length-1,measure.length-1)]){
+              if(measure.length<4+openNotes&&lastMeasure[min(lastMeasure.length-1,measure.length-1)]>measure[min(lastMeasure.length-1,measure.length-1)]){
                 shiftMeasure--;
               }
             }
@@ -165,14 +166,14 @@ function loadSettings(){
           else{
             shiftMeasure=0;
           }
-          while(shiftMeasure+measure.length>4){
+          while(shiftMeasure+measure.length>4+openNotes){
             shiftMeasure--;
           }
           if(shiftMeasure<0){
             shiftMeasure=0;
           }
           quality[0]++;
-          if(measure.length>5){
+          if(measure.length>5+openNotes){
             quality[1]++;
           }
           else if (measure.length<3) {
@@ -183,16 +184,23 @@ function loadSettings(){
           }
           console.log('shift: '+shiftMeasure);
         }
-        chartedNotes[i]=(measure.indexOf(unChartedNotes[i][1])+shiftMeasure)%5;
+        if(!openNotes||((i==0||unChartedNotes[i-1][0]<unChartedNotes[i][0])&&(i==unChartedNotes.length||unChartedNotes[i+1][0]>unChartedNotes[i][0]))){
+          chartedNotes[i]=(measure.indexOf(unChartedNotes[i][1])+shiftMeasure)%(5+openNotes);
+        }
+        else{
+          chartedNotes[i]=-1;
+        }
       }
     }
     else{
-      chartedNotes[i]=unChartedNotes[i][1]%5;
+      chartedNotes[i]=unChartedNotes[i][1]%(5+openNotes);
     }
   }
 
   for(var i=0;i<chartedNotes.length;i++){
-    notesString+='  '+unChartedNotes[i][0]+' = N '+chartedNotes[i]+' '+unChartedNotes[i][2]+'\n';
+    if(chartedNotes[i]>=0){
+      notesString+='  '+unChartedNotes[i][0]+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+unChartedNotes[i][2]+'\n';
+    }
   }
 
   var zip = new JSZip();
@@ -260,6 +268,10 @@ function loadHTMLcontent(){
       <label for="patternLength"><span  data-toggle="tooltip" title="within the specified unit range, (if Shift notes enabled) it will try and keep the note pattern preserved, and every period it will shift to try and recenter so as to avoid wrapping too much.">Pattern Length (in quarter notes)</span></label>
     </div>
     <div class="custom-control custom-checkbox">
+      <input type="checkbox" checked="true" class="custom-control-input" id="openNotes">
+      <label class="custom-control-label" for="openNotes"><span  data-toggle="tooltip" title="When enabled, include open notes">Open notes</span></label>
+    </div>
+    <div class="custom-control custom-checkbox">
       <input type="checkbox" checked="true" class="custom-control-input" onClick="toggleMeasureShift()" id="measureToggle">
       <label class="custom-control-label" for="measureToggle"><span  data-toggle="tooltip" title="When enabled, the program will try and keep the the patterns within the 5 lanes rather than wraping">Shift notes</span></label>
     </div>`;
@@ -291,6 +303,16 @@ function setup() {
 
 function drawNote(note,y,type,duration){
   noStroke();
+  if(openNotes && note === -1){
+    fill(150,0,200,200);
+    rect(0,y-duration-4,width,duration+8);
+    return;
+  }
+  else if (note<0) {
+    return;
+  }
+
+  //console.log('note- '+note);
 
   colors[note].setAlpha(150);
   fill(colors[note]);
@@ -406,7 +428,7 @@ function draw() {
   if(note<0){note=0;}
   while(note<chartedNotes.length&&unChartedNotes[i][0]<=last+preview.scale){
     if(!lastNote[i]||note>lastNote[i]){
-      drawNote(chartedNotes[note],height-(unChartedNotes[note][0]-preview.time)/preview.scale*height,'',unChartedNotes[note][2]/preview.scale*height);
+      drawNote(chartedNotes[note]-openNotes,height-(unChartedNotes[note][0]-preview.time)/preview.scale*height,'',unChartedNotes[note][2]/preview.scale*height);
       lastNote[i]=note;
     }
     note++;

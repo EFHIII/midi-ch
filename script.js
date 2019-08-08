@@ -184,7 +184,7 @@ function loadSettings(){
           }
           console.log('shift: '+shiftMeasure);
         }
-        if(!openNotes||((i==0||unChartedNotes[i-1][0]<unChartedNotes[i][0])&&(i==unChartedNotes.length||unChartedNotes[i+1][0]>unChartedNotes[i][0]))){
+        if(!openNotes||((i==0||unChartedNotes[i-1][0]<unChartedNotes[i][0])&&(i+1>=unChartedNotes.length||unChartedNotes[i+1][0]>unChartedNotes[i][0]))){
           chartedNotes[i]=(measure.indexOf(unChartedNotes[i][1])+shiftMeasure)%(5+openNotes);
         }
         else{

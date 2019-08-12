@@ -59,7 +59,6 @@ var unChartedNotes=[];
 var chartedNotes=[];
 var measureShift=true;
 var stripSustain=0;
-var patternLength=0;
 var openNotes=1;
 var quality=[0,0,0];
 
@@ -72,7 +71,6 @@ function toggleMeasureShift(){
 
 function loadSettings(){
   openNotes = document.getElementById("openNotes").checked?1:0;
-  patternLength = document.getElementById("patternLength").value;
   var old_element = document.getElementById("blob");
   var new_element = old_element.cloneNode(true);
   old_element.parentNode.replaceChild(new_element, old_element);
@@ -126,76 +124,121 @@ function loadSettings(){
   unChartedNotes.sort((a,b)=>a[0]-b[0]);
   chartedNotes=[];
 
-  var measure=[];
-  var onMeasure=-1;
-  var shiftMeasure=0;
-  quality=[0,0,0,0];
-  for(var i=0;i<unChartedNotes.length;i++){
-    if(measureShift){
-      if(i>0&&unChartedNotes[i-1][1]===unChartedNotes[i][1]){
-        chartedNotes[i]=chartedNotes[i-1];
+  /*-- Start KA Import --*/
+
+  var gaps=[];
+  for(var i=1;i<unChartedNotes.length;i++){
+    gaps.push([i,unChartedNotes[i][0]-unChartedNotes[i-1][0]]);
+  }
+
+  //function sortinga(a,b){return a[1]-b[1];};
+
+  gaps.sort((a,b)=>{a[1]-b[1]});
+
+  var groups=[];
+
+  function findInGroups(note){
+    for(var i=0;i<groups.length;i++){
+      for(var j=0;j<groups[i].length;j++){
+        if(groups[i][j]===note){
+          return [i,j];
+        }
+      }
+    }
+    return [-1,-1];
+  };
+  function mergable(a,b){
+    var distinct=[];
+    for(var i=0;i<a.length;i++){
+      if(distinct.indexOf(unChartedNotes[a[i]][1])<0){
+          distinct.push(unChartedNotes[a[i]][1]);
+      }
+    }
+    for(var i=0;i<b.length;i++){
+      if(distinct.indexOf(unChartedNotes[b[i]][1])<0){
+        distinct.push(unChartedNotes[b[i]][1]);
+      }
+    }
+    if(distinct.length>5+openNotes){return false;}
+    return true;
+  };
+
+  for(var i=0;i<gaps.length;i++){
+    var index=gaps[i][0];
+    var group1=findInGroups(index-1)[0];
+    var group2=findInGroups(index)[0];
+    if(group2>=0){
+      if(group1>=0){
+        if(mergable(groups[group1],groups[group2])){
+          groups[group1]=groups[group1].concat(groups[group2]);
+          groups.splice(group2,1);
+        }
       }
       else{
-        if((unChartedNotes[i][0]/(preview.ppq*patternLength))>>0!=onMeasure){
-          var lastMeasure=measure.slice();
-          measure=[];
-          onMeasure=(unChartedNotes[i][0]/(preview.ppq*patternLength))>>0;
-          var j=0;
-          while(i+j<unChartedNotes.length&&(unChartedNotes[i+j][0]/(preview.ppq*patternLength))>>0==onMeasure){
-            if(measure.indexOf(unChartedNotes[i+j][1])<0){
-              measure.push(unChartedNotes[i+j][1]);
-            }
-            j++;
-          }
-          measure.sort((a,b)=>a-b);
-          console.log(measure);
-          if(measure.length<5+openNotes&&onMeasure>0){
-            if(lastMeasure[0]<measure[0]){
-              shiftMeasure++;
-              if(measure.length<4+openNotes&&lastMeasure[1]<measure[0]){
-                shiftMeasure++;
-              }
-            }
-            else if(lastMeasure[min(lastMeasure.length-1,measure.length-1)]>measure[min(lastMeasure.length-1,measure.length-1)]){
-              shiftMeasure--;
-              if(measure.length<4+openNotes&&lastMeasure[min(lastMeasure.length-1,measure.length-1)]>measure[min(lastMeasure.length-1,measure.length-1)]){
-                shiftMeasure--;
-              }
-            }
-          }
-          else{
-            shiftMeasure=0;
-          }
-          while(shiftMeasure+measure.length>4+openNotes){
-            shiftMeasure--;
-          }
-          if(shiftMeasure<0){
-            shiftMeasure=0;
-          }
-          quality[0]++;
-          if(measure.length>5+openNotes){
-            quality[1]++;
-          }
-          else if (measure.length<3) {
-            quality[2]++;
-          }
-          else {
-            quality[3]++;
-          }
-          console.log('shift: '+shiftMeasure);
-        }
-        if(!openNotes||((i==0||unChartedNotes[i-1][0]<unChartedNotes[i][0])&&(i+1>=unChartedNotes.length||unChartedNotes[i+1][0]>unChartedNotes[i][0]))){
-          chartedNotes[i]=(measure.indexOf(unChartedNotes[i][1])+shiftMeasure)%(5+openNotes);
-        }
-        else{
-          chartedNotes[i]=-1;
+        if(mergable(groups[group2],[index-1])){
+            groups[group2].push(index-1);
         }
       }
     }
+    else if(group1>=0){
+      if(mergable(groups[group1],[index])){
+                groups[group1].push(index);
+            }
+    }
     else{
-      chartedNotes[i]=unChartedNotes[i][1]%(5+openNotes);
+      groups[groups.length]=[index-1,index];
     }
   }
+
+  var distinct=[];
+
+  for(var g=0;g<groups.length;g++){
+    distinct.push([]);
+    for(var i=0;i<groups[g].length;i++){
+      if(distinct[g].indexOf(unChartedNotes[groups[g][i]][1])<0){
+        distinct[g].push(unChartedNotes[groups[g][i]][1]);
+      }
+    }
+  }
+
+  /*if less than 6 note range group, shift*/
+  for(var g=0;g<groups.length;g++){
+    var d=0;
+    var gd=1;
+    while(distinct[g].length<5+openNotes){
+      if(g>0&&d<groups[g-1].length){
+        if(distinct[g].indexOf(unChartedNotes[groups[g-gd][groups[g-gd].length-1-d]][1])<0){
+          distinct[g].push(unChartedNotes[groups[g-gd][groups[g-gd].length-1-d]][1]);
+        }
+      }
+
+      if(g<groups.length-1&&distinct[g].length<5+openNotes){
+        if(d<groups[g+gd].length){
+          if(distinct[g].indexOf(unChartedNotes[groups[g+gd][d]][1])<0){
+            distinct[g].push(unChartedNotes[groups[g+gd][d]][1]);
+          }
+        }
+      }
+      d++;
+      if((g<0||d>=groups[g-gd].length)&&(g>=groups.length-2||d>=groups[g+gd].length)){
+        gd++;
+        d=0;
+      }
+      if(g-gd<0&&g+gd>=groups.length){
+        distinct[g].push(-1);
+      }
+    }
+    distinct[g].sort((a,b)=>{a-b});
+    //println((groups[g].length)+' - '+distinct[g].join());
+  }
+
+  for(var i=0;i<unChartedNotes.length;i++){
+    //chartedNotes.push(unChartedNotes[i][1]%5);
+    var group=findInGroups(i);
+    chartedNotes.push([distinct[group[0]].indexOf(unChartedNotes[groups[group[0]][group[1]]][1])]);
+  }
+
+  /*-- End KA Import --*/
 
   for(var i=0;i<chartedNotes.length;i++){
     if(chartedNotes[i]>=0){
@@ -263,25 +306,22 @@ function loadHTMLcontent(){
   htmlContent.innerHTML=
   `<button id="blob" class="btn btn-primary">click to download</button><br>
   <button class="btn btn-primary" onclick="loadSettings()">Load New Settings</button><br>
-    <div>
-      <input type="number" value=8 class="input" id="patternLength">
-      <label for="patternLength"><span  data-toggle="tooltip" title="within the specified unit range, (if Shift notes enabled) it will try and keep the note pattern preserved, and every period it will shift to try and recenter so as to avoid wrapping too much.">Pattern Length (in quarter notes)</span></label>
-    </div>
     <div class="custom-control custom-checkbox">
       <input type="checkbox" checked="true" class="custom-control-input" id="openNotes">
       <label class="custom-control-label" for="openNotes"><span  data-toggle="tooltip" title="When enabled, include open notes">Open notes</span></label>
-    </div>
-    <div class="custom-control custom-checkbox">
-      <input type="checkbox" checked="true" class="custom-control-input" onClick="toggleMeasureShift()" id="measureToggle">
-      <label class="custom-control-label" for="measureToggle"><span  data-toggle="tooltip" title="When enabled, the program will try and keep the the patterns within the 5 lanes rather than wraping">Shift notes</span></label>
     </div>`;
   settings = {
     tracks:[]
   };
   for(var i=0;i<currentMidi.tracks.length;i++){
-    settings.tracks[i]=true;
+    if(i==0){
+      settings.tracks[i]=true;
+    }
+    else{
+      settings.tracks[i]=false;
+    }
     htmlContent.innerHTML+=`<div class="custom-control custom-checkbox">
-      <input type="checkbox" checked="true" class="custom-control-input" onClick="toggleTrack(`+i+`)" id='customCheck`+i+`'>
+      <input type="checkbox" `+(settings.tracks[i]?'checked="true"':'')+` class="custom-control-input" onClick="toggleTrack(`+i+`)" id='customCheck`+i+`'>
       <label class="custom-control-label" for="customCheck`+i+`">`+currentMidi.tracks[i].name+' - '+currentMidi.tracks[i].instrument.family+': '+currentMidi.tracks[i].instrument.name+`</label>
     </div>`;
     //htmlContent.innerHTML+='<input type="checkbox" checked="true" onClick="toggleTrack('+i+')"><label>track '+currentMidi.tracks[i].name+'<br>'+currentMidi.tracks[i].instrument.family+': '+currentMidi.tracks[i].instrument.name+'</label><br>';

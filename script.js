@@ -61,6 +61,7 @@ var measureShift=true;
 var stripSustain=0;
 var openNotes=1;
 var quality=[0,0,0];
+var groups=[];
 
 function toggleTrack(track){
   settings.tracks[track] = !settings.tracks[track];
@@ -68,6 +69,33 @@ function toggleTrack(track){
 function toggleMeasureShift(){
   measureShift = !measureShift;
 }
+
+
+function findInGroups(note){
+  for(var i=0;i<groups.length;i++){
+    for(var j=0;j<groups[i].length;j++){
+      if(groups[i][j]===note){
+        return [i,j];
+      }
+    }
+  }
+  return [-1,-1];
+};
+function mergable(a,b){
+  var distinct=[];
+  for(var i=0;i<a.length;i++){
+    if(distinct.indexOf(unChartedNotes[a[i]][1])<0){
+        distinct.push(unChartedNotes[a[i]][1]);
+    }
+  }
+  for(var i=0;i<b.length;i++){
+    if(distinct.indexOf(unChartedNotes[b[i]][1])<0){
+      distinct.push(unChartedNotes[b[i]][1]);
+    }
+  }
+  if(distinct.length>5+openNotes){return false;}
+  return true;
+};
 
 function loadSettings(){
   openNotes = document.getElementById("openNotes").checked?1:0;
@@ -133,35 +161,11 @@ function loadSettings(){
 
   //function sortinga(a,b){return a[1]-b[1];};
 
-  gaps.sort((a,b)=>{a[1]-b[1]});
+  gaps.sort((a,b)=>a[1]-b[1]);
 
-  var groups=[];
+  groups=[];
 
-  function findInGroups(note){
-    for(var i=0;i<groups.length;i++){
-      for(var j=0;j<groups[i].length;j++){
-        if(groups[i][j]===note){
-          return [i,j];
-        }
-      }
-    }
-    return [-1,-1];
-  };
-  function mergable(a,b){
-    var distinct=[];
-    for(var i=0;i<a.length;i++){
-      if(distinct.indexOf(unChartedNotes[a[i]][1])<0){
-          distinct.push(unChartedNotes[a[i]][1]);
-      }
-    }
-    for(var i=0;i<b.length;i++){
-      if(distinct.indexOf(unChartedNotes[b[i]][1])<0){
-        distinct.push(unChartedNotes[b[i]][1]);
-      }
-    }
-    if(distinct.length>5+openNotes){return false;}
-    return true;
-  };
+  console.log(gaps);
 
   for(var i=0;i<gaps.length;i++){
     var index=gaps[i][0];
@@ -178,12 +182,18 @@ function loadSettings(){
         if(mergable(groups[group2],[index-1])){
             groups[group2].push(index-1);
         }
+        else{
+          groups[groups.length]=[index-1];
+        }
       }
     }
     else if(group1>=0){
       if(mergable(groups[group1],[index])){
-                groups[group1].push(index);
-            }
+          groups[group1].push(index);
+      }
+      else{
+        groups[groups.length]=[index];
+      }
     }
     else{
       groups[groups.length]=[index-1,index];
@@ -206,13 +216,13 @@ function loadSettings(){
     var d=0;
     var gd=1;
     while(distinct[g].length<5+openNotes){
-      if(g>0&&d<groups[g-1].length){
+      if(g-gd>0&&d<groups[g-gd].length){
         if(distinct[g].indexOf(unChartedNotes[groups[g-gd][groups[g-gd].length-1-d]][1])<0){
           distinct[g].push(unChartedNotes[groups[g-gd][groups[g-gd].length-1-d]][1]);
         }
       }
 
-      if(g<groups.length-1&&distinct[g].length<5+openNotes){
+      if(g+gd<groups.length-1&&distinct[g].length<5+openNotes){
         if(d<groups[g+gd].length){
           if(distinct[g].indexOf(unChartedNotes[groups[g+gd][d]][1])<0){
             distinct[g].push(unChartedNotes[groups[g+gd][d]][1]);
@@ -220,7 +230,7 @@ function loadSettings(){
         }
       }
       d++;
-      if((g<0||d>=groups[g-gd].length)&&(g>=groups.length-2||d>=groups[g+gd].length)){
+      if((g-gd<0||d>=groups[g-gd].length)&&(g+gd>=groups.length-2||d>=groups[g+gd].length)){
         gd++;
         d=0;
       }
@@ -228,22 +238,40 @@ function loadSettings(){
         distinct[g].push(-1);
       }
     }
-    distinct[g].sort((a,b)=>{a-b});
-    //println((groups[g].length)+' - '+distinct[g].join());
+    distinct[g].sort((a,b)=>a-b);
+    console.log(groups[g].length);
+    console.log(distinct[g]);
   }
 
   for(var i=0;i<unChartedNotes.length;i++){
     //chartedNotes.push(unChartedNotes[i][1]%5);
     var group=findInGroups(i);
+    try{
     chartedNotes.push([distinct[group[0]].indexOf(unChartedNotes[groups[group[0]][group[1]]][1])]);
+    }catch(e){
+      console.log(e);
+      console.log(i);
+      console.log(group);
+    }
   }
 
   /*-- End KA Import --*/
 
+  //chartedNotes.sort((a,b)=>{a[0]-b[0]});
+
   for(var i=0;i<chartedNotes.length;i++){
-    if(chartedNotes[i]>=0){
-      notesString+='  '+unChartedNotes[i][0]+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+unChartedNotes[i][2]+'\n';
+    if(openNotes && chartedNotes[i] - openNotes === -1){
+      if((i<=0||unChartedNotes[i-1][0]!=unChartedNotes[i][0])&&(i>=unChartedNotes.length-1||unChartedNotes[i+1][0]!=unChartedNotes[i][0])){
+      }
+      else{
+        chartedNotes.splice(i,1);
+        i--;
+      }
     }
+  }
+
+  for(var i=0;i<chartedNotes.length;i++){
+    notesString+='  '+unChartedNotes[i][0]+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+unChartedNotes[i][2]+'\n';
   }
 
   var zip = new JSZip();
@@ -466,8 +494,8 @@ function draw() {
 
   var note=findNotes(last,last+preview.scale);
   if(note<0){note=0;}
-  while(note<chartedNotes.length&&unChartedNotes[i][0]<=last+preview.scale){
-    if(!lastNote[i]||note>lastNote[i]){
+  while(note<chartedNotes.length&&unChartedNotes[note][0]<=last+preview.scale){
+    if(!lastNote[note]||note>lastNote[note]){
       drawNote(chartedNotes[note]-openNotes,height-(unChartedNotes[note][0]-preview.time)/preview.scale*height,'',unChartedNotes[note][2]/preview.scale*height);
       lastNote[i]=note;
     }

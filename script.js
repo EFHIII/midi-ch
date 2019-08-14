@@ -62,6 +62,8 @@ var stripSustain=0;
 var openNotes=1;
 var quality=[0,0,0];
 var groups=[];
+var openSkipGap=1/16;
+var maxNotes=2;
 
 function toggleTrack(track){
   settings.tracks[track] = !settings.tracks[track];
@@ -98,6 +100,16 @@ function mergable(a,b){
 };
 
 function loadSettings(){
+  maxNotes=document.getElementById("maxNotes").value*1;
+  if(maxNotes<1){
+    maxNotes=1;
+  }
+  if(maxNotes>6){
+    maxNotes=6;
+  }
+  preview.scale=document.getElementById("previewScale").value*1;
+  if(preview.scale<=0){preview.scale=4000;}
+  openSkipGap = document.getElementById("openSkipGap").value/100*preview.ppq;
   openNotes = document.getElementById("openNotes").checked?1:0;
   var old_element = document.getElementById("blob");
   var new_element = old_element.cloneNode(true);
@@ -141,7 +153,7 @@ function loadSettings(){
   for(var i=0;i<currentMidi.tracks.length;i++){
     if(settings.tracks[i]){
       for(var note=0;note<currentMidi.tracks[i].notes.length;note++){
-        unChartedNotes.push([currentMidi.tracks[i].notes[note].ticks,distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi),currentMidi.tracks[i].notes[note].durationTicks<preview.ppq?0:max(0,currentMidi.tracks[i].notes[note].durationTicks-stripSustain)]);
+        unChartedNotes.push([currentMidi.tracks[i].notes[note].ticks,distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi),currentMidi.tracks[i].notes[note].durationTicks<preview.ppq?0:currentMidi.tracks[i].notes[note].durationTicks]);
         if(currentMidi.tracks[i].notes[note].ticks>songLength){
           songLength=currentMidi.tracks[i].notes[note].ticks;
         }
@@ -151,6 +163,41 @@ function loadSettings(){
 
   unChartedNotes.sort((a,b)=>a[0]-b[0]);
   chartedNotes=[];
+
+  for(var i=0;i<unChartedNotes.length-1;i++){
+    if(unChartedNotes[i][0] == unChartedNotes[i+1][0] && unChartedNotes[i][1] == unChartedNotes[i+1][1]){
+      if(unChartedNotes[i][1] < unChartedNotes[i+1][1]){
+        unChartedNotes.splice(i,1);
+      }
+      else{
+        unChartedNotes.splice(i+1,1);
+      }
+      i--;
+    }
+  }
+
+  for(var i=0;i<unChartedNotes.length-1;i++){
+    var notes=[[i,unChartedNotes[i][1]]];
+    while(i < unChartedNotes.length-1 && unChartedNotes[i][0] == unChartedNotes[i+1][0]){
+      i++;
+      notes.push([i,unChartedNotes[i][1]]);
+    }
+    if(notes.length>maxNotes){
+      console.log(unChartedNotes[notes[0][0]][0]);
+      console.log(JSON.stringify(notes));
+      notes.sort((a,b)=>b[1]-a[1]);
+      console.log(JSON.stringify(notes));
+      for(var j=0;j<maxNotes;j++){
+        notes.splice(0,1);
+      }
+      notes.sort((a,b)=>b[0]-a[0]);
+      console.log(JSON.stringify(notes));
+      for(var j=0;j<notes.length;j++){
+        unChartedNotes.splice(notes[j][0],1);
+        if(notes[j][0]<=i){i--;}
+      }
+    }
+  }
 
   /*-- Start KA Import --*/
 
@@ -165,7 +212,7 @@ function loadSettings(){
 
   groups=[];
 
-  console.log(gaps);
+  //console.log(gaps);
 
   for(var i=0;i<gaps.length;i++){
     var index=gaps[i][0];
@@ -247,7 +294,7 @@ function loadSettings(){
     //chartedNotes.push(unChartedNotes[i][1]%5);
     var group=findInGroups(i);
     try{
-    chartedNotes.push([distinct[group[0]].indexOf(unChartedNotes[groups[group[0]][group[1]]][1])]);
+    chartedNotes.push(distinct[group[0]].indexOf(unChartedNotes[groups[group[0]][group[1]]][1]));
     }catch(e){
       console.log(e);
       console.log(i);
@@ -258,20 +305,34 @@ function loadSettings(){
   /*-- End KA Import --*/
 
   //chartedNotes.sort((a,b)=>{a[0]-b[0]});
+  //unChartedNotes.sort((a,b)=>{a[0]-b[0]});
 
   for(var i=0;i<chartedNotes.length;i++){
     if(openNotes && chartedNotes[i] - openNotes === -1){
-      if((i<=0||unChartedNotes[i-1][0]!=unChartedNotes[i][0])&&(i>=unChartedNotes.length-1||unChartedNotes[i+1][0]!=unChartedNotes[i][0])){
-      }
-      else{
+      if((i>0&&abs(unChartedNotes[i-1][0]-unChartedNotes[i][0])<openSkipGap)||(i<unChartedNotes.length-1&&abs(unChartedNotes[i+1][0]-unChartedNotes[i][0]<openSkipGap))){
+        if(i>0&&i<unChartedNotes.length-1){
+          console.log('removed open- '+min(abs(unChartedNotes[i-1][0]-unChartedNotes[i][0]),abs(unChartedNotes[i+1][0]-unChartedNotes[i][0])));
+        }
         chartedNotes.splice(i,1);
+        unChartedNotes.splice(i,1);
         i--;
       }
     }
   }
 
   for(var i=0;i<chartedNotes.length;i++){
-    notesString+='  '+unChartedNotes[i][0]+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+unChartedNotes[i][2]+'\n';
+    var duration=unChartedNotes[i][2];
+    if(duration > 0){
+      for(var j=0;j<chartedNotes.length;j++){
+        if(unChartedNotes[i][0]!=unChartedNotes[j][0] && unChartedNotes[j][0]-unChartedNotes[i][0]>0 && unChartedNotes[j][0]-unChartedNotes[i][0] < duration && (openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes ) == (openNotes && chartedNotes[j] - openNotes === -1 ? 7 : chartedNotes[j] - openNotes )){
+          duration = unChartedNotes[j][0]-unChartedNotes[i][0];
+          //console.log('trim');
+        }
+      }
+      duration-=stripSustain;
+      if(duration<0){duration=0;}
+    }
+    notesString+='  '+unChartedNotes[i][0]+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+duration+'\n';
   }
 
   var zip = new JSZip();
@@ -330,6 +391,7 @@ icon = efhiii
 }
 
 function loadHTMLcontent(){
+  openSkipGap=1/16;
   measureShift=true;
   htmlContent.innerHTML=
   `<button id="blob" class="btn btn-primary">click to download</button><br>
@@ -337,6 +399,18 @@ function loadHTMLcontent(){
     <div class="custom-control custom-checkbox">
       <input type="checkbox" checked="true" class="custom-control-input" id="openNotes">
       <label class="custom-control-label" for="openNotes"><span  data-toggle="tooltip" title="When enabled, include open notes">Open notes</span></label>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <input type="number" checked="true" id="maxNotes" value=2>
+      <label for="maxNotes"><span  data-toggle="tooltip" title="Strips away lower notes so that only n notes start at the same time">Max Simultanious Notes</span></label>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <input type="number" checked="true" id="previewScale" value=4000>
+      <label for="previewScale"><span  data-toggle="tooltip" title="Scaling factor of the preivew">Scale</span></label>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <input type="number" checked="true" id="openSkipGap" value=`+openSkipGap*100+`>
+      <label for="openSkipGap"><span  data-toggle="tooltip" title="% of a quarter note that is too short for a note and open to be next to eachother">Skip Open Notes limit</span></label>
     </div>`;
   settings = {
     tracks:[]
@@ -357,7 +431,7 @@ function loadHTMLcontent(){
 
   preview.ppq=currentMidi.header.ppq;
   preview.speed=((4/60)*currentMidi.header.ppq)>>0;
-  stripSustain=preview.ppq/4;
+  stripSustain=preview.ppq/8;
 
   loadSettings();
 }
@@ -373,7 +447,7 @@ function drawNote(note,y,type,duration){
   noStroke();
   if(openNotes && note === -1){
     fill(150,0,200,200);
-    rect(0,y-duration-4,width,duration+8);
+    rect(0,y-(duration>0?duration:0)-4,width,(duration>0?duration:0)+8);
     return;
   }
   else if (note<0) {
@@ -384,7 +458,7 @@ function drawNote(note,y,type,duration){
 
   colors[note].setAlpha(150);
   fill(colors[note]);
-  if(duration){
+  if(duration>0){
     rect(note*width/6+width/6-width/40,y-duration,width/20,duration,width/40);
   }
   colors[note].setAlpha(255);
@@ -470,8 +544,7 @@ function draw() {
   var Y=height+last*(height/preview.scale);
   strokeWeight(2);
   stroke(255);//   7/12
-  var notesPerMeasuer=currentMidi.header.timeSignatures[0].timeSignature[0];
-  var ticksPerNote=preview.ppq*currentMidi.header.tempos[0].bpm*currentMidi.header.timeSignatures[0].timeSignature[0]/currentMidi.header.timeSignatures[0].timeSignature[1];
+  var ticksPerNote=currentMidi.header.timeSignatures.length>0?preview.ppq*currentMidi.header.tempos[0].bpm*currentMidi.header.timeSignatures[0].timeSignature[0]/currentMidi.header.timeSignatures[0].timeSignature[1]:480;
   var tempo=0;
   var timeSignature=0;
   var t=0;
@@ -496,7 +569,7 @@ function draw() {
   if(note<0){note=0;}
   while(note<chartedNotes.length&&unChartedNotes[note][0]<=last+preview.scale){
     if(!lastNote[note]||note>lastNote[note]){
-      drawNote(chartedNotes[note]-openNotes,height-(unChartedNotes[note][0]-preview.time)/preview.scale*height,'',unChartedNotes[note][2]/preview.scale*height);
+      drawNote(chartedNotes[note]-openNotes,height-(unChartedNotes[note][0]-preview.time)/preview.scale*height,'',(unChartedNotes[note][2]-stripSustain)/preview.scale*height);
       lastNote[i]=note;
     }
     note++;

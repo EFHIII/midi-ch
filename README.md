@@ -1,4 +1,4 @@
 # .midi to Clone Hero
-.midi to clone hero converter
+.midi to [Clone Hero](https://clonehero.net/) converter
 
-https://efhiii.github.io/midi-ch/
+link: https://efhiii.github.io/midi-ch/

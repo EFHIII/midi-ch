@@ -100,6 +100,8 @@ function mergable(a,b){
 };
 
 function loadSettings(){
+  stripSustain=document.getElementById("stripSustain").value*preview.ppq/100/2;
+  if(stripSustain<0){stripSustain=0;}
   maxNotes=document.getElementById("maxNotes").value*1;
   if(maxNotes<1){
     maxNotes=1;
@@ -153,7 +155,7 @@ function loadSettings(){
   for(var i=0;i<currentMidi.tracks.length;i++){
     if(settings.tracks[i]){
       for(var note=0;note<currentMidi.tracks[i].notes.length;note++){
-        unChartedNotes.push([currentMidi.tracks[i].notes[note].ticks,distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi),currentMidi.tracks[i].notes[note].durationTicks<preview.ppq?0:currentMidi.tracks[i].notes[note].durationTicks]);
+        unChartedNotes.push([currentMidi.tracks[i].notes[note].ticks,distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi),currentMidi.tracks[i].notes[note].durationTicks<=stripSustain?0:currentMidi.tracks[i].notes[note].durationTicks]);
         if(currentMidi.tracks[i].notes[note].ticks>songLength){
           songLength=currentMidi.tracks[i].notes[note].ticks;
         }
@@ -323,14 +325,22 @@ function loadSettings(){
   for(var i=0;i<chartedNotes.length;i++){
     var duration=unChartedNotes[i][2];
     if(duration > 0){
+      var strip=true;
       for(var j=0;j<chartedNotes.length;j++){
-        if(unChartedNotes[i][0]!=unChartedNotes[j][0] && unChartedNotes[j][0]-unChartedNotes[i][0]>0 && unChartedNotes[j][0]-unChartedNotes[i][0] < duration && (openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes ) == (openNotes && chartedNotes[j] - openNotes === -1 ? 7 : chartedNotes[j] - openNotes )){
-          duration = unChartedNotes[j][0]-unChartedNotes[i][0];
+        if(unChartedNotes[i][0]!=unChartedNotes[j][0] && unChartedNotes[j][0]-unChartedNotes[i][0]>0 && unChartedNotes[j][0]-unChartedNotes[i][0] <= duration ){
+          //strip=true;
+          if( (openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes ) == (openNotes && chartedNotes[j] - openNotes === -1 ? 7 : chartedNotes[j] - openNotes ) ){
+            duration = unChartedNotes[j][0]-unChartedNotes[i][0];
+            //strip=false;
+          }
           //console.log('trim');
         }
       }
-      duration-=stripSustain;
+      if(strip){
+        duration-=stripSustain;
+      }
       if(duration<0){duration=0;}
+      unChartedNotes[i][2]=duration;
     }
     notesString+='  '+unChartedNotes[i][0]+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+duration+'\n';
   }
@@ -354,8 +364,9 @@ diff_guitarghl = -1
 diff_bassghl = -1
 preview_start_time = 0
 frets = 0
-charter = Edward Haas
+charter = <color=#0064c8>Edward Haas</color>
 icon = efhiii
+loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.github.io/midi-ch/
 
 `);
   zip.file("notes.chart", `[Song]
@@ -393,6 +404,7 @@ icon = efhiii
 function loadHTMLcontent(){
   openSkipGap=1/16;
   measureShift=true;
+  stripSustain=preview.ppq/2;
   htmlContent.innerHTML=
   `<button id="blob" class="btn btn-primary">click to download</button><br>
   <button class="btn btn-primary" onclick="loadSettings()">Load New Settings</button><br>
@@ -400,17 +412,21 @@ function loadHTMLcontent(){
       <input type="checkbox" checked="true" class="custom-control-input" id="openNotes">
       <label class="custom-control-label" for="openNotes"><span  data-toggle="tooltip" title="When enabled, include open notes">Open notes</span></label>
     </div>
-    <div class="custom-control custom-checkbox">
-      <input type="number" checked="true" id="maxNotes" value=2>
+    <div class="custom-control">
+      <input type="number" id="maxNotes" value=2>
       <label for="maxNotes"><span  data-toggle="tooltip" title="Strips away lower notes so that only n notes start at the same time">Max Simultanious Notes</span></label>
     </div>
-    <div class="custom-control custom-checkbox">
-      <input type="number" checked="true" id="previewScale" value=4000>
+    <div class="custom-control">
+      <input type="number" id="previewScale" value=4000>
       <label for="previewScale"><span  data-toggle="tooltip" title="Scaling factor of the preivew">Scale</span></label>
     </div>
-    <div class="custom-control custom-checkbox">
-      <input type="number" checked="true" id="openSkipGap" value=`+openSkipGap*100+`>
+    <div class="custom-control">
+      <input type="number" id="openSkipGap" value=`+openSkipGap*100+`>
       <label for="openSkipGap"><span  data-toggle="tooltip" title="% of a quarter note that is too short for a note and open to be next to eachother">Skip Open Notes limit</span></label>
+    </div>
+    <div class="custom-control">
+      <input type="number" id="stripSustain" value=50>
+      <label for="stripSustain"><span  data-toggle="tooltip" title="Shortens Sustained notes by this % of a beat">Strip Sustain</span></label>
     </div>`;
   settings = {
     tracks:[]
@@ -431,7 +447,6 @@ function loadHTMLcontent(){
 
   preview.ppq=currentMidi.header.ppq;
   preview.speed=((4/60)*currentMidi.header.ppq)>>0;
-  stripSustain=preview.ppq/8;
 
   loadSettings();
 }
@@ -569,7 +584,7 @@ function draw() {
   if(note<0){note=0;}
   while(note<chartedNotes.length&&unChartedNotes[note][0]<=last+preview.scale){
     if(!lastNote[note]||note>lastNote[note]){
-      drawNote(chartedNotes[note]-openNotes,height-(unChartedNotes[note][0]-preview.time)/preview.scale*height,'',(unChartedNotes[note][2]-stripSustain)/preview.scale*height);
+      drawNote(chartedNotes[note]-openNotes,height-(unChartedNotes[note][0]-preview.time)/preview.scale*height,'',unChartedNotes[note][2]/preview.scale*height);
       lastNote[i]=note;
     }
     note++;

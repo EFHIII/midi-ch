@@ -43,6 +43,34 @@ else {
 }
 var currentMidi = null;
 var settings;
+
+var synths = [];
+var now = Tone.now() + 0.5;
+function playMidi(){
+    while(synths.length){
+      const synth = synths.shift()
+      synth.dispose()
+    }
+    synths = [];
+    now = Tone.now() + 0.5;
+    currentMidi.tracks.forEach(track => {
+        //create a synth for each track
+        const synth = new Tone.PolySynth(1, Tone.Synth, {
+            envelope : {
+                attack : 0.02,
+                decay : 0.1,
+                sustain : 0.3,
+                release : 1
+            }
+        }).toMaster()
+        synths.push(synth)
+        //schedule all of the events
+        track.notes.forEach(note => {
+            synth.triggerAttackRelease(note.name, note.duration, note.time + now, note.velocity)
+        })
+    })
+}
+
 function parseFile(file){
   //read the file
   const reader = new FileReader()
@@ -50,6 +78,7 @@ function parseFile(file){
     const midi = new Midi(e.target.result)
     currentMidi = midi
     console.log(currentMidi)
+    playMidi();
     loadHTMLcontent();
   }
   reader.readAsArrayBuffer(file)
@@ -125,6 +154,9 @@ function loadSettings(){
   }
   for(var i=0;i<currentMidi.header.tempos.length;i++){
     syncEvents.push([currentMidi.header.tempos[i].ticks,'  '+currentMidi.header.tempos[i].ticks+' = B '+(currentMidi.header.tempos[i].bpm*1000>>0)+'\n']);
+  }
+  if(!i){
+    syncEvents.push([0,'  0 = B 120000\n']);
   }
   //sort in cronological order
   syncEvents.sort((a,b)=>a[0]-b[0]);
@@ -559,7 +591,10 @@ function draw() {
   var Y=height+last*(height/preview.scale);
   strokeWeight(2);
   stroke(255);//   7/12
-  var ticksPerNote=currentMidi.header.timeSignatures.length>0?preview.ppq*currentMidi.header.tempos[0].bpm*currentMidi.header.timeSignatures[0].timeSignature[0]/currentMidi.header.timeSignatures[0].timeSignature[1]:480;
+  var ticksPerNote=480;
+  if(preview.ppq*currentMidi.header.tempos.length){
+    var ticksPerNote=currentMidi.header.timeSignatures.length>0?preview.ppq*currentMidi.header.tempos[0].bpm*currentMidi.header.timeSignatures[0].timeSignature[0]/currentMidi.header.timeSignatures[0].timeSignature[1]:480;
+  }
   var tempo=0;
   var timeSignature=0;
   var t=0;

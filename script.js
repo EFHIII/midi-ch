@@ -44,41 +44,22 @@ else {
 var currentMidi = null;
 var settings;
 
-var synths = [];
-var now = Tone.now() + 0.5;
-function playMidi(){
-    while(synths.length){
-      const synth = synths.shift()
-      synth.dispose()
+var synth = new Tone.PolySynth(10, Tone.Synth, {
+    envelope : {
+        attack : 0.02,
+        decay : 0.1,
+        sustain : 0.3,
+        release : 0.9
     }
-    synths = [];
-    now = Tone.now() + 0.5;
-    currentMidi.tracks.forEach(track => {
-        //create a synth for each track
-        const synth = new Tone.PolySynth(1, Tone.Synth, {
-            envelope : {
-                attack : 0.02,
-                decay : 0.1,
-                sustain : 0.3,
-                release : 1
-            }
-        }).toMaster()
-        synths.push(synth)
-        //schedule all of the events
-        track.notes.forEach(note => {
-            synth.triggerAttackRelease(note.name, note.duration, note.time + now, note.velocity)
-        })
-    })
-}
+}).toMaster()
 
 function parseFile(file){
   //read the file
   const reader = new FileReader()
   reader.onload = function(e){
     const midi = new Midi(e.target.result)
-    currentMidi = midi
-    console.log(currentMidi)
-    playMidi();
+    currentMidi = midi;
+    //console.log(currentMidi);
     loadHTMLcontent();
   }
   reader.readAsArrayBuffer(file)
@@ -187,7 +168,16 @@ function loadSettings(){
   for(var i=0;i<currentMidi.tracks.length;i++){
     if(settings.tracks[i]){
       for(var note=0;note<currentMidi.tracks[i].notes.length;note++){
-        unChartedNotes.push([currentMidi.tracks[i].notes[note].ticks,distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi),currentMidi.tracks[i].notes[note].durationTicks<=stripSustain?0:currentMidi.tracks[i].notes[note].durationTicks]);
+        unChartedNotes.push([
+          currentMidi.tracks[i].notes[note].ticks,
+          distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi),
+          currentMidi.tracks[i].notes[note].durationTicks<=stripSustain?0:currentMidi.tracks[i].notes[note].durationTicks,
+          currentMidi.tracks[i].notes[note].time,
+          currentMidi.tracks[i].notes[note].name,
+          currentMidi.tracks[i].notes[note].velocity,
+          currentMidi.tracks[i].notes[note].duration,
+          currentMidi.tracks[i].notes[note].durationTicks
+        ]);
         if(currentMidi.tracks[i].notes[note].ticks>songLength){
           songLength=currentMidi.tracks[i].notes[note].ticks;
         }
@@ -217,15 +207,15 @@ function loadSettings(){
       notes.push([i,unChartedNotes[i][1]]);
     }
     if(notes.length>maxNotes){
-      console.log(unChartedNotes[notes[0][0]][0]);
-      console.log(JSON.stringify(notes));
+      //console.log(unChartedNotes[notes[0][0]][0]);
+      //console.log(JSON.stringify(notes));
       notes.sort((a,b)=>b[1]-a[1]);
-      console.log(JSON.stringify(notes));
+      //console.log(JSON.stringify(notes));
       for(var j=0;j<maxNotes;j++){
         notes.splice(0,1);
       }
       notes.sort((a,b)=>b[0]-a[0]);
-      console.log(JSON.stringify(notes));
+      //console.log(JSON.stringify(notes));
       for(var j=0;j<notes.length;j++){
         unChartedNotes.splice(notes[j][0],1);
         if(notes[j][0]<=i){i--;}
@@ -320,8 +310,8 @@ function loadSettings(){
       }
     }
     distinct[g].sort((a,b)=>a-b);
-    console.log(groups[g].length);
-    console.log(distinct[g]);
+    //console.log(groups[g].length);
+    //console.log(distinct[g]);
   }
 
   for(var i=0;i<unChartedNotes.length;i++){
@@ -345,7 +335,7 @@ function loadSettings(){
     if(openNotes && chartedNotes[i] - openNotes === -1){
       if((i>0&&abs(unChartedNotes[i-1][0]-unChartedNotes[i][0])<openSkipGap)||(i<unChartedNotes.length-1&&abs(unChartedNotes[i+1][0]-unChartedNotes[i][0]<openSkipGap))){
         if(i>0&&i<unChartedNotes.length-1){
-          console.log('removed open- '+min(abs(unChartedNotes[i-1][0]-unChartedNotes[i][0]),abs(unChartedNotes[i+1][0]-unChartedNotes[i][0])));
+          //console.log('removed open- '+min(abs(unChartedNotes[i-1][0]-unChartedNotes[i][0]),abs(unChartedNotes[i+1][0]-unChartedNotes[i][0])));
         }
         chartedNotes.splice(i,1);
         unChartedNotes.splice(i,1);
@@ -441,7 +431,7 @@ function loadHTMLcontent(){
   `<button id="blob" class="btn btn-primary">click to download</button><br>
   <button class="btn btn-primary" onclick="loadSettings()">Load New Settings</button><br>
     <div class="custom-control custom-checkbox">
-      <input type="checkbox" checked="true" class="custom-control-input" id="openNotes">
+      <input type="checkbox" checked="false" class="custom-control-input" id="openNotes">
       <label class="custom-control-label" for="openNotes"><span  data-toggle="tooltip" title="When enabled, include open notes">Open notes</span></label>
     </div>
     <div class="custom-control">
@@ -449,7 +439,7 @@ function loadHTMLcontent(){
       <label for="maxNotes"><span  data-toggle="tooltip" title="Strips away lower notes so that only n notes start at the same time">Max Simultanious Notes</span></label>
     </div>
     <div class="custom-control">
-      <input type="number" id="previewScale" value=4000>
+      <input type="number" id="previewScale" value=2>
       <label for="previewScale"><span  data-toggle="tooltip" title="Scaling factor of the preivew">Scale</span></label>
     </div>
     <div class="custom-control">
@@ -479,6 +469,10 @@ function loadHTMLcontent(){
 
   preview.ppq=currentMidi.header.ppq;
   preview.speed=((4/60)*currentMidi.header.ppq)>>0;
+  preview.time=0;
+  frameLength=0;
+  lastFrameTime=Date.now();
+  currentFrameTime=Date.now();
 
   loadSettings();
 }
@@ -538,19 +532,19 @@ function drawNote(note,y,type,duration){
 }
 
 var preview={
-  scale:4000,
-  time:0,
+  scale:2,
   speed:30,
-  ppq:100
+  ppq:100,
+  time:0
 };
 
 function findNotes(from,to){
   var interval=Math.ceil(chartedNotes.length/4);
   var at=interval*2;
   var pls=2;
-  while(interval>=1&&pls&&unChartedNotes[at][0]!=from){
+  while(interval>=1&&pls&&unChartedNotes[at][3]!=from){
     if(interval == 1){pls--;}
-    if(unChartedNotes[at][0]>=from){
+    if(unChartedNotes[at][3]>=from){
       at-=interval;
       if(at<0){at=0;}
     }
@@ -561,7 +555,7 @@ function findNotes(from,to){
     interval=Math.ceil(interval/2);
   }
   var bottom=at-10;
-  while(bottom>0&&unChartedNotes[bottom-1][0]>=from){
+  while(bottom>0&&unChartedNotes[bottom-1][3]>=from){
     bottom--;
   }
   return bottom;
@@ -571,6 +565,79 @@ var lastFrameTime=Date.now();
 var currentFrameTime=Date.now();
 
 function draw() {
+  background(0);
+  stroke(200);
+  strokeWeight(2);
+  for(var i=0;i<5;i++){
+    line(i*width/6+width/6,0,i*width/6+width/6,height);
+  }
+  line(0,height*0.9,width,height*0.9);
+  if(!currentMidi){
+    return;
+  }
+
+  lastFrameTime=currentFrameTime;
+  currentFrameTime=Date.now();
+  var frameLength=(currentFrameTime-lastFrameTime)/1000;
+  preview.time+=frameLength;
+
+  //var Y=height+last*(height/preview.scale);
+
+  //var Y = Tone.now()*(height/preview.scale);
+
+  strokeWeight(2);
+  stroke(255);//   7/12
+
+  //var now=Tone.now()-0.25;
+
+
+  if(mouseIsPressed && mouseX>0){
+    preview.time=unChartedNotes[unChartedNotes.length-1][3]*(height-mouseY)/1/height;
+    frameLength=0;
+    lastFrameTime=Date.now();
+    currentFrameTime=Date.now();
+  }
+
+  if(preview.time > currentMidi.duration){
+    //now=Tone.now()-0.75;
+    preview.time=0;
+    frameLength=0;
+    lastFrameTime=Date.now();
+    currentFrameTime=Date.now();
+  }
+  //var Y=0;
+
+  //while(t<now+1){
+
+  var lastNote=0;
+
+  //var note=findNotes(preview.time,preview.time+preview.scale/2);
+  //if(note<0){note=0;}
+  var note=0;
+  while(note<chartedNotes.length&&unChartedNotes[note][3]<=preview.time+preview.scale*1.1){
+    var currentNote=unChartedNotes[note];
+    if(currentNote[3]-preview.time<=0&&currentNote[3]-(preview.time-frameLength)>0){
+      synth.triggerAttackRelease(currentNote[4], currentNote[6], Tone.now(), currentNote[5]);
+    }
+
+    var Y=0.9*height-(currentNote[3]-preview.time)/preview.scale*height;
+    if(Y>0&&Y<0.9*height&&(!lastNote[note]||note>lastNote[note])){
+      drawNote(chartedNotes[note]-openNotes,Y,'',(currentNote[6]/currentNote[5]*currentNote[2]/1000)/preview.scale*height);
+      lastNote[i]=note;
+    }
+    note++;
+  }
+
+  if(quality[0]){
+    noStroke();
+    fill(255,0,0);
+    rect(0,0,width,10);
+    fill(0,200,0);
+    rect(0,0,width*quality[3]/quality[0],10);
+    fill(255,255,0);
+    rect(width*quality[3]/quality[0],0,width*quality[2]/quality[0],10);
+  }
+  /*
   background(0);
   stroke(200);
   strokeWeight(2);
@@ -634,7 +701,7 @@ function draw() {
     fill(255,255,0);
     rect(width*quality[3]/quality[0],0,width*quality[2]/quality[0],10);
   }
-
+  */
 }
 
 /* full screening will change the size of the canvas */

@@ -43,6 +43,11 @@ When Open Notes is on, strips 1/this beats from open notes
 ## Strip Sustain
 When Open Notes is on, strips this% beats from open sustain notes. (recommended: set 0 and strip sustains in MoonScraper or EoF)
 
+## Leading Silence
+Number of seconds of silence at the start of the chart.
+
+Must also be applied to the audio file in order to sync properly, this does not generate an audio file. https://solmire.com/midi-to-mp3 is a good midi to mp3 converter.
+
 ## Instrument toggles
 When an instrument is toggled on, (after loading new settings) the chart will incorporate that instrument. Having multiple instruments on will have the chart use all toggled instruments with a preference for higher notes. Deleting notes will remove them from their instrument, not just the chart and will persist after reloading the chart.
 

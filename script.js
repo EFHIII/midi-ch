@@ -141,6 +141,7 @@ function loadSettings(){
     maxNotes=6;
   }
   preview.scale=document.getElementById("previewScale").value*1;
+  preview.leadingSeconds=document.getElementById("leadingSeconds").value*1;
   if(preview.scale<=0){preview.scale=4000;}
   openSkipGap = 1/document.getElementById("openSkipGap").value*preview.ppq;
   openNotes = document.getElementById("openNotes").checked?1:0;
@@ -148,17 +149,15 @@ function loadSettings(){
   var new_element = old_element.cloneNode(true);
   old_element.parentNode.replaceChild(new_element, old_element);
 
+  var twoSec=preview.ppq*(preview.leadingSeconds>>0);
   //sync track events
   var syncTrackString='';
-  var syncEvents=[];
+  var syncEvents=[[0,'  0 = TS 4\n'],[0,'  0 = B 120000\n']];
   for(var i=0;i<currentMidi.header.timeSignatures.length;i++){
-    syncEvents.push([currentMidi.header.timeSignatures[i].ticks,'  '+currentMidi.header.timeSignatures[i].ticks+' = TS '+(currentMidi.header.timeSignatures[i].timeSignature[0]*4/currentMidi.header.timeSignatures[i].timeSignature[1])+'\n']);
+    syncEvents.push([twoSec+currentMidi.header.timeSignatures[i].ticks,'  '+(twoSec+currentMidi.header.timeSignatures[i].ticks)+' = TS '+(currentMidi.header.timeSignatures[i].timeSignature[0]*4/currentMidi.header.timeSignatures[i].timeSignature[1])+'\n']);
   }
   for(var i=0;i<currentMidi.header.tempos.length;i++){
-    syncEvents.push([currentMidi.header.tempos[i].ticks,'  '+currentMidi.header.tempos[i].ticks+' = B '+(currentMidi.header.tempos[i].bpm*1000>>0)+'\n']);
-  }
-  if(!i){
-    syncEvents.push([0,'  0 = B 120000\n']);
+    syncEvents.push([twoSec+currentMidi.header.tempos[i].ticks,'  '+(twoSec+currentMidi.header.tempos[i].ticks)+' = B '+(currentMidi.header.tempos[i].bpm*1000>>0)+'\n']);
   }
   //sort in cronological order
   syncEvents.sort((a,b)=>a[0]-b[0]);
@@ -357,9 +356,9 @@ function loadSettings(){
   for(var i=0;i<chartedNotes.length;i++){
     if(openNotes && chartedNotes[i] - openNotes === -1){
       if((i>0&&abs(unChartedNotes[i-1][0]-unChartedNotes[i][0])<openSkipGap)||(i<unChartedNotes.length-1&&abs(unChartedNotes[i+1][0]-unChartedNotes[i][0]<openSkipGap))){
-        if(i>0&&i<unChartedNotes.length-1){
+        //if(i>0&&i<unChartedNotes.length-1){
           //console.log('removed open- '+min(abs(unChartedNotes[i-1][0]-unChartedNotes[i][0]),abs(unChartedNotes[i+1][0]-unChartedNotes[i][0])));
-        }
+        //}
         chartedNotes.splice(i,1);
         unChartedNotes.splice(i,1);
         i--;
@@ -387,7 +386,7 @@ function loadSettings(){
       if(duration<0){duration=0;}
       unChartedNotes[i][2]=duration;
     }
-    notesString+='  '+unChartedNotes[i][0]+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+duration+'\n';
+    notesString+='  '+(twoSec+unChartedNotes[i][0])+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+duration+'\n';
   }
 
   var zip = new JSZip();
@@ -457,26 +456,30 @@ function loadHTMLcontent(){
   stripSustain=0;
   htmlContent.innerHTML=
   `<button id="blob" class="btn btn-primary">click to download</button><br>
-  <button class="btn btn-primary" onclick="loadSettings()"><span  data-toggle="tooltip" title="Re-charts the song based on the new settings and any recently deleted notes">Load New Settings</button><br>
+  <button class="btn btn-primary" onclick="loadSettings()"><span data-toggle="tooltip" title="Re-charts the song based on the new settings and any recently deleted notes">Load New Settings</button><br>
     <div class="custom-control custom-checkbox">
       <input type="checkbox" class="custom-control-input" id="openNotes">
-      <label class="custom-control-label" for="openNotes"><span  data-toggle="tooltip" title="When enabled, include open notes">Open notes</span></label>
+      <label class="custom-control-label" for="openNotes"><span data-toggle="tooltip" title="When enabled, include open notes">Open notes</span></label>
     </div>
     <div class="custom-control">
       <input type="number" id="maxNotes" value=2>
-      <label for="maxNotes"><span  data-toggle="tooltip" title="Strips away lower notes so that only n notes start at the same time">Max Simultaneous Notes</span></label>
+      <label for="maxNotes"><span data-toggle="tooltip" title="Strips away lower notes so that only n notes start at the same time">Max Simultaneous Notes</span></label>
     </div>
     <div class="custom-control">
       <input type="number" id="previewScale" value=2>
-      <label for="previewScale"><span  data-toggle="tooltip" title="Seconds visible in the preivew">Scale</span></label>
+      <label for="previewScale"><span data-toggle="tooltip" title="Seconds visible in the preivew">Scale</span></label>
     </div>
     <div class="custom-control">
       <input type="number" id="openSkipGap" value=`+(1/openSkipGap)+`>
-      <label for="openSkipGap"><span  data-toggle="tooltip" title="% of a quarter note that is too short for a note and open to be next to eachother">Skip Open Notes limit</span></label>
+      <label for="openSkipGap"><span data-toggle="tooltip" title="% of a quarter note that is too short for a note and open to be next to eachother">Skip Open Notes limit</span></label>
     </div>
     <div class="custom-control">
       <input type="number" id="stripSustain" value=50>
-      <label for="stripSustain"><span  data-toggle="tooltip" title="Shortens Sustained notes by this % of a beat">Strip Sustain</span></label>
+      <label for="stripSustain"><span data-toggle="tooltip" title="Shortens Sustained notes by this % of a beat">Strip Sustain</span></label>
+    </div>
+    <div class="custom-control">
+      <input type="number" id="leadingSeconds" value=2>
+      <label for="leadingSeconds"><span data-toggle="tooltip" title="Seconds of silence at the start of the chart.">Leading silence</span></label>
     </div>`;
   settings = {
     tracks:[]
@@ -503,6 +506,7 @@ function loadHTMLcontent(){
   preview.ppq=currentMidi.header.ppq;
   preview.speed=((4/60)*currentMidi.header.ppq)>>0;
   preview.time=-0.1;
+  preview.leadingSeconds=2;
   frameLength=0;
   lastFrameTime=Date.now();
   currentFrameTime=Date.now();
@@ -568,7 +572,8 @@ var preview={
   scale:2,
   speed:30,
   ppq:100,
-  time:0
+  time:0,
+  leadingSeconds:2
 };
 
 function findNotes(from,to){

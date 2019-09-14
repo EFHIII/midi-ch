@@ -4,17 +4,28 @@
 link: https://efhiii.github.io/midi-ch/
 
 # Keyboard shortcuts
-- SPACE: Pause/Resume
-- UP-ARROW: Step forward
-- DOWN-ARROW: Step back
-- +: Increase step size ( * 1.2 )
-- -: Decrease step size ( / 1.2 )
-- hold D: Delete the note the bottom fret represents that pass the middle red line
-- hold BACKSPACE: Delete the note the top fret represents that pass the middle red line
-- hold DELETE: Delete all notes that pass the middle red line
-- Z: Undo last note deletion
-- L: Load changes (necessary for making note deletions affect the chart properly, but slow so, especially on longer charts, avoid using frequently)
-- S: Save (export to chart)
+- SPACE
+  - Pause/Resume
+- UP-ARROW
+  - Step forward
+- DOWN-ARROW
+  - Step back
+- +
+  - Increase step size ( * 1.2 )
+- -
+  - Decrease step size ( / 1.2 )
+- hold D
+  - Delete the note the bottom fret represents that pass the middle red line
+- hold BACKSPACE
+  - Delete the note the top fret represents that pass the middle red line
+- hold DELETE
+  - Delete all notes that pass the middle red line
+- Z
+  - Undo last note deletion
+- L
+  - Load changes (necessary for making note deletions affect the chart properly, but slow so, especially on longer charts, avoid using frequently)
+- S
+  - Save (export to chart)
 
 # Other features
 ## Scale setting

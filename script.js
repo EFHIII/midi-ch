@@ -457,7 +457,7 @@ function loadHTMLcontent(){
   stripSustain=preview.ppq/2;
   htmlContent.innerHTML=
   `<button id="blob" class="btn btn-primary">click to download</button><br>
-  <button class="btn btn-primary" onclick="loadSettings()">Load New Settings</button><br>
+  <button class="btn btn-primary" onclick="loadSettings()"><span  data-toggle="tooltip" title="Re-charts the song based on the new settings and any recently deleted notes">Load New Settings</button><br>
     <div class="custom-control custom-checkbox">
       <input type="checkbox" class="custom-control-input" id="openNotes">
       <label class="custom-control-label" for="openNotes"><span  data-toggle="tooltip" title="When enabled, include open notes">Open notes</span></label>
@@ -468,7 +468,7 @@ function loadHTMLcontent(){
     </div>
     <div class="custom-control">
       <input type="number" id="previewScale" value=2>
-      <label for="previewScale"><span  data-toggle="tooltip" title="Scaling factor of the preivew">Scale</span></label>
+      <label for="previewScale"><span  data-toggle="tooltip" title="Seconds visible in the preivew">Scale</span></label>
     </div>
     <div class="custom-control">
       <input type="number" id="openSkipGap" value=`+openSkipGap*100+`>

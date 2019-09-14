@@ -142,7 +142,7 @@ function loadSettings(){
   }
   preview.scale=document.getElementById("previewScale").value*1;
   if(preview.scale<=0){preview.scale=4000;}
-  openSkipGap = document.getElementById("openSkipGap").value/100*preview.ppq;
+  openSkipGap = 1/document.getElementById("openSkipGap").value*preview.ppq;
   openNotes = document.getElementById("openNotes").checked?1:0;
   var old_element = document.getElementById("blob");
   var new_element = old_element.cloneNode(true);
@@ -454,7 +454,7 @@ function loadHTMLcontent(){
   }
   openSkipGap=1/16;
   measureShift=true;
-  stripSustain=preview.ppq/2;
+  stripSustain=0;
   htmlContent.innerHTML=
   `<button id="blob" class="btn btn-primary">click to download</button><br>
   <button class="btn btn-primary" onclick="loadSettings()"><span  data-toggle="tooltip" title="Re-charts the song based on the new settings and any recently deleted notes">Load New Settings</button><br>
@@ -464,14 +464,14 @@ function loadHTMLcontent(){
     </div>
     <div class="custom-control">
       <input type="number" id="maxNotes" value=2>
-      <label for="maxNotes"><span  data-toggle="tooltip" title="Strips away lower notes so that only n notes start at the same time">Max Simultanious Notes</span></label>
+      <label for="maxNotes"><span  data-toggle="tooltip" title="Strips away lower notes so that only n notes start at the same time">Max Simultaneous Notes</span></label>
     </div>
     <div class="custom-control">
       <input type="number" id="previewScale" value=2>
       <label for="previewScale"><span  data-toggle="tooltip" title="Seconds visible in the preivew">Scale</span></label>
     </div>
     <div class="custom-control">
-      <input type="number" id="openSkipGap" value=`+openSkipGap*100+`>
+      <input type="number" id="openSkipGap" value=`+(1/openSkipGap)+`>
       <label for="openSkipGap"><span  data-toggle="tooltip" title="% of a quarter note that is too short for a note and open to be next to eachother">Skip Open Notes limit</span></label>
     </div>
     <div class="custom-control">

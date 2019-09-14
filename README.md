@@ -28,8 +28,23 @@ link: https://efhiii.github.io/midi-ch/
   - Save (export to chart)
 
 # Other features
-## Scale setting
+## Open Notes
+When on, the chart will treat open notes as a 6th fret, bellow green. (I recommended not using this and instead add open notes in Moon Scraper or EoF after exporting.)
+
+## Max Simultaneous Notes
+When on, the chart will treat open notes as a 6th fret, bellow green. (I recommended not using this and instead add open notes in MoonScraper or EoF after exporting.)
+
+## Scale
 How many seconds can be seen in the preview on the right.
+
+## Strip Open Notes Limit
+When Open Notes is on, strips 1/this beats from open notes
+
+## Strip Sustain
+When Open Notes is on, strips this% beats from open sustain notes. (recommended: leave 0 and strip sustains in MoonScraper or EoF)
+
+## Instrument toggles
+When an instrument is toggled on, (after loading new settings) the chart will incorporate that instrument. Having multiple instruments on will have the chart use all toggled instruments with a preference for higher notes. Deleting notes will remove them from their instrument, not just the chart and will persist after reloading the chart.
 
 ## Song playback
 Only plays the notes that the chart is showing

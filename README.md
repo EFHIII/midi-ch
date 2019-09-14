@@ -15,11 +15,11 @@ link: https://efhiii.github.io/midi-ch/
 - \-
   - Decrease step size ( / 1.2 )
 - hold D
-  - Delete the note the bottom fret represents that pass the middle red line
+  - Delete the note the bottom fret represents that passes the middle red line
 - hold BACKSPACE
-  - Delete the note the top fret represents that pass the middle red line
+  - Delete the note the top fret represents that passes the middle red line
 - hold DELETE
-  - Delete all notes that pass the middle red line
+  - Delete all notes that passes the middle red line
 - Z
   - Undo last note deletion
 - L

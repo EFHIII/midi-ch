@@ -600,10 +600,49 @@ var paused=false;
 var OS=0;
 var lastLen=0.3;
 
+var deletedNotes=[];
+function unshiftNotes(from){
+  var index=unChartedNotes[from][10];
+  for(var i=from;i<unChartedNotes.length;i++){
+    unChartedNotes[i][10]++;
+  }
+  for(var i=0;i<deletedNotes.length;i++){
+    if(deletedNotes[i].unCharted[10]>index){
+      deletedNotes[i].unCharted[10]++;
+    }
+  }
+}
+function undoDeleted(){
+  if(deletedNotes.length<1){return}
+  var data=deletedNotes.pop();
+  currentMidi.tracks[data.unCharted[9]].notes.splice(data.unCharted[10],0,data.track);
+  unshiftNotes(data.note);
+  unChartedNotes.splice(data.note,0,data.unCharted);
+  chartedNotes.splice(data.note,0,data.charted);
+}
 function shiftNotes(from){
+  var index=unChartedNotes[from][10];
   for(var i=from;i<unChartedNotes.length;i++){
     unChartedNotes[i][10]--;
   }
+  for(var i=0;i<deletedNotes.length;i++){
+    if(deletedNotes[i].unCharted[10]>index){
+      deletedNotes[i].unCharted[10]--;
+    }
+  }
+}
+function deleteNote(note){
+  currentNote=unChartedNotes[note];
+  deletedNotes.push({
+    note:note,
+    charted:chartedNotes[note],
+    unCharted:currentNote.slice(),
+    track:JSON.parse(JSON.stringify(currentMidi.tracks[currentNote[9]].notes[currentNote[10]]))
+  });
+  currentMidi.tracks[currentNote[9]].notes.splice(currentNote[10],1);
+  shiftNotes(note);
+  unChartedNotes.splice(note,1);
+  chartedNotes.splice(note,1);
 }
 function delTop(from,to){
   var note=-1;
@@ -617,10 +656,7 @@ function delTop(from,to){
   while(note<chartedNotes.length&&currentNote[3]<to){
     if(currentNote[3]!=lastTime&&currentNotes.length>0){
       currentNotes.sort((a,b)=>{return b[0][8]-a[0][8]});
-      currentMidi.tracks[currentNotes[0][0][9]].notes.splice(currentNotes[0][0][10],1);
-      shiftNotes(currentNotes[0][0][10]);
-      unChartedNotes.splice(currentNotes[0][1],1);
-      chartedNotes.splice(currentNotes[0][1],1);
+      deleteNote(currentNotes[0][1]);
       currentNotes=[];
       note--;
     }
@@ -631,10 +667,7 @@ function delTop(from,to){
   }
   if(currentNotes.length>0){
     currentNotes.sort((a,b)=>{return b[0][8]-a[0][8]});
-    currentMidi.tracks[currentNotes[0][0][9]].notes.splice(currentNotes[0][0][10],1);
-    shiftNotes(currentNotes[0][0][10]);
-    unChartedNotes.splice(currentNotes[0][1],1);
-    chartedNotes.splice(currentNotes[0][1],1);
+    deleteNote(currentNotes[0][1]);
   }
 }
 function delBot(from,to){
@@ -649,10 +682,7 @@ function delBot(from,to){
   while(note<chartedNotes.length&&currentNote[3]<to){
     if(currentNote[3]!=lastTime&&currentNotes.length>0){
       currentNotes.sort((a,b)=>{return a[0][8]-b[0][8]});
-      currentMidi.tracks[currentNotes[0][0][9]].notes.splice(currentNotes[0][0][10],1);
-      shiftNotes(currentNotes[0][0][10]);
-      unChartedNotes.splice(currentNotes[0][1],1);
-      chartedNotes.splice(currentNotes[0][1],1);
+      deleteNote(currentNotes[0][1]);
       currentNotes=[];
       note--;
     }
@@ -663,10 +693,7 @@ function delBot(from,to){
   }
   if(currentNotes.length>0){
     currentNotes.sort((a,b)=>{return a[0][8]-b[0][8]});
-    currentMidi.tracks[currentNotes[0][0][9]].notes.splice(currentNotes[0][0][10],1);
-    shiftNotes(currentNotes[0][0][10]);
-    unChartedNotes.splice(currentNotes[0][1],1);
-    chartedNotes.splice(currentNotes[0][1],1);
+    deleteNote(currentNotes[0][1]);
   }
 }
 function delAll(from,to){
@@ -677,12 +704,7 @@ function delAll(from,to){
     currentNote=unChartedNotes[note];
   }
   while(note<chartedNotes.length&&currentNote[3]<to){
-    currentMidi.tracks[currentNote[0][9]].notes.splice(currentNote[0][10],1);
-    shiftNotes(currentNote[0][10]);
-    unChartedNotes.splice(note,1);
-    chartedNotes.splice(note,1);
-
-    currentNotes.push([currentNote,note]);
+    deleteNote(note);
     currentNote=unChartedNotes[note];
   }
 }
@@ -863,7 +885,7 @@ window.addEventListener("keydown", function(e) {
 }, false);
 
 var tv=1;
-function keyReleased() {
+function keyPressed() {
   if (keyCode === 32) {
     paused = !paused;
   }
@@ -894,6 +916,15 @@ function keyReleased() {
   }
   if (keyCode === 189) {
     tv/=1.2;
+  }
+  if (key === "z") {
+    undoDeleted();
+  }
+  if (key === "l") {
+    loadSettings();
+  }
+  if (key === "s") {
+    document.getElementById('blob').click();
   }
 }
 

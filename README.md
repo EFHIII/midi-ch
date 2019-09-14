@@ -10,9 +10,9 @@ link: https://efhiii.github.io/midi-ch/
   - Step forward
 - DOWN-ARROW
   - Step back
-- +
+- \+
   - Increase step size ( * 1.2 )
-- -
+- \-
   - Decrease step size ( / 1.2 )
 - hold D
   - Delete the note the bottom fret represents that pass the middle red line

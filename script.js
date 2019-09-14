@@ -131,6 +131,7 @@ function mergable(a,b){
 };
 
 function loadSettings(){
+  undeletedNotes=[];
   stripSustain=document.getElementById("stripSustain").value*preview.ppq/100/2;
   if(stripSustain<0){stripSustain=0;}
   maxNotes=document.getElementById("maxNotes").value*1;
@@ -606,6 +607,7 @@ var OS=0;
 var lastLen=0.3;
 
 var deletedNotes=[];
+var undeletedNotes=[];
 function unshiftNotes(from){
   var index=unChartedNotes[from][10];
   for(var i=from;i<unChartedNotes.length;i++){
@@ -624,6 +626,7 @@ function undoDeleted(){
   unshiftNotes(data.note);
   unChartedNotes.splice(data.note,0,data.unCharted);
   chartedNotes.splice(data.note,0,data.charted);
+  undeletedNotes.push(data.note);
 }
 function shiftNotes(from){
   var index=unChartedNotes[from][10];
@@ -928,6 +931,9 @@ function keyPressed() {
   }
   if (key === "z") {
     undoDeleted();
+  }
+  if (key === "y" && undeletedNotes.length>0) {
+    deleteNote(undeletedNotes.pop());
   }
   if (key === "l") {
     loadSettings();

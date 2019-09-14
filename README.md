@@ -22,6 +22,8 @@ link: https://efhiii.github.io/midi-ch/
   - Delete all notes that passes the middle red line
 - Z
   - Undo last note deletion
+- Y
+  - Redo last note deletion
 - L
   - Load changes (necessary for making note deletions affect the chart properly, but slow so, especially on longer charts, avoid using frequently)
 - S

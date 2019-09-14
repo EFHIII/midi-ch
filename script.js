@@ -708,6 +708,7 @@ function delAll(from,to){
     currentNote=unChartedNotes[note];
   }
 }
+
 function draw() {
   background(0);
   stroke(150);
@@ -767,8 +768,11 @@ function draw() {
   rect(0,0,14,height);
   if(keyIsDown(BACKSPACE)||keyIsDown(DELETE)||keyIsDown(68)){
     fill(255,0,0);
-    rect(0,height/2,width,2);
   }
+  else{
+    fill(50);
+  }
+  rect(0,height/2,width,2);
   if(keyIsDown(BACKSPACE)){delTop(preview.time-frameLength+preview.scale*0.4,preview.time+preview.scale*0.4)}
   if(keyIsDown(68)){delBot(preview.time-frameLength+preview.scale*0.4,preview.time+preview.scale*0.4)}
   if(keyIsDown(DELETE)){delAll(preview.time-frameLength+preview.scale*0.4,preview.time+preview.scale*0.4)}

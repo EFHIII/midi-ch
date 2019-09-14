@@ -44,14 +44,17 @@ else {
 var currentMidi = null;
 var settings;
 
-var synth = new Tone.PolySynth(10, Tone.Synth, {
+var synths =[];
+for(var i=0;i<10;i++){
+  synths.push( new Tone.PolySynth(10, Tone.Synth, {
     envelope : {
         attack : 0.02,
         decay : 0.1,
         sustain : 0.3,
         release : 0.9
     }
-}).toMaster()
+  }).toMaster());
+}
 
 function parseFile(file){
   //read the file
@@ -74,6 +77,24 @@ var quality=[0,0,0];
 var groups=[];
 var openSkipGap=1/16;
 var maxNotes=2;
+
+var noteMap;
+function renderNoteMap(){
+  if(!currentMidi){return;}
+  background(0);
+  var note=0;
+  while(note<chartedNotes.length){
+    var currentNote=unChartedNotes[note];
+    strokeWeight(5);
+    stroke(chartedNotes[note]-openNotes<0?color(255,0,255):colors[chartedNotes[note]-openNotes]);
+    point(3+chartedNotes[note]*2,height-(currentNote[3]/currentMidi.duration)*height);
+    strokeWeight(3);
+    stroke(255);
+    point(3+chartedNotes[note]*2,height-(currentNote[3]/currentMidi.duration)*height);
+    note++;
+  }
+  noteMap=get(0,0,16,height);
+}
 
 function toggleTrack(track){
   settings.tracks[track] = !settings.tracks[track];
@@ -421,9 +442,14 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
           jQuery("#blob").text(err);
       });
   });
+  renderNoteMap();
 }
 
 function loadHTMLcontent(){
+  previews=[];
+  for(var i=0;i<myIntervals.length;i++){
+    clearInterval(myIntervals[i]);
+  }
   openSkipGap=1/16;
   measureShift=true;
   stripSustain=preview.ppq/2;
@@ -462,9 +488,14 @@ function loadHTMLcontent(){
     }
     htmlContent.innerHTML+=`<div class="custom-control custom-checkbox">
       <input type="checkbox" `+(settings.tracks[i]?'checked="true"':'')+` class="custom-control-input" onClick="toggleTrack(`+i+`)" id='customCheck`+i+`'>
-      <label class="custom-control-label" for="customCheck`+i+`">`+currentMidi.tracks[i].name+' - '+currentMidi.tracks[i].instrument.family+': '+currentMidi.tracks[i].instrument.name+`</label>
+      <label class="custom-control-label" for="customCheck`+i+`">`+currentMidi.tracks[i].name+' - '+currentMidi.tracks[i].instrument.family+': '+currentMidi.tracks[i].instrument.name+`</label><br>
+      <canvas class="notesPreview" id="canvasNumber`+i+`"></canvas>
     </div>`;
     //htmlContent.innerHTML+='<input type="checkbox" checked="true" onClick="toggleTrack('+i+')"><label>track '+currentMidi.tracks[i].name+'<br>'+currentMidi.tracks[i].instrument.family+': '+currentMidi.tracks[i].instrument.name+'</label><br>';
+  }
+  for(var i=0;i<currentMidi.tracks.length;i++){
+    previews.push(new drawNotesPreview("canvasNumber"+i,currentMidi.tracks[i]));
+    myIntervals.push(setInterval(drawPreviewBuffer, 0, i));
   }
 
   preview.ppq=currentMidi.header.ppq;
@@ -488,7 +519,7 @@ function drawNote(note,y,type,duration){
   noStroke();
   if(openNotes && note === -1){
     fill(150,0,200,200);
-    rect(0,y-(duration>0?duration:0)-4,width,(duration>0?duration:0)+8);
+    rect(14,y-(duration>0?duration:0)-4,width,(duration>0?duration:0)+8);
     return;
   }
   else if (note<0) {
@@ -563,7 +594,8 @@ function findNotes(from,to){
 
 var lastFrameTime=Date.now();
 var currentFrameTime=Date.now();
-
+var paused=false;
+var OS=0;
 function draw() {
   background(0);
   stroke(200);
@@ -579,7 +611,12 @@ function draw() {
   lastFrameTime=currentFrameTime;
   currentFrameTime=Date.now();
   var frameLength=(currentFrameTime-lastFrameTime)/1000;
-  preview.time+=frameLength;
+  if(!paused){
+    preview.time+=frameLength;
+  }
+  else{
+    frameLength=0;
+  }
 
   //var Y=height+last*(height/preview.scale);
 
@@ -613,11 +650,17 @@ function draw() {
 
   //var note=findNotes(preview.time,preview.time+preview.scale/2);
   //if(note<0){note=0;}
+  noStroke();
+  fill(255);
+  rect(0,0,14,height);
+
   var note=0;
-  while(note<chartedNotes.length&&unChartedNotes[note][3]<=preview.time+preview.scale*1.1){
-    var currentNote=unChartedNotes[note];
+  var currentNote=unChartedNotes[note];
+  while(note<chartedNotes.length&&preview.time+preview.scale+1-currentNote[3]>0){
+    currentNote=unChartedNotes[note];
     if(currentNote[3]-preview.time<=0&&currentNote[3]-(preview.time-frameLength)>0){
-      synth.triggerAttackRelease(currentNote[4], currentNote[6], Tone.now(), currentNote[5]);
+      synths[OS].triggerAttackRelease(currentNote[4], currentNote[6], Tone.now(), currentNote[5]);
+      OS=(OS+1)%10;
     }
 
     var Y=0.9*height-(currentNote[3]-preview.time)/preview.scale*height;
@@ -627,6 +670,12 @@ function draw() {
     }
     note++;
   }
+  image(noteMap,0,0);
+  fill(255,255,255,150);
+  noStroke();
+  rect(0,height-((preview.time+preview.scale)/currentMidi.duration)*height,16,preview.scale/currentMidi.duration*height);
+  stroke(255);
+  line(0,height-(preview.time/currentMidi.duration)*height,16,height-(preview.time/currentMidi.duration)*height);
 
   if(quality[0]){
     noStroke();
@@ -704,9 +753,16 @@ function draw() {
   */
 }
 
+function keyPressed() {
+  if (keyCode == 32) {
+    paused = !paused;
+  }
+}
+
 /* full screening will change the size of the canvas */
 function windowResized() {
   resizeCanvas(windowWidth/4, windowHeight);
+  renderNoteMap();
 }
 
 /* prevents the mobile browser from processing some default
@@ -716,3 +772,26 @@ function windowResized() {
 document.ontouchmove = function(event) {
     event.preventDefault();
 };
+
+var myIntervals=[];
+var previews=[];
+function drawNotesPreview(canvasID,track){
+  this.canvas = document.getElementById(canvasID);
+  this.canvas.width=600;
+  this.canvas.height=200;
+  this.w=600;
+  this.h=200;
+  this.track=track;
+  this.ctx = this.canvas.getContext("2d");
+};
+function drawPreviewBuffer(n){
+  previews[n].draw();
+}
+drawNotesPreview.prototype.draw=function() {
+  this.ctx.fillStyle="#000";
+  this.ctx.fillRect(0,0,this.w,this.h);
+  this.ctx.fillStyle="#fff";
+  for(var i=0;i<this.track.notes.length;i++){
+    this.ctx.fillRect(this.track.notes[i].time/currentMidi.duration*this.w,this.h-this.track.notes[i].midi/88*this.h,2,2);
+  }
+}

@@ -119,7 +119,7 @@ function loadSettings(){
     maxNotes=6;
   }
   preview.scale=document.getElementById("previewScale").value*1;
-  preview.leadingSeconds=document.getElementById("leadingSeconds").value*1;
+  preview.leadingSeconds=((document.getElementById("leadingSeconds").value*1)>>0)*2;
   if(preview.scale<=0){preview.scale=4000;}
   openSkipGap = 1/document.getElementById("openSkipGap").value*preview.ppq;
   openNotes = document.getElementById("openNotes").checked?1:0;
@@ -127,7 +127,7 @@ function loadSettings(){
   var new_element = old_element.cloneNode(true);
   old_element.parentNode.replaceChild(new_element, old_element);
 
-  var twoSec=preview.ppq*(preview.leadingSeconds>>0);
+  var twoSec=preview.ppq*preview.leadingSeconds;
   //sync track events
   var syncTrackString='';
   var syncEvents=[[0,'  0 = TS 4\n'],[0,'  0 = B 120000\n']];
@@ -356,7 +356,6 @@ artist = `+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="artist").l
 album = `+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="album").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="album")[0].text:'Unknown')+`
 genre = `+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre")[0].text:'rock')+`
 year = `+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="year")[0].text:'Unknown')+`
-song_length = `+songLength+`
 count = 0
 diff_band = -1
 diff_guitar = -1
@@ -465,7 +464,7 @@ function loadHTMLcontent(){
   preview.ppq=currentMidi.header.ppq;
   preview.speed=((4/60)*currentMidi.header.ppq)>>0;
   preview.time=-0.1;
-  preview.leadingSeconds=2;
+  preview.leadingSeconds=4;
   frameLength=0;
   lastFrameTime=Date.now();
   currentFrameTime=Date.now();
@@ -530,7 +529,7 @@ var preview={
   speed:30,
   ppq:100,
   time:0,
-  leadingSeconds:2
+  leadingSeconds:4
 };
 
 function findNotes(from,to){

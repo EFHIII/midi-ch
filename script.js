@@ -564,13 +564,15 @@ var lastLen=0.3;
 
 var deletedNotes=[];
 var undeletedNotes=[];
-function unshiftNotes(from){
+function unshiftNotes(from,track){
   var index=unChartedNotes[from][10];
   for(var i=from;i<unChartedNotes.length;i++){
-    unChartedNotes[i][10]++;
+    if(unChartedNotes[i][9]===track){
+      unChartedNotes[i][10]++;
+    }
   }
   for(var i=0;i<deletedNotes.length;i++){
-    if(deletedNotes[i].unCharted[10]>index){
+    if(deletedNotes[i].unCharted[10]>index&&deletedNotes[i].unCharted[9]===track){
       deletedNotes[i].unCharted[10]++;
     }
   }
@@ -579,18 +581,20 @@ function undoDeleted(){
   if(deletedNotes.length<1){return}
   var data=deletedNotes.pop();
   currentMidi.tracks[data.unCharted[9]].notes.splice(data.unCharted[10],0,data.track);
-  unshiftNotes(data.note);
+  unshiftNotes(data.note,data.unCharted[9]);
   unChartedNotes.splice(data.note,0,data.unCharted);
   chartedNotes.splice(data.note,0,data.charted);
   undeletedNotes.push(data.note);
 }
-function shiftNotes(from){
+function shiftNotes(from,track){
   var index=unChartedNotes[from][10];
   for(var i=from;i<unChartedNotes.length;i++){
-    unChartedNotes[i][10]--;
+    if(unChartedNotes[i][9]===track){
+      unChartedNotes[i][10]--;
+    }
   }
   for(var i=0;i<deletedNotes.length;i++){
-    if(deletedNotes[i].unCharted[10]>index){
+    if(deletedNotes[i].unCharted[10]>index&&deletedNotes[i].unCharted[9]===track){
       deletedNotes[i].unCharted[10]--;
     }
   }
@@ -604,7 +608,7 @@ function deleteNote(note){
     track:JSON.parse(JSON.stringify(currentMidi.tracks[currentNote[9]].notes[currentNote[10]]))
   });
   currentMidi.tracks[currentNote[9]].notes.splice(currentNote[10],1);
-  shiftNotes(note);
+  shiftNotes(note,currentNote[9]);
   unChartedNotes.splice(note,1);
   chartedNotes.splice(note,1);
 }

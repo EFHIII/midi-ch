@@ -34,16 +34,16 @@ link: https://efhiii.github.io/midi-ch/
 When on, the chart will treat open notes as a 6th fret, bellow green. (I recommended not using this and instead add open notes in Moon Scraper or EoF after exporting.)
 
 ## Max Simultaneous Notes
-When on, the chart will treat open notes as a 6th fret, bellow green. (I recommended not using this and instead add open notes in MoonScraper or EoF after exporting.)
+This is the maximum number of notes that the chart will include as a chord. It's worth noting that if a sustain goes past the next note, it's still possible to go above this limit.
 
 ## Scale
 How many seconds can be seen in the preview on the right.
 
-## Strip Open Notes Limit
+## Skip Open Notes Limit
 When Open Notes is on, strips 1/this beats from open notes
 
 ## Strip Sustain
-When Open Notes is on, strips this% beats from open sustain notes. (recommended: set 0 and strip sustains in MoonScraper or EoF)
+When Open Notes is on, strips this% beats from sustain notes. (recommended: set 0 and strip sustains in MoonScraper or EoF)
 
 ## Leading Silence
 Number of seconds of silence at the start of the chart.
@@ -66,6 +66,6 @@ Click (or drag) anywhere in the chart preview to jump to that part of the song s
 White line that follows the fret it represents, further left being low notes, right being high notes in the range of the 88 keys of a keyboard.
 
 ## Instrument visual aid
-Bellow the check for each instrument on the left, there's a preview of that instruments notes throughout the song, x-axis is time, y-axis is pitch. The red line represents where the chart playback is.
+Bellow the check for each instrument on the left, there's a preview of that instruments' notes throughout the song, x-axis is time, y-axis is pitch. The red line represents where the chart playback is.
 
 Each instrument that is checked, upon loading the settings, that instrument will be applied to the chart (provided it doesn't exceed the max simultaneous notes threshold)

@@ -43,7 +43,7 @@ How many seconds can be seen in the preview on the right.
 When Open Notes is on, strips 1/this beats from open notes
 
 ## Strip Sustain
-When Open Notes is on, strips this% beats from sustain notes. (recommended: set 0 and strip sustains in MoonScraper or EoF)
+Strips this% beats from sustain notes. (recommended: set 0 and strip sustains in MoonScraper or EoF)
 
 ## Leading Silence
 Number of seconds of silence at the start of the chart.

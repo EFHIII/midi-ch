@@ -1,6 +1,5 @@
 /**
 TODO:
-- max bpm
 - Charting mechanism to avoid making two successive notes that are different be the same fret between groups.
 */
 {
@@ -60,6 +59,7 @@ var groups=[];
 var openSkipGap=1/16;
 var maxNotes=2;
 var frets=5;
+var maxBPS=30;
 
 var noteMap;
 function renderNoteMap(){
@@ -115,6 +115,8 @@ function mergable(a,b){
 
 function loadSettings(){
   undeletedNotes=[];
+  maxBPS=document.getElementById("maxBPS").value*1;
+  if(maxBPS<=0){maxBPS=Infinity;}
   frets=document.getElementById("frets").value*1;
   stripSustain=document.getElementById("stripSustain").value*preview.ppq/100/2;
   if(stripSustain<0){stripSustain=0;}
@@ -193,6 +195,14 @@ function loadSettings(){
   }
 
   unChartedNotes.sort((a,b)=>a[0]-b[0]);
+  if(maxBPS>0){
+    for(var i=1;i<unChartedNotes.length;i++){
+      if(unChartedNotes[i][3]-unChartedNotes[i-1][3]>0&&unChartedNotes[i][3]-unChartedNotes[i-1][3]<1/maxBPS){
+        unChartedNotes.splice(i,1);
+        i--;
+      }
+    }
+  }
   chartedNotes=[];
 
   for(var i=0;i<unChartedNotes.length-1;i++){
@@ -431,8 +441,12 @@ function loadHTMLcontent(){
       <label for="frets"><span data-toggle="tooltip" title="5 for Hard/Expert, 4 for Medium, 3 for Easy">Frets</span></label>
     </div>
     <div class="custom-control">
+      <input type="number" id="maxBPS" value=30 min="1" step="1">
+      <label for="maxBPS"><span data-toggle="tooltip" title="Max Beats Per Second: Notes that would be faster than this are automatically ignored, 0=Infinite BPS">Max BPS</span></label>
+    </div>
+    <div class="custom-control">
       <input type="number" id="maxNotes" value=2 min="1" step="1">
-      <label for="maxNotes"><span data-toggle="tooltip" title="Strips away lower notes so that only n notes start at the same time">Max Simultaneous Notes</span></label>
+      <label for="maxNotes"><span data-toggle="tooltip" title="Strips away lower notes so that only this many notes start at the same time">Max Simultaneous Notes</span></label>
     </div>
     <div class="custom-control">
       <input type="number" id="previewScale" value=2>

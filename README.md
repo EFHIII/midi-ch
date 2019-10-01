@@ -33,6 +33,12 @@ link: https://efhiii.github.io/midi-ch/
 ## Open Notes
 When on, the chart will treat open notes as a 6th fret, bellow green. (I recommended not using this and instead add open notes in Moon Scraper or EoF after exporting.)
 
+## Frets
+The number of frets used in the chart (not counting open notes). The standard is 5 for Expert and Hard, 4 for Medium, and 3 for Easy.
+
+# Max BPS
+Any note that's is more than the maximum Beats per second threshold relative to the previous note gets ignored and isn't charted.
+
 ## Max Simultaneous Notes
 This is the maximum number of notes that the chart will include as a chord. It's worth noting that if a sustain goes past the next note, it's still possible to go above this limit.
 

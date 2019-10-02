@@ -36,7 +36,7 @@ When on, the chart will treat open notes as a 6th fret, bellow green. (I recomme
 ## Frets
 The number of frets used in the chart (not counting open notes). The standard is 5 for Expert and Hard, 4 for Medium, and 3 for Easy.
 
-# Max BPS
+## Max BPS
 Any note that's is more than the maximum Beats per second threshold relative to the previous note gets ignored and isn't charted.
 
 ## Max Simultaneous Notes
@@ -47,6 +47,9 @@ How many seconds can be seen in the preview on the right.
 
 ## Skip Open Notes Limit
 When Open Notes is on, strips 1/this beats from open notes
+
+## Ignore Gap
+Seconds between notes where it no longer matters if different notes are played on the same fret in succession.
 
 ## Strip Sustain
 Strips this% beats from sustain notes. (recommended: set 0 and strip sustains in MoonScraper or EoF)

@@ -196,7 +196,17 @@ function loadSettings(){
     }
   }
 
-  unChartedNotes.sort((a,b)=>a[0]-b[0]);
+  unChartedNotes.sort((a,b)=>a[0]+a[8]/128-b[0]-b[8]/128);
+  for(var i=1;i<unChartedNotes.length;i++){
+    if(unChartedNotes[i-1][0]==unChartedNotes[i][0]&&unChartedNotes[i-1][8]==unChartedNotes[i][8]){
+      console.log(unChartedNotes[i-1]);
+      unChartedNotes[i-1][5]=max(unChartedNotes[i-1][5],unChartedNotes[i][5]);
+      unChartedNotes[i-1][6]=max(unChartedNotes[i-1][6],unChartedNotes[i][6]);
+      unChartedNotes[i-1][7]=max(unChartedNotes[i-1][7],unChartedNotes[i][7]);
+      unChartedNotes.splice(i,1);
+      i--;
+    }
+  }
   if(maxBPS>0){
     for(var i=1;i<unChartedNotes.length;i++){
       if(unChartedNotes[i][3]-unChartedNotes[i-1][3]>0&&unChartedNotes[i][3]-unChartedNotes[i-1][3]<1/maxBPS){

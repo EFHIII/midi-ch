@@ -52,6 +52,7 @@ var htmlContent=document.getElementById('htmlContent');
 var unChartedNotes=[];
 var chartedNotes=[];
 var measureShift=true;
+var extendedSustains=false;
 var stripSustain=0;
 var minimumSustain=0;
 var openNotes=0;
@@ -62,6 +63,7 @@ var maxNotes=2;
 var frets=5;
 var maxBPS=30;
 var ignoreGap=1;
+var noteTolerance=20;
 
 var noteMap;
 function renderNoteMap(){
@@ -115,6 +117,15 @@ function mergable(a,b){
   return true;
 };
 
+function getTempo(t){
+	var temp=240;
+	for(var i=0;i<currentMidi.header.tempos.length;i++){
+		if(currentMidi.header.tempos[i].time<=t){temp=currentMidi.header.tempos[i].bpm;}
+		else{i=Infinity;}
+	}
+	return temp;
+}
+
 function loadSettings(){
   undeletedNotes=[];
   minimumSustain=document.getElementById("minimumSustain").value*1;
@@ -136,9 +147,11 @@ function loadSettings(){
   if(preview.scale<=0){preview.scale=4000;}
   openSkipGap = 1/document.getElementById("openSkipGap").value*preview.ppq;
   openNotes = document.getElementById("openNotes").checked?1:0;
+  extendedSustains = document.getElementById("extendedSustains").checked?1:0;
   var old_element = document.getElementById("blob");
   var new_element = old_element.cloneNode(true);
   old_element.parentNode.replaceChild(new_element, old_element);
+  noteTolerance=document.getElementById("noteTolerance").value*preview.ppq;
 
   var twoSec=preview.ppq*preview.leadingSeconds;
   //sync track events
@@ -422,16 +435,20 @@ function loadSettings(){
     var duration=unChartedNotes[i][2];
     if(duration > 0){
       var strip=false;
+      var cTempo=60/getTempo(unChartedNotes[i][3]);
       for(var j=0;j<chartedNotes.length;j++){
-        if(unChartedNotes[i][0]!=unChartedNotes[j][0] && unChartedNotes[j][0]-unChartedNotes[i][0]>0 && ( unChartedNotes[j][0]-unChartedNotes[i][0] <= duration+stripSustain*preview.ppq && unChartedNotes[j][0]-unChartedNotes[i][0] <= duration )){
-          duration = unChartedNotes[j][0]-unChartedNotes[i][0];
-          strip=true;
+        if(unChartedNotes[i][0]!=unChartedNotes[j][0] && unChartedNotes[j][0]-unChartedNotes[i][0]>0 && unChartedNotes[i][0]+duration+stripSustain*preview.ppq*cTempo >= unChartedNotes[j][0]){
+          if(!extendedSustains||chartedNotes[i]==chartedNotes[j]||Math.abs(unChartedNotes[i][0]+duration-unChartedNotes[j][0])<noteTolerance){
+            duration = unChartedNotes[j][0]-unChartedNotes[i][0];
+            strip=true;
+            j=chartedNotes.length;
+          }
         }
       }
       if(strip){
-        duration-=stripSustain*preview.ppq;
+        duration-=stripSustain*preview.ppq*cTempo;
       }
-      if(duration<minimumSustain*preview.ppq){duration=0;}
+      if(duration<minimumSustain*preview.ppq*cTempo){duration=0;}
       unChartedNotes[i][2]=duration;
     }
     notesString+='  '+(twoSec+unChartedNotes[i][0])+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+duration+'\n';
@@ -508,6 +525,10 @@ function loadHTMLcontent(){
       <input type="checkbox" class="custom-control-input" id="openNotes">
       <label class="custom-control-label" for="openNotes"><span data-toggle="tooltip" title="When enabled, include open notes">Open notes</span></label>
     </div>
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" checked=true class="custom-control-input" id="extendedSustains">
+      <label class="custom-control-label" for="extendedSustains"><span data-toggle="tooltip" title="When enabled, allows extended sustains">Extended Sustains</span></label>
+    </div>
     <div class="custom-control">
       <input type="number" id="frets" value=5 min="1" step="1">
       <label for="frets"><span data-toggle="tooltip" title="5 for Hard/Expert, 4 for Medium, 3 for Easy">Frets</span></label>
@@ -535,6 +556,10 @@ function loadHTMLcontent(){
     <div class="custom-control">
       <input type="number" id="ignoreGap" value=1 min="0">
       <label for="ignoreGap"><span data-toggle="tooltip" title="Seconds between notes where it no longer matters if different notes are played with the same fret">Ignore gap</span></label>
+    </div>
+    <div class="custom-control">
+      <input type="number" id="noteTolerance" value=0.1 min="0">
+      <label for="noteTolerance"><span data-toggle="tooltip" title="beats tollerance when determining if a note lands at the same time as another note. Only relevent when Extended Sustains is on">Note Tollerance</span></label>
     </div>
     <div class="custom-control">
       <input type="number" id="leadingSeconds" value=2 min="0">
@@ -626,6 +651,24 @@ function drawNote(note,y,type,duration){
       stroke(0);
       fill(255,150);
       ellipse(note*width/6+width/6,y,width/14,width/14);
+  }
+}
+
+function drawSustain(note,y,type,duration){
+  noStroke();
+  if(openNotes && note === -1){
+    fill(150,0,200,200);
+    rect(14,y-(duration>0?duration:0)-4,width,height*0.9-(y-(duration>0?duration:0)-4));
+    return;
+  }
+  else if (note<0) {
+    return;
+  }
+
+  colors[note].setAlpha(150);
+  fill(colors[note]);
+  if(duration>0){
+    rect(note*width/6+width/6-width/40,y-duration,width/20,height*0.9-(y-duration-4),width/40);
   }
 }
 
@@ -788,6 +831,9 @@ function drawLines(note){
   var fromTime=0;
   var bpm=240;
   var ts=[4,4];
+  if(currentMidi.header.timeSignatures.length){
+    ts=[currentMidi.header.timeSignatures[0].timeSignature[0],currentMidi.header.timeSignatures[0].timeSignature[1]];
+  }
   var currentTS=0;
   var fromBPM=0;
   var currentBPM=0;
@@ -905,6 +951,7 @@ function draw() {
     }
 
     var Y=0.9*height-(currentNote[3]-preview.time)/preview.scale*height;
+    var sus=currentNote[6]/currentNote[7]*currentNote[2];
     if(Y>0&&Y<0.9*height&&(!lastNote[note]||note>lastNote[note])){
       if(!lines){
         lines=true;
@@ -913,8 +960,14 @@ function draw() {
       fill(255);
       noStroke();
       ellipse(unChartedNotes[note][8]/88*width,Y,width/88,width/6);
-      drawNote(chartedNotes[note]-openNotes,Y,'',(currentNote[6]/currentNote[5]*currentNote[2]/1000)/preview.scale*height);
+      drawNote(chartedNotes[note]-openNotes,Y,'',(sus)/preview.scale*height);
       lastNote[i]=note;
+    }
+    else if(Y>0.9*height){
+      var Y2=0.9*height-(currentNote[3]+sus-preview.time)/preview.scale*height;
+      if(Y2<0.9*height&&(!lastNote[note]||note>lastNote[note])){
+        drawSustain(chartedNotes[note]-openNotes,Y,'',sus/preview.scale*height);
+      }
     }
     note++;
   }

@@ -840,16 +840,16 @@ function drawLines(note){
   var currentBPM=0;
   while(currentTS<currentMidi.header.timeSignatures.length&&currentMidi.header.timeSignatures[currentTS].ticks<=fromTick){currentTS++;}
   currentTS--;
-  ts=[currentMidi.header.timeSignatures[currentTS].timeSignature[0],currentMidi.header.timeSignatures[currentTS].timeSignature[1]];
+  ts=currentMidi.header.timeSignatures[currentTS]?[currentMidi.header.timeSignatures[currentTS].timeSignature[0],currentMidi.header.timeSignatures[currentTS].timeSignature[1]]:[4,4];
   if(ts[0]<=0){ts[0]=4;}
   if(ts[1]<=0){ts[1]=4;}
   while(currentBPM<currentMidi.header.tempos.length&&currentMidi.header.tempos[currentBPM].ticks<=fromTick){
     currentBPM++;
   }
   currentBPM--;
-  bpm=currentMidi.header.tempos[currentBPM].bpm;
+  bpm=currentMidi.header.tempos[currentBPM]?currentMidi.header.tempos[currentBPM].bpm:120;
   if(bpm<=0){bpm=1;}
-  fromTime=currentMidi.header.tempos[currentBPM].time;
+  fromTime=currentMidi.header.tempos[currentBPM]?currentMidi.header.tempos[currentBPM].time:0;
 
   while(fromTime<=from){
     fromTime+=60/bpm*ts[0];
@@ -866,7 +866,7 @@ function drawLines(note){
       currentBPM++;
       i=currentMidi.header.tempos[currentBPM].time;
     }
-    bpm=currentMidi.header.tempos[currentBPM].bpm;
+    bpm=currentMidi.header.tempos[currentBPM]?currentMidi.header.tempos[currentBPM].bpm:120;
     if(bpm<=0){bpm=1;}
   }
   currentBPM=fromBPM;
@@ -880,7 +880,7 @@ function drawLines(note){
       currentBPM++;
       i=currentMidi.header.tempos[currentBPM].time;
     }
-    bpm=currentMidi.header.tempos[currentBPM].bpm;
+    bpm=currentMidi.header.tempos[currentBPM]?currentMidi.header.tempos[currentBPM].bpm:120;
     if(bpm<=0){bpm=1;}
   }
 }

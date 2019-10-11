@@ -374,7 +374,7 @@ function loadSettings(){
   }
 
   for(var i=0;i<groups.length;i++){
-    groups[i].sort();
+    groups[i].sort((a,b)=>a-b);
   }
 
   //shift notes if it makes sense between groups

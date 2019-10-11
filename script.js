@@ -389,8 +389,8 @@ function loadSettings(){
             var t=1;
             while(t<unChartedNotes.length&&chartedNotes[b+t]==chartedNotes[b]){t++;}
             if(b+t>=unChartedNotes.length||chartedNotes[b+t]!=chartedNotes[b]){
-              for(var i=0;i<t;i++){
-                chartedNotes[b+i]++;
+              for(var j=0;j<t;j++){
+                chartedNotes[b+j]++;
               }
               done=true;
             }
@@ -399,8 +399,8 @@ function loadSettings(){
             var t=1;
             while(t<a&&chartedNotes[a-t]==chartedNotes[a]){t++;}
             if(t>a||chartedNotes[a-t]!=chartedNotes[a]){
-              for(var i=0;i<t;i++){
-                chartedNotes[a-i]--;
+              for(var j=0;j<t;j++){
+                chartedNotes[a-j]--;
               }
               done=true;
             }
@@ -421,8 +421,8 @@ function loadSettings(){
             var t=1;
             while(t<a&&chartedNotes[a-t]==chartedNotes[a]){t++;}
             if(t>a||chartedNotes[a-t]!=chartedNotes[a]){
-              for(var i=0;i<t;i++){
-                chartedNotes[a-i]++;
+              for(var j=0;j<t;j++){
+                chartedNotes[a-j]++;
               }
               done=true;
             }

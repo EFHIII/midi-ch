@@ -452,7 +452,7 @@ function loadSettings(){
       if(duration<minimumSustain*preview.ppq*cTempo){duration=0;}
       unChartedNotes[i][2]=duration;
     }
-    notesString+='  '+(twoSec+unChartedNotes[i][0])+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+duration+'\n';
+    notesString+='  '+(twoSec+unChartedNotes[i][0])+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+Math.round(duration)+'\n';
   }
 
   var zip = new JSZip();

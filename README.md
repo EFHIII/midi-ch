@@ -14,6 +14,10 @@ link: https://efhiii.github.io/midi-ch/
   - Increase step size ( * 1.2 )
 - \-
   - Decrease step size ( / 1.2 )
+- hold RIGHT-ARROW
+  - Pushes low notes that passes the middle blue line in a chord rightward forcing chords of GR/RY/YB/BO
+- hold LEFT-ARROW
+  - Deletes all notes left of the highest note in a chord (makes chords not chords) when a chord passes the middle blue line
 - hold D
   - Delete the note the bottom fret represents that passes the middle red line
 - hold BACKSPACE
@@ -51,8 +55,8 @@ When Open Notes is on, strips 1/this beats from open notes
 ## Ignore Gap
 Seconds between notes where it no longer matters if different notes are played on the same fret in succession.
 
-## Strip Sustain
-Strips this% beats from sustain notes. (recommended: set 0 and strip sustains in MoonScraper or EoF)
+## Sustain Gap multiplier
+Allows you to have extra long or short sustain gaps. By default, 1 which puts in  length sustain gaps based on the tempo. 2 would double the length of sustain gaps, 0.5 would half them.
 
 ## Leading Silence
 Number of seconds of silence at the start of the chart.

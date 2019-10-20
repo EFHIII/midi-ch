@@ -52,6 +52,8 @@ function parseFile(file){
 var htmlContent=document.getElementById('htmlContent');
 var unChartedNotes=[];
 var chartedNotes=[];
+var distinctNotes=[];
+var distinct=[];
 var measureShift=true;
 var extendedSustains=false;
 var stripSustain=0;
@@ -171,13 +173,14 @@ function loadSettings(){
     syncTrackString+=syncEvents[i][1];
   }
 
-  var distinctNotes=[];
+  distinctNotes=[];
   var songLength=0;
   for(var i=0;i<currentMidi.tracks.length;i++){
     if(settings.tracks[i]){
       for(var note=0;note<currentMidi.tracks[i].notes.length;note++){
-        if(distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi)<0){
-          distinctNotes.push(currentMidi.tracks[i].notes[note].midi);
+        var midValue=currentMidi.tracks[i].notes[note].hasOwnProperty('altmidi')?currentMidi.tracks[i].notes[note].altmidi:currentMidi.tracks[i].notes[note].midi;
+        if(distinctNotes.indexOf(midValue)<0){
+          distinctNotes.push(midValue);
         }
         if(currentMidi.tracks[i].notes[note].ticks>songLength){
           songLength=currentMidi.tracks[i].notes[note].ticks;
@@ -185,7 +188,7 @@ function loadSettings(){
       }
     }
   }
-  distinctNotes.sort();
+  distinctNotes.sort((a,b)=>a-b);
 
   unChartedNotes=[];
   var notesString='';
@@ -194,7 +197,7 @@ function loadSettings(){
       for(var note=0;note<currentMidi.tracks[i].notes.length;note++){
         unChartedNotes.push([
           currentMidi.tracks[i].notes[note].ticks,//0
-          distinctNotes.indexOf(currentMidi.tracks[i].notes[note].midi),//1
+          distinctNotes.indexOf(currentMidi.tracks[i].notes[note].hasOwnProperty('altmidi')?currentMidi.tracks[i].notes[note].altmidi:currentMidi.tracks[i].notes[note].midi),//1
           currentMidi.tracks[i].notes[note].durationTicks/preview.ppq<=minimumSustain?0:currentMidi.tracks[i].notes[note].durationTicks,//2
           currentMidi.tracks[i].notes[note].time,//3
           currentMidi.tracks[i].notes[note].name,//4
@@ -308,7 +311,7 @@ function loadSettings(){
     }
   }
 
-  var distinct=[];
+  distinct=[];
 
   for(var g=0;g<groups.length;g++){
     distinct.push([]);
@@ -378,6 +381,7 @@ function loadSettings(){
   }
 
   //shift notes if it makes sense between groups
+  /*
   for(var i=0;i<groups.length;i++){
     if(findInGroups(groups[i][groups[i].length-1]+1)[0]>=0){
       var a=groups[i][groups[i].length-1];
@@ -431,14 +435,23 @@ function loadSettings(){
       }
     }
   }
+  */
 
   for(var i=0;i<chartedNotes.length;i++){
     var duration=unChartedNotes[i][2];
     if(duration > 0){
       var strip=false;
-      var cTempo=60/getTempo(unChartedNotes[i][3]);
+      var cTempo=getTempo(unChartedNotes[i][3])/60;
+      stripAmount=1/16;
+      if(cTempo>=16){stripAmount=2;}
+      else if(cTempo>=8){stripAmount=1;}
+      else if(cTempo>=4){stripAmount=1/2;}
+      else if(cTempo>=1.6){stripAmount=1/4;}
+      else if(cTempo>=0.5){stripAmount=1/8;}
+      else if(cTempo>=0.3){stripAmount=1/12;}
+      stripAmount*=stripSustain;
       for(var j=0;j<chartedNotes.length;j++){
-        if(unChartedNotes[i][0]!=unChartedNotes[j][0] && unChartedNotes[j][0]-unChartedNotes[i][0]>0 && unChartedNotes[i][0]+duration+stripSustain*preview.ppq*cTempo >= unChartedNotes[j][0]){
+        if(unChartedNotes[i][0]!=unChartedNotes[j][0] && unChartedNotes[j][0]-unChartedNotes[i][0]>0 && unChartedNotes[i][0]+duration+stripAmount*preview.ppq*cTempo >= unChartedNotes[j][0]){
           if(!extendedSustains||chartedNotes[i]==chartedNotes[j]||Math.abs(unChartedNotes[i][0]+duration-unChartedNotes[j][0])<noteTolerance){
             duration = unChartedNotes[j][0]-unChartedNotes[i][0];
             strip=true;
@@ -447,7 +460,7 @@ function loadSettings(){
         }
       }
       if(strip){
-        duration-=stripSustain*preview.ppq*cTempo;
+        duration-=stripAmount*preview.ppq*cTempo;
       }
       if(duration<minimumSustain*preview.ppq*cTempo){duration=0;}
       unChartedNotes[i][2]=duration;
@@ -487,7 +500,7 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
   Resolution = `+preview.ppq+`
   Player2 = bass
   Difficulty = 4
-  PreviewStart = 0
+  PreviewStart = `+(1000*preview.leadingSeconds>>0)+`
   PreviewEnd = 0
   Genre = "`+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre")[0].text:'rock')+`"
   MediaType = "cd"
@@ -547,8 +560,8 @@ function loadHTMLcontent(){
       <label for="openSkipGap"><span data-toggle="tooltip" title="% of a quarter note that is too short for a note and open to be next to eachother">Skip Open Notes limit</span></label>
     </div>
     <div class="custom-control">
-      <input type="number" id="stripSustain" value=0.25 min="0">
-      <label for="stripSustain"><span data-toggle="tooltip" title="Leaves a gap of this many beats between a sustain and the next note">Sustain Gap</span></label>
+      <input type="number" id="stripSustain" value=1 min="0">
+      <label for="stripSustain"><span data-toggle="tooltip" title="Sustain gaps are managed automatically, but this will modify their size">Sustain Gap multiplier</span></label>
     </div>
     <div class="custom-control">
       <input type="number" id="minimumSustain" value=0.5 min="0">
@@ -825,6 +838,85 @@ function delAll(from,to){
   }
 }
 
+function pushNoteRight(note,pushToNote,n){
+  currentNote=unChartedNotes[note];
+  toNote=unChartedNotes[pushToNote];
+  var group=findInGroups(pushToNote)[0];
+  var target=toNote[1];
+  var closest=-1;
+  for(var i=0;i<distinct[group].length;i++){
+    if(distinct[group][i]>closest&&distinct[group][i]<target){
+      closest=distinct[group][i];
+    }
+  }
+  if(closest>=0){
+    currentMidi.tracks[currentNote[9]].notes[currentNote[10]].altmidi=distinctNotes[closest];
+    console.log("moved from "+currentNote[1]+" to "+closest+" - "+target);
+    chartedNotes[note]=max(chartedNotes[pushToNote]-n,0);
+  }
+}
+
+function pushRight(from,to){
+  var note=-1;
+  var currentNote=[0,0,0,0];
+  while(note<chartedNotes.length&&currentNote[3]<from){
+    note++;
+    currentNote=unChartedNotes[note];
+  }
+  var currentNotes=[];
+  var lastTime=-1;
+  while(note<chartedNotes.length&&currentNote[3]<to){
+    if(currentNote[3]!=lastTime&&currentNotes.length>0){
+      currentNotes.sort((a,b)=>{return a[0][8]-b[0][8]});
+      for(var i=0;i<currentNotes.length-1;i++){
+        pushNoteRight(currentNotes[i][1],currentNotes[currentNotes.length-1][1],i+1);
+      }
+      currentNotes=[];
+    }
+    currentNotes.push([currentNote,note]);
+    lastTime=currentNote[3];
+    note++;
+    currentNote=unChartedNotes[note];
+  }
+  if(currentNotes.length>0){
+    currentNotes.sort((a,b)=>{return a[0][8]-b[0][8]});
+    for(var i=0;i<currentNotes.length-1;i++){
+      pushNoteRight(currentNotes[i][1],currentNotes[currentNotes.length-1][1],i+1);
+    }
+  }
+}
+function stripLeft(from,to){
+  var note=-1;
+  var currentNote=[0,0,0,0];
+  while(note<chartedNotes.length&&currentNote[3]<from){
+    note++;
+    currentNote=unChartedNotes[note];
+  }
+  var currentNotes=[];
+  var lastTime=-1;
+  while(note<chartedNotes.length&&currentNote[3]<to){
+    if(currentNote[3]!=lastTime&&currentNotes.length>0){
+      currentNotes.sort((a,b)=>{return a[0][8]-b[0][8]});
+      for(var i=0;i<currentNotes.length-1;i++){
+        deleteNote(currentNotes[i][1]);
+        note--;
+      }
+      currentNotes=[];
+    }
+    currentNotes.push([currentNote,note]);
+    lastTime=currentNote[3];
+    note++;
+    currentNote=unChartedNotes[note];
+  }
+  if(currentNotes.length>0){
+    currentNotes.sort((a,b)=>{return a[0][8]-b[0][8]});
+    for(var i=0;i<currentNotes.length-1;i++){
+      deleteNote(currentNotes[i][1]);
+      note--;
+    }
+  }
+}
+
 function drawLines(note){
   stroke(128);
   var from=unChartedNotes[note][3];
@@ -932,6 +1024,9 @@ function draw() {
   if(keyIsDown(BACKSPACE)||keyIsDown(DELETE)||keyIsDown(68)){
     fill(255,0,0);
   }
+  else if(keyIsDown(RIGHT_ARROW)||keyIsDown(LEFT_ARROW)){
+    fill(0,100,200);
+  }
   else{
     fill(50);
   }
@@ -939,6 +1034,11 @@ function draw() {
   if(keyIsDown(BACKSPACE)){delTop(preview.time-frameLength+preview.scale*0.4,preview.time+preview.scale*0.4)}
   if(keyIsDown(68)){delBot(preview.time-frameLength+preview.scale*0.4,preview.time+preview.scale*0.4)}
   if(keyIsDown(DELETE)){delAll(preview.time-frameLength+preview.scale*0.4,preview.time+preview.scale*0.4)}
+
+  if(keyIsDown(RIGHT_ARROW)){pushRight(preview.time-frameLength+preview.scale*0.4,preview.time+preview.scale*0.4)}
+
+  if(keyIsDown(LEFT_ARROW)){stripLeft(preview.time-frameLength+preview.scale*0.4,preview.time+preview.scale*0.4)}
+
 
   var note=0;
   var currentNote=unChartedNotes[note];
@@ -965,9 +1065,9 @@ function draw() {
       drawNote(chartedNotes[note]-openNotes,Y,'',(sus)/preview.scale*height);
       lastNote[i]=note;
     }
-    else if(Y>0.9*height){
+    else if(Y>=0.9*height){
       var Y2=0.9*height-(currentNote[3]+sus-preview.time)/preview.scale*height;
-      if(Y2<0.9*height&&(!lastNote[note]||note>lastNote[note])){
+      if(Y2<=0.9*height&&(!lastNote[note]||note>lastNote[note])){
         drawSustain(chartedNotes[note]-openNotes,Y,'',sus/preview.scale*height);
       }
     }
@@ -1010,6 +1110,9 @@ function keyPressed() {
     if(keyIsDown(BACKSPACE)){delTop(preview.time+preview.scale*0.4,preview.time+0.2*tv+preview.scale*0.4)}
     if(keyIsDown(68)){delBot(preview.time+preview.scale*0.4,preview.time+0.2*tv+preview.scale*0.4)}
     if(keyIsDown(DELETE)){delAll(preview.time+preview.scale*0.4,preview.time+0.2*tv+preview.scale*0.4)}
+
+    if(keyIsDown(RIGHT_ARROW)){pushRight(preview.time+preview.scale*0.4,preview.time+0.2*tv+preview.scale*0.4)}
+    if(keyIsDown(LEFT_ARROW)){stripLeft(preview.time+preview.scale*0.4,preview.time+0.2*tv+preview.scale*0.4)}
     preview.time+=0.2*tv;
     frameLength=0;
     lastFrameTime=Date.now();
@@ -1019,6 +1122,9 @@ function keyPressed() {
       if(keyIsDown(BACKSPACE)){preview.time-0.2*tv+preview.scale*0.4,delTop(preview.time+preview.scale*0.4)}
       if(keyIsDown(68)){delBot(preview.time-0.2*tv+preview.scale*0.4,preview.time+preview.scale*0.4)}
       if(keyIsDown(DELETE)){delBot(preview.time-0.2*tv+preview.scale*0.4,preview.time+preview.scale*0.4)}
+
+      if(keyIsDown(RIGHT_ARROW)){pushRight(preview.time-0.2*tv+preview.scale*0.4,preview.time+preview.scale*0.4)}
+      if(keyIsDown(LEFT_ARROW)){stripLeft(preview.time-0.2*tv+preview.scale*0.4,preview.time+preview.scale*0.4)}
     preview.time-=0.2*tv;
     frameLength=0;
     lastFrameTime=Date.now();

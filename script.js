@@ -442,13 +442,15 @@ function loadSettings(){
     if(duration > 0){
       var strip=false;
       var cTempo=getTempo(unChartedNotes[i][3])/60;
-      stripAmount=1/4;
-      if(cTempo>=16){stripAmount=1/64;}
-      else if(cTempo>=8){stripAmount=1/32;}
-      else if(cTempo>=4){stripAmount=1/16;}
-      else if(cTempo>=1.6){stripAmount=1/8;}
-      else if(cTempo>=0.5){stripAmount=1/6;}
-      else if(cTempo>=0.3){stripAmount=1/4;}
+      stripAmount=1;
+      if(cTempo>=14){stripAmount=1/64;}
+      else if(cTempo>=7){stripAmount=1/32;}
+      else if(cTempo>=3.6){stripAmount=1/16;}
+      else if(cTempo>=2.5){stripAmount=1/12;}
+      else if(cTempo>=1.8){stripAmount=1/8;}
+      else if(cTempo>=1.3){stripAmount=1/6;}
+      else if(cTempo>=0.8){stripAmount=1/4;}
+      else if(cTempo>=0.4){stripAmount=1/2;}
       stripAmount*=stripSustain;
       for(var j=0;j<chartedNotes.length;j++){
         if(unChartedNotes[i][0]!=unChartedNotes[j][0] && unChartedNotes[j][0]-unChartedNotes[i][0]>0 && unChartedNotes[i][0]+duration+stripAmount*preview.ppq*cTempo >= unChartedNotes[j][0]){

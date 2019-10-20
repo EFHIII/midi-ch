@@ -442,13 +442,13 @@ function loadSettings(){
     if(duration > 0){
       var strip=false;
       var cTempo=getTempo(unChartedNotes[i][3])/60;
-      stripAmount=1/16;
-      if(cTempo>=16){stripAmount=2;}
-      else if(cTempo>=8){stripAmount=1;}
-      else if(cTempo>=4){stripAmount=1/2;}
-      else if(cTempo>=1.6){stripAmount=1/4;}
-      else if(cTempo>=0.5){stripAmount=1/8;}
-      else if(cTempo>=0.3){stripAmount=1/12;}
+      stripAmount=1/4;
+      if(cTempo>=16){stripAmount=1/64;}
+      else if(cTempo>=8){stripAmount=1/32;}
+      else if(cTempo>=4){stripAmount=1/16;}
+      else if(cTempo>=1.6){stripAmount=1/8;}
+      else if(cTempo>=0.5){stripAmount=1/6;}
+      else if(cTempo>=0.3){stripAmount=1/4;}
       stripAmount*=stripSustain;
       for(var j=0;j<chartedNotes.length;j++){
         if(unChartedNotes[i][0]!=unChartedNotes[j][0] && unChartedNotes[j][0]-unChartedNotes[i][0]>0 && unChartedNotes[i][0]+duration+stripAmount*preview.ppq*cTempo >= unChartedNotes[j][0]){
@@ -484,7 +484,7 @@ diff_drums = -1
 diff_keys = -1
 diff_guitarghl = -1
 diff_bassghl = -1
-preview_start_time = 0
+preview_start_time = `+(1000*preview.leadingSeconds>>0)+`
 frets = 0
 charter = <color=#0064c8>Edward Haas</color>
 icon = efhiii
@@ -501,7 +501,7 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
   Player2 = bass
   Difficulty = 4
   PreviewStart = `+(1000*preview.leadingSeconds>>0)+`
-  PreviewEnd = 0
+  PreviewEnd = `+(1000*(preview.leadingSeconds+10)>>0)+`
   Genre = "`+(currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre").length?currentMidi.header.meta.filter(e=>e.type.toLowerCase()==="genre")[0].text:'rock')+`"
   MediaType = "cd"
   MusicStream = "song.ogg"
@@ -572,7 +572,7 @@ function loadHTMLcontent(){
       <label for="ignoreGap"><span data-toggle="tooltip" title="Seconds between notes where it no longer matters if different notes are played with the same fret">Ignore gap</span></label>
     </div>
     <div class="custom-control">
-      <input type="number" id="noteTolerance" value=0.1 min="0">
+      <input type="number" id="noteTolerance" value=0.15 min="0">
       <label for="noteTolerance"><span data-toggle="tooltip" title="beats tollerance when determining if a note lands at the same time as another note. Only relevent when Extended Sustains is on">Note Tollerance</span></label>
     </div>
     <div class="custom-control">

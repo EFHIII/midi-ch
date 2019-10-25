@@ -61,7 +61,7 @@ Allows you to have extra long or short sustain gaps. By default, 1 which puts in
 ## Leading Silence
 Number of seconds of silence at the start of the chart.
 
-Must also be applied to the audio file in order to sync properly, this does not generate an audio file. https://solmire.com/midi-to-mp3 is a good midi to mp3 converter.
+Must also be applied to the audio file in order to sync properly, this does not generate an audio file. LMMS is a good midi to mp3/ogg/wav converter, especially if you get some nice sound-fonts.
 
 ## Instrument toggles
 When an instrument is toggled on, (after loading new settings) the chart will incorporate that instrument. Having multiple instruments on will have the chart use all toggled instruments with a preference for higher notes. Deleting notes will remove them from their instrument, not just the chart and will persist after reloading the chart.

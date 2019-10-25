@@ -441,7 +441,7 @@ function loadSettings(){
     var duration=unChartedNotes[i][2];
     if(duration > 0){
       var strip=false;
-      var cTempo=getTempo(unChartedNotes[i][3])/60;
+      var cTempo=getTempo(unChartedNotes[i][3]+unChartedNotes[i][6])/60;
       stripAmount=1;
       if(cTempo>=14){stripAmount=1/64;}
       else if(cTempo>=7){stripAmount=1/32;}

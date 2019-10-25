@@ -3,6 +3,10 @@
 
 link: https://efhiii.github.io/midi-ch/
 
+example chart: https://youtu.be/D7Xqxiyp6tM
+
+Slightly outdated tutorial: https://youtu.be/qp49H-Ns2yg
+
 # Keyboard shortcuts
 - SPACE
   - Pause/Resume

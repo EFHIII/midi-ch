@@ -7,6 +7,8 @@ example chart: https://youtu.be/D7Xqxiyp6tM
 
 Slightly outdated tutorial: https://youtu.be/qp49H-Ns2yg
 
+If you have questions, feel free to ask me on Discord: EFHIII#0462
+
 # Keyboard shortcuts
 - SPACE
   - Pause/Resume

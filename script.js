@@ -437,6 +437,7 @@ function loadSettings(){
   }
   */
 
+  var lastTick=0;
   for(var i=0;i<chartedNotes.length;i++){
     var duration=unChartedNotes[i][2];
     if(duration > 0){
@@ -482,6 +483,10 @@ function loadSettings(){
       }
       myLastNote--;
     }
+    if(findInGroups(i)[1]===0){
+      notesString+='  '+((twoSec+unChartedNotes[i][0]+lastTick)/2>>0)+' = E Section_Division\n';
+    }
+    lastTick=(twoSec+unChartedNotes[i][0]);
     //end test
   }
 
@@ -1080,6 +1085,11 @@ function draw() {
       noStroke();
       ellipse(unChartedNotes[note][8]/88*width,Y,width/88,width/6);
       drawNote(chartedNotes[note]-openNotes,Y,'',(sus)/preview.scale*height);
+      if(findInGroups(note)[1]===0){
+        fill(255,0,0,200);
+        noStroke();
+        rect(0,Y-4,width,8);
+      }
       //test
       var myLastNote=note;
       while(myLastNote>0&&unChartedNotes[myLastNote][0]==currentNote[0]){myLastNote--;}

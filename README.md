@@ -86,3 +86,6 @@ White line that follows the fret it represents, further left being low notes, ri
 Bellow the check for each instrument on the left, there's a preview of that instruments' notes throughout the song, x-axis is time, y-axis is pitch. The red line represents where the chart playback is.
 
 Each instrument that is checked, upon loading the settings, that instrument will be applied to the chart (provided it doesn't exceed the max simultaneous notes threshold)
+
+## bad same note events
+When you save and download the resulting chart, custom chart specific events will be put in in the places where the auto-charter acknowledges that it did a poor job, which you can see if you open the chart in MoonScraper. This makes it easier to clean up parts that aren't auto charted well by telling you the spots that need attention.

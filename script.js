@@ -468,6 +468,21 @@ function loadSettings(){
       unChartedNotes[i][2]=duration;
     }
     notesString+='  '+(twoSec+unChartedNotes[i][0])+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+Math.round(duration)+'\n';
+
+    //test
+    var myLastNote=i;
+    while(myLastNote>0&&unChartedNotes[myLastNote][0]==unChartedNotes[i][0]){myLastNote--;}
+    var lastT=unChartedNotes[myLastNote][0];
+    while(myLastNote>0&&unChartedNotes[myLastNote][0]==lastT){
+      if(note>0&&unChartedNotes[myLastNote][1]==unChartedNotes[i][1]&&chartedNotes[i]!=chartedNotes[myLastNote]){
+        notesString+='  '+(twoSec+unChartedNotes[i][0])+' = E Bad_Different_Fret\n';
+      }
+      else if(note>0&&unChartedNotes[myLastNote][1]!=unChartedNotes[i][1]&&chartedNotes[i]==chartedNotes[myLastNote]){
+        notesString+='  '+(twoSec+unChartedNotes[i][0])+' = E Bad_Same_Fret\n';
+      }
+      myLastNote--;
+    }
+    //end test
   }
 
   var zip = new JSZip();
@@ -1065,6 +1080,24 @@ function draw() {
       noStroke();
       ellipse(unChartedNotes[note][8]/88*width,Y,width/88,width/6);
       drawNote(chartedNotes[note]-openNotes,Y,'',(sus)/preview.scale*height);
+      //test
+      var myLastNote=note;
+      while(myLastNote>0&&unChartedNotes[myLastNote][0]==currentNote[0]){myLastNote--;}
+      var lastT=unChartedNotes[myLastNote][0];
+      while(myLastNote>0&&unChartedNotes[myLastNote][0]==lastT){
+        if(note>0&&unChartedNotes[myLastNote][1]==currentNote[1]&&chartedNotes[note]!=chartedNotes[myLastNote]){
+          fill(255,0,0);
+          stroke(255);
+          rect(chartedNotes[note]*width/6+width/6-5,Y,10,(currentNote[3]-preview.time)/preview.scale*height-(unChartedNotes[myLastNote][3]-preview.time)/preview.scale*height);
+        }
+        else if(note>0&&unChartedNotes[myLastNote][1]!=currentNote[1]&&chartedNotes[note]==chartedNotes[myLastNote]){
+          fill(255,0,0);
+          stroke(255);
+          rect(chartedNotes[note]*width/6+width/6-5,Y,10,(currentNote[3]-preview.time)/preview.scale*height-(unChartedNotes[myLastNote][3]-preview.time)/preview.scale*height);
+        }
+        myLastNote--;
+      }
+      //end test
       lastNote[i]=note;
     }
     else if(Y>=0.9*height){

@@ -7,7 +7,7 @@ example chart: https://youtu.be/D7Xqxiyp6tM
 
 Slightly outdated tutorial: https://youtu.be/qp49H-Ns2yg
 
-If you have questions, feel free to ask me on Discord: EFHIII#0462
+If you have questions, feel free to ask me on Discord: EFHIII#0462 or here: https://discord.gg/TkXTuhh
 
 # Keyboard shortcuts
 - SPACE
@@ -69,36 +69,37 @@ Number of seconds of silence at the start of the chart.
 
 Must also be applied to the audio file in order to sync properly, this does not generate an audio file. LMMS is a good midi to mp3/ogg/wav converter, especially if you get some nice sound-fonts.
 
-## Instrument toggles
+## Instrument Toggles
 When an instrument is toggled on, (after loading new settings) the chart will incorporate that instrument. Having multiple instruments on will have the chart use all toggled instruments with a preference for higher notes. Deleting notes will remove them from their instrument, not just the chart and will persist after reloading the chart.
 
-## Song playback
+## Song Playback
 Only plays the notes that the chart is showing
 
-## Chart preview map
+## Chart Preview Map
 All the notes of the chart are displayed in miniature on the left of the chat preview with a white line showing where you currently are in the chart.
 
-## Chart scrubbing
+## Chart Scrubbing
 Click (or drag) anywhere in the chart preview to jump to that part of the song shown in the chart preview map
 
-## Pitch visual aid
+## Pitch Visual Aid
 White line that follows the fret it represents, further left being low notes, right being high notes in the range of the 88 keys of a keyboard.
 
-## Instrument visual aid
+## Instrument Visual Aid
 Bellow the check for each instrument on the left, there's a preview of that instruments' notes throughout the song, x-axis is time, y-axis is pitch. The red line represents where the chart playback is.
 
 Each instrument that is checked, upon loading the settings, that instrument will be applied to the chart (provided it doesn't exceed the max simultaneous notes threshold)
 
-## custom events
+## Custom Events
 When you save and download the resulting chart, custom chart specific events will be put in in the places where the auto-charter acknowledges that it may have done a poor job, which you can see if you open the chart in MoonScraper. This makes it easier to clean up parts that aren't auto charted well by telling you the spots that might need attention.
 
+### `Section_Division`
 The auto-charter divides the chart into manageable chunks, but there's not always a clean transition between these. As a result, there are a few events that may be added around these transitions. At every transition there's a `Section_Division` event in between the last note of one section and the first note of the next.
 
+### `Bad_Different_Fret`
 If the first note of a section is the same note, but charted as a different fret as the last note of the previous section, then a `Bad_Different_Fret` event will be placed on that note.
 
+### `Bad_Too_low`
 If the first note of a section is a higher note than the last note of the previous section, but is charted as a lower fret, then a `Bad_Too_Low` event will be placed on that note.
 
+### `Bad_Too_High`
 If the first note of a section is a lower note than the last note of the previous section, but is charted as a higher fret, then a `Bad_Too_High` event will be placed on that note.
-
-## bad note events
-When you save and download the resulting chart, custom chart specific events will be put in in the places where the auto-charter acknowledges that it did a poor job, which you can see if you open the chart in MoonScraper. This makes it easier to clean up parts that aren't auto charted well by telling you the spots that need attention.

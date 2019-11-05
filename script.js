@@ -470,13 +470,19 @@ function loadSettings(){
     }
     notesString+='  '+(twoSec+unChartedNotes[i][0])+' = N '+(openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes )+' '+Math.round(duration)+'\n';
 
-    //test
+    //events
     var myLastNote=i;
     while(myLastNote>0&&unChartedNotes[myLastNote][0]==unChartedNotes[i][0]){myLastNote--;}
     var lastT=unChartedNotes[myLastNote][0];
     while(myLastNote>0&&unChartedNotes[myLastNote][0]==lastT){
-      if(note>0&&unChartedNotes[myLastNote][1]==unChartedNotes[i][1]&&chartedNotes[i]!=chartedNotes[myLastNote]){
+      if(note>0&&unChartedNotes[myLastNote][1]==unChartedNotes[i][1]&&chartedNotes[myLastNote]!=chartedNotes[i]){
         notesString+='  '+(twoSec+unChartedNotes[i][0])+' = E Bad_Different_Fret\n';
+      }
+      else if(note>0&&unChartedNotes[myLastNote][1]<unChartedNotes[i][1]&&chartedNotes[myLastNote]>=chartedNotes[i]){
+        notesString+='  '+(twoSec+unChartedNotes[i][0])+' = E Bad_Too_Low\n';
+      }
+      else if(note>0&&unChartedNotes[myLastNote][1]>unChartedNotes[i][1]&&chartedNotes[myLastNote]<=chartedNotes[i]){
+        notesString+='  '+(twoSec+unChartedNotes[i][0])+' = E Bad_Too_High\n';
       }
       else if(note>0&&unChartedNotes[myLastNote][1]!=unChartedNotes[i][1]&&chartedNotes[i]==chartedNotes[myLastNote]){
         notesString+='  '+(twoSec+unChartedNotes[i][0])+' = E Bad_Same_Fret\n';
@@ -487,7 +493,7 @@ function loadSettings(){
       notesString+='  '+((twoSec+unChartedNotes[i][0]+lastTick)/2>>0)+' = E Section_Division\n';
     }
     lastTick=(twoSec+unChartedNotes[i][0]);
-    //end test
+    //end events
   }
 
   var zip = new JSZip();

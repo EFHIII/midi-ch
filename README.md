@@ -89,5 +89,16 @@ Bellow the check for each instrument on the left, there's a preview of that inst
 
 Each instrument that is checked, upon loading the settings, that instrument will be applied to the chart (provided it doesn't exceed the max simultaneous notes threshold)
 
-## bad same note events
+## custom events
+When you save and download the resulting chart, custom chart specific events will be put in in the places where the auto-charter acknowledges that it may have done a poor job, which you can see if you open the chart in MoonScraper. This makes it easier to clean up parts that aren't auto charted well by telling you the spots that might need attention.
+
+The auto-charter divides the chart into manageable chunks, but there's not always a clean transition between these. As a result, there are a few events that may be added around these transitions. At every transition there's a `Section_Division` event in between the last note of one section and the first note of the next.
+
+If the first note of a section is the same note, but charted as a different fret as the last note of the previous section, then a `Bad_Different_Fret` event will be placed on that note.
+
+If the first note of a section is a higher note than the last note of the previous section, but is charted as a lower fret, then a `Bad_Too_Low` event will be placed on that note.
+
+If the first note of a section is a lower note than the last note of the previous section, but is charted as a higher fret, then a `Bad_Too_High` event will be placed on that note.
+
+## bad note events
 When you save and download the resulting chart, custom chart specific events will be put in in the places where the auto-charter acknowledges that it did a poor job, which you can see if you open the chart in MoonScraper. This makes it easier to clean up parts that aren't auto charted well by telling you the spots that need attention.

@@ -444,14 +444,16 @@ function loadSettings(){
       var strip=false;
       var cTempo=getTempo(unChartedNotes[i][3]+unChartedNotes[i][6])/60;
       stripAmount=1;
-      if(cTempo>=14){stripAmount=1/64;}
-      else if(cTempo>=7){stripAmount=1/32;}
-      else if(cTempo>=3.6){stripAmount=1/16;}
+      if(cTempo>=16){stripAmount=1;}
+      else if(cTempo>=8){stripAmount=1/2;}
+      else if(cTempo>=5){stripAmount=1/4;}
+      else if(cTempo>=3){stripAmount=1/8;}
       else if(cTempo>=2.5){stripAmount=1/12;}
-      else if(cTempo>=1.8){stripAmount=1/8;}
-      else if(cTempo>=1.3){stripAmount=1/6;}
-      else if(cTempo>=0.8){stripAmount=1/4;}
-      else if(cTempo>=0.4){stripAmount=1/2;}
+      else if(cTempo>=1.8){stripAmount=1/16;}
+      else if(cTempo>=0.8){stripAmount=1/32;}
+      else if(cTempo>=0.4){stripAmount=1/64;}
+      else if(cTempo>=0.2){stripAmount=1/128;}
+      else if(cTempo>=0.1){stripAmount=1/256;}
       stripAmount*=stripSustain;
       for(var j=0;j<chartedNotes.length;j++){
         if(unChartedNotes[i][0]!=unChartedNotes[j][0] && unChartedNotes[j][0]-unChartedNotes[i][0]>0 && unChartedNotes[i][0]+duration+stripAmount*preview.ppq*cTempo >= unChartedNotes[j][0]){
@@ -474,6 +476,9 @@ function loadSettings(){
     var myLastNote=i;
     while(myLastNote>0&&unChartedNotes[myLastNote][0]==unChartedNotes[i][0]){myLastNote--;}
     var lastT=unChartedNotes[myLastNote][0];
+    if(findInGroups(i)[1]===0){
+      notesString+='  '+(twoSec+unChartedNotes[i][0])+' = E Section_Division\n';
+    }
     while(myLastNote>0&&unChartedNotes[myLastNote][0]==lastT){
       if(note>0&&unChartedNotes[myLastNote][1]==unChartedNotes[i][1]&&chartedNotes[myLastNote]!=chartedNotes[i]){
         notesString+='  '+(twoSec+unChartedNotes[i][0])+' = E Bad_Different_Fret\n';
@@ -488,9 +493,6 @@ function loadSettings(){
         notesString+='  '+(twoSec+unChartedNotes[i][0])+' = E Bad_Same_Fret\n';
       }
       myLastNote--;
-    }
-    if(findInGroups(i)[1]===0){
-      notesString+='  '+((twoSec+unChartedNotes[i][0]+lastTick)/2>>0)+' = E Section_Division\n';
     }
     lastTick=(twoSec+unChartedNotes[i][0]);
     //end events
@@ -1091,9 +1093,9 @@ function draw() {
       noStroke();
       ellipse(unChartedNotes[note][8]/88*width,Y,width/88,width/6);
       drawNote(chartedNotes[note]-openNotes,Y,'',(sus)/preview.scale*height);
+      noStroke();
       if(findInGroups(note)[1]===0){
         fill(255,0,0,200);
-        noStroke();
         rect(0,Y-4,width,8);
       }
       //test
@@ -1102,14 +1104,12 @@ function draw() {
       var lastT=unChartedNotes[myLastNote][0];
       while(myLastNote>0&&unChartedNotes[myLastNote][0]==lastT){
         if(note>0&&unChartedNotes[myLastNote][1]==currentNote[1]&&chartedNotes[note]!=chartedNotes[myLastNote]){
-          fill(255,0,0);
-          stroke(255);
-          rect(chartedNotes[note]*width/6+width/6-5,Y,10,(currentNote[3]-preview.time)/preview.scale*height-(unChartedNotes[myLastNote][3]-preview.time)/preview.scale*height);
+          fill(255,0,0,150);
+          rect(chartedNotes[note]*width/6+width/6-10,Y,20,(currentNote[3]-preview.time)/preview.scale*height-(unChartedNotes[myLastNote][3]-preview.time)/preview.scale*height);
         }
         else if(note>0&&unChartedNotes[myLastNote][1]!=currentNote[1]&&chartedNotes[note]==chartedNotes[myLastNote]){
-          fill(255,0,0);
-          stroke(255);
-          rect(chartedNotes[note]*width/6+width/6-5,Y,10,(currentNote[3]-preview.time)/preview.scale*height-(unChartedNotes[myLastNote][3]-preview.time)/preview.scale*height);
+          fill(255,0,0,150);
+          rect(chartedNotes[note]*width/6+width/6-10,Y,20,(currentNote[3]-preview.time)/preview.scale*height-(unChartedNotes[myLastNote][3]-preview.time)/preview.scale*height);
         }
         myLastNote--;
       }

@@ -1,9 +1,11 @@
 # .midi to Clone Hero
 .midi to [Clone Hero](https://clonehero.net/) converter
 
+If you're lazy: https://efhiii.github.io/midi-ch/auto (automatically provides full dificulty, but gives you less control and requires a very clean midi)
+
 link: https://efhiii.github.io/midi-ch/
 
-example chart: https://youtu.be/D7Xqxiyp6tM
+example chart: https://youtu.be/Pv_2j9EDV_k
 
 Slightly outdated tutorial: https://youtu.be/qp49H-Ns2yg
 
@@ -67,7 +69,7 @@ Allows you to have extra long or short sustain gaps. By default, 1 which puts in
 ## Leading Silence
 Number of seconds of silence at the start of the chart.
 
-Must also be applied to the audio file in order to sync properly, this does not generate an audio file. LMMS is a good midi to mp3/ogg/wav converter, especially if you get some nice sound-fonts.
+Must also be applied to the audio file in order to sync properly, this does not generate an audio file. Any DAW *should* work, although some might create inacurate tempo-maps. FL Studio is a good choice.
 
 ## Instrument Toggles
 When an instrument is toggled on, (after loading new settings) the chart will incorporate that instrument. Having multiple instruments on will have the chart use all toggled instruments with a preference for higher notes. Deleting notes will remove them from their instrument, not just the chart and will persist after reloading the chart.
@@ -76,7 +78,7 @@ When an instrument is toggled on, (after loading new settings) the chart will in
 Only plays the notes that the chart is showing
 
 ## Chart Preview Map
-All the notes of the chart are displayed in miniature on the left of the chat preview with a white line showing where you currently are in the chart.
+All the notes of the chart are displayed in miniature on the left of the chart preview with a white line showing where you currently are in the chart.
 
 ## Chart Scrubbing
 Click (or drag) anywhere in the chart preview to jump to that part of the song shown in the chart preview map

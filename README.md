@@ -1,9 +1,11 @@
 # .midi to Clone Hero
 .midi to [Clone Hero](https://clonehero.net/) converter
 
+If you're lazy: https://efhiii.github.io/midi-ch/auto (automatically provides full dificulty, but gives you less control and requires a very clean midi)
+
 link: https://efhiii.github.io/midi-ch/
 
-example chart: https://youtu.be/D7Xqxiyp6tM
+example chart: https://youtu.be/Pv_2j9EDV_k
 
 Slightly outdated tutorial: https://youtu.be/qp49H-Ns2yg
 

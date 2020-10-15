@@ -511,11 +511,19 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
   var difFrets=['5','5','4','3'];
   var difBPS=['30','15','9','5'];
 
-  var cnt = Math.min(16,settings.tracks.length);
-  if (settings.tracks.length<=4){
+  var realTracks=[];
+
+  for(var i=0;i<currentMidi.tracks.length;i++){
+    if(currentMidi.tracks[i].notes.length>0){
+      realTracks.push(i);
+    }
+  }
+
+  var cnt = Math.min(16,realTracks.length);
+  if (realTracks<=4){
     cnt*=4;
     for(var j=0;j<4;j++){
-      settings.tracks[j]=true;
+      settings.tracks[realTracks[j]]=true;
       for(var i=0;i<4;i++){
         if(cnt-->0){
           document.getElementById('frets').value=difFrets[i];
@@ -525,7 +533,7 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
           tracksString+=`[${difNames[i]}${trackNames[j]}]\n{\n${notesString}}\n`;
         }
       }
-      settings.tracks[j]=false;
+      settings.tracks[realTracks[j]]=false;
     }
   }
   else{
@@ -533,10 +541,10 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
       for(var j=0;j<4;j++){
         if(cnt-->0){
           document.getElementById('frets').value='5';
-          settings.tracks[j]=true;
+          settings.tracks[realTracks[j]]=true;
           loadDataSettings();
           tracksString+=`[${difNames[i]}${trackNames[j]}]\n{\n${notesString}}\n`;
-          settings.tracks[j]=false;
+          settings.tracks[realTracks[j]]=false;
         }
       }
     }

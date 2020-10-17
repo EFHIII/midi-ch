@@ -520,7 +520,7 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
   }
 
   var cnt = Math.min(16,realTracks.length);
-  if (realTracks<=4){
+  if (realTracks.length<=4){
     cnt*=4;
     for(var j=0;j<4;j++){
       settings.tracks[realTracks[j]]=true;

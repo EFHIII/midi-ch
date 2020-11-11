@@ -135,6 +135,7 @@ function loadSettings(){
   ignoreGap=document.getElementById("ignoreGap").value*1;
   maxBPS=document.getElementById("maxBPS").value*1;
   if(maxBPS<=0){maxBPS=Infinity;}
+  document.getElementById("frets").value=Math.max(0,Math.min(5,document.getElementById("frets").value));
   frets=document.getElementById("frets").value*1;
   stripSustain=document.getElementById("stripSustain").value*1;
   if(stripSustain<0){stripSustain=0;}
@@ -444,6 +445,7 @@ function loadSettings(){
       var strip=false;
       var cTempo=getTempo(unChartedNotes[i][3]+unChartedNotes[i][6])/60;
       stripAmount=1;
+
       if(cTempo>=16){stripAmount=1;}
       else if(cTempo>=8){stripAmount=1/2;}
       else if(cTempo>=5){stripAmount=1/4;}
@@ -454,6 +456,19 @@ function loadSettings(){
       else if(cTempo>=0.4){stripAmount=1/64;}
       else if(cTempo>=0.2){stripAmount=1/128;}
       else if(cTempo>=0.1){stripAmount=1/256;}
+      /*
+      if(cTempo>=8){stripAmount=1/2;}
+      else if(cTempo>=4){stripAmount=1/4;}
+      else if(cTempo>=2){stripAmount=1/8;}
+      else if(cTempo>=1){stripAmount=1/12;}
+      else if(cTempo>=0.5){stripAmount=1/16;}
+      else if(cTempo>=0.25){stripAmount=1/32;}
+      else if(cTempo>=0.12){stripAmount=1/64;}
+      else if(cTempo>=0.05){stripAmount=1/128;}
+      else if(cTempo>=0.02){stripAmount=1/256;}
+      else if(cTempo>=0.01){stripAmount=1/512;}
+      */
+      
       stripAmount*=stripSustain;
       for(var j=0;j<chartedNotes.length;j++){
         if(unChartedNotes[i][0]!=unChartedNotes[j][0] && unChartedNotes[j][0]-unChartedNotes[i][0]>0 && unChartedNotes[i][0]+duration+stripAmount*preview.ppq*cTempo >= unChartedNotes[j][0]){

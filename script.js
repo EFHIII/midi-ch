@@ -606,7 +606,7 @@ function loadHTMLcontent() {
     </div>
     <div class="custom-control">
       <input type="number" id="noteTolerance" value=0.15 min="0">
-      <label for="noteTolerance"><span data-toggle="tooltip" title="beats tollerance when determining if a note lands at the same time as another note. Only relevent when Extended Sustains is on">Note Tollerance</span></label>
+      <label for="noteTolerance"><span data-toggle="tooltip" title="beats tollerance when determining if a note lands at the same time as another note. Only relevent when Extended Sustains is on">Note Tolerance</span></label>
     </div>
     <div class="custom-control">
       <input type="number" id="leadingSeconds" value=2 min="0">

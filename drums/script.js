@@ -443,7 +443,7 @@ function loadHTMLcontent() {
         `<label class="d7 custom-control-label" for="midi${i}-${j}-7"></label></div></div><div style="height:2em;padding-top:0.6em">&nbsp;`+
                                                                                 `<div class="custom-control custom-checkbox"><input class="d8 custom-control-input" type="checkbox" ${j==35?'checked':''} id="midi${i}-${j}-8"> `+
         `<label class="d8 custom-control-label" for="midi${i}-${j}-8"></label></div><div class="custom-control custom-checkbox"><input class="d11 custom-control-input" type="checkbox" ${j==36?'checked':''} id="midi${i}-${j}-11"> `+
-        `<label class="d11 custom-control-label" for="midi${i}-${j}-11"></label></div><div class="custom-control custom-checkbox"><input class="d9 custom-control-input" type="checkbox" ${j==46?'checked':''} id="midi${i}-${j}-9"> `+
+        `<label class="d11 custom-control-label" for="midi${i}-${j}-11"></label></div><div class="custom-control custom-checkbox"><input class="d9 custom-control-input" type="checkbox" id="midi${i}-${j}-9"> `+
         `<label class="d9 custom-control-label" for="midi${i}-${j}-9"></label></div><div class="custom-control custom-checkbox"> <input class="d10 custom-control-input" type="checkbox" id="midi${i}-${j}-10">`+
         `<label class="d10 custom-control-label" for="midi${i}-${j}-10"><span style="position:relative;top:0.35em">${drumNames[kit][j]?drumNames[kit][j]:`MIDI ${j}`}</span></label></div></div></div><hr>`;
 

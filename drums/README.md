@@ -40,7 +40,7 @@ Number of seconds of silence at the start of the chart.
 Must also be applied to the audio file in order to sync properly, this does not generate an audio file. Any DAW *should* work, although some might create inacurate tempo-maps. FL Studio is a good choice.
 
 ## Percussion Selectors
-Each percussion piece used in the Midi will get it's own selector. By default, some of them will already be assigned to one of the 7 pads or 2 peddals which are colored accordingly. You can change these and assign the other percussion pieces using the checkboxes. The rightmost two checkboxes are accent each & log each respectively. Loging each will put in a custom event each time that percusion piece is played, which can be useful when manually editing a chart. Deleting notes will remove them from their instrument, not just the chart and will persist after reloading the chart.
+Each percussion piece used in the Midi will get it's own selector. By default, some of them will already be assigned to one of the 7 pads or 2 peddals which are colored accordingly. You can change these and assign the other percussion pieces using the checkboxes. The rightmost two checkboxes are accent each (WIP) & log each respectively. Loging each will put in a custom event each time that percusion piece is played, which can be useful when manually editing a chart. Deleting notes will remove them from their instrument, not just the chart and will persist after reloading the chart.
 
 ## Song Playback
 Plays the notes that the chart is showing

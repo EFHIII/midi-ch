@@ -482,12 +482,7 @@ function setup() {
   colors = [color(255, 0, 0), color(255, 255, 0), color(0, 50, 200), color(0, 200, 0), color(255, 128, 0)];
 }
 
-function drawNote(cn, y, tp) {
-  noStroke();
-  if(note < 0) {
-    return;
-  }
-
+function drawNote(cn, y) {
   if(cn%100 === 0 || cn%100>9){return;}
   var type='';
   var cymbal = false;
@@ -496,6 +491,11 @@ function drawNote(cn, y, tp) {
   }
   if(cn >= 10 && cn < 20 || cn >= 30){type = 'hopo';}
   var note = (cn%100)/2>>0;
+
+  if(note < 0) {
+    return;
+  }
+  noStroke();
 
   colors[note%5].setAlpha(150);
   fill(colors[note%5]);
@@ -885,7 +885,7 @@ function draw() {
   while(note < chartedNotes.length && preview.time + preview.scale + 1 - currentNote[3] > 0) {
     currentNote = unChartedNotes[note];
     if(currentNote[3] - preview.time <= 0 && currentNote[3] - (preview.time - frameLength) > 0) {
-      if(currentNote[8]-26 > 0 && currentNote[8]-26 < 62){
+      if(currentNote[8]-26 > 0 && currentNote[8]-26 < 62 && chartedNotes[note]%100 !== 0 && chartedNotes[note]%100<10){
         sound.play(currentNote[8]-26+'');
       }
       lastLen = (currentNote[6] < 0 || currentNote > 5) ? lastLen : currentNote[6];
@@ -893,7 +893,7 @@ function draw() {
     }
 
     var Y = 0.9 * height - (currentNote[3] - preview.time) / preview.scale * height;
-    var sus = currentNote[6] / currentNote[7] * currentNote[2];
+
     if(Y > 0 && Y < 0.9 * height && (!lastNote[note] || note > lastNote[note])) {
       if(!lines) {
         lines = true;
@@ -902,7 +902,7 @@ function draw() {
       fill(255);
       noStroke();
       //ellipse(unChartedNotes[note][8] / 88 * width, Y, width / 88, width / 5);
-      drawNote(chartedNotes[note], Y, '', (sus) / preview.scale * height);
+      drawNote(chartedNotes[note], Y, '');
       noStroke();
       //test
       var myLastNote = note;
@@ -921,7 +921,7 @@ function draw() {
       //end test
       lastNote[i] = note;
     } else if(Y >= 0.9 * height) {
-      var Y2 = 0.9 * height - (currentNote[3] + sus - preview.time) / preview.scale * height;
+      var Y2 = 0.9 * height - (currentNote[3] - preview.time) / preview.scale * height;
     }
     note++;
   }

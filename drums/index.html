@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>MIDI-CH</title>
+    <title>MIDI-CH Drums</title>
     <link href="../favicon.ico" rel="shortcut icon" type="image/x-icon" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style media="screen">
@@ -208,6 +208,12 @@ canvas{
   background-color: black;
 }
 
+#help{
+  padding-left: 1em;
+  font-size: 1.2em;
+  position: absolute;
+  top:1em;
+}
 
     </style>
   </head>
@@ -222,6 +228,7 @@ canvas{
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.2.2/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
     <div id='container'>
+      <div id='help'><a target="_blank" href='https://github.com/efhiii/midi-ch/tree/master/drums/'><b>Help</b></a><br><a target="_blank" href='https://efhiii.github.io/midi-ch/'><b>Guitar</b></a></div>
       <div id="FileDrop">
         <div id="Text">
           Drop a midi file here

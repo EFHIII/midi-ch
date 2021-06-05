@@ -755,7 +755,7 @@ function findNotes(from, to) {
 
 var lastFrameTime = Date.now();
 var currentFrameTime = Date.now();
-var paused = false;
+var paused = true;
 var OS = 0;
 var lastLen = 0.3;
 

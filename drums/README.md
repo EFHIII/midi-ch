@@ -51,7 +51,7 @@ All the notes of the chart are displayed in miniature on the left of the chart p
 ## Chart Scrubbing
 Click (or drag) anywhere in the chart preview to jump to that part of the song shown in the chart preview map
 
-## kit Visual Aid
+## Kit Visual Aid
 Bellow the check for each kit on the left, there's a preview of that kit's notes throughout the song, x-axis is time, y-axis is midi ID. The red line represents where the chart playback is.
 
 ## Custom Events

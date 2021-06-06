@@ -828,7 +828,7 @@ function drawLines() {
   }
   let currentTS = 0;
   let currentBPM = 0;
-  while(currentTS+1 < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS+1].ticks <= 0) {
+  while(currentTS + 1 < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS + 1].ticks <= 0) {
     currentTS++;
     ts = [currentMidi.header.timeSignatures[currentTS].timeSignature[0], currentMidi.header.timeSignatures[currentTS].timeSignature[1]];
   }
@@ -839,7 +839,7 @@ function drawLines() {
     ts[1] = 4;
   }
 
-  while(currentBPM+1 < currentMidi.header.tempos.length && currentMidi.header.tempos[currentBPM+1].ticks <= 0) {
+  while(currentBPM + 1 < currentMidi.header.tempos.length && currentMidi.header.tempos[currentBPM + 1].ticks <= 0) {
     currentBPM++;
     bpm = currentMidi.header.tempos[currentBPM].bpm;
   }
@@ -866,7 +866,7 @@ function drawLines() {
       }
     }
     beat = (beat + 1) % ts[0];
-    if(beat == 0){
+    if(beat == 0) {
       measure++;
     }
 

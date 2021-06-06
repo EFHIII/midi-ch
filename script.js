@@ -1041,54 +1041,44 @@ function stripLeft(from, to) {
   }
 }
 
-function drawLines(note) {
+function drawLines() {
   if(MINIMAL) {
     return;
   }
   stroke(128);
-  //let from = unChartedNotes[note][3];
-  let from = 0;
-  //let fromTick = unChartedNotes[note][0];
-  let fromTick = 0;
-  let fromTime = 0;
   let bpm = 240;
   let ts = [4, 4];
   if(currentMidi.header.timeSignatures.length) {
     ts = [currentMidi.header.timeSignatures[0].timeSignature[0], currentMidi.header.timeSignatures[0].timeSignature[1]];
   }
-  let currentTS = 0;
-  let fromBPM = 0;
-  let currentBPM = 0;
-  while(currentTS < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS].ticks <= fromTick) {
-    currentTS++;
+  if(currentMidi.header.tempos.length) {
+    bpm = currentMidi.header.tempos[0].bpm;
   }
-  currentTS--;
-  ts = currentMidi.header.timeSignatures[currentTS] ? [currentMidi.header.timeSignatures[currentTS].timeSignature[0], currentMidi.header.timeSignatures[currentTS].timeSignature[1]] : [4, 4];
+  let currentTS = 0;
+  let currentBPM = 0;
+  while(currentTS+1 < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS+1].ticks <= 0) {
+    currentTS++;
+    ts = [currentMidi.header.timeSignatures[currentTS].timeSignature[0], currentMidi.header.timeSignatures[currentTS].timeSignature[1]];
+  }
   if(ts[0] <= 0) {
     ts[0] = 4;
   }
   if(ts[1] <= 0) {
     ts[1] = 4;
   }
-  while(currentBPM < currentMidi.header.tempos.length && currentMidi.header.tempos[currentBPM].ticks <= fromTick) {
+
+  while(currentBPM+1 < currentMidi.header.tempos.length && currentMidi.header.tempos[currentBPM+1].ticks <= 0) {
     currentBPM++;
+    bpm = currentMidi.header.tempos[currentBPM].bpm;
   }
-  currentBPM--;
-  bpm = currentMidi.header.tempos[currentBPM] ? currentMidi.header.tempos[currentBPM].bpm : 120;
   if(bpm <= 0) {
     bpm = 1;
   }
-  fromTime = currentMidi.header.tempos[currentBPM] ? currentMidi.header.tempos[currentBPM].time : 0;
-
-  //while(fromTime <= from) {
-  //  fromTime += 60 / bpm * ts[0];
-  //}
-  //fromTime -= 120 / bpm * ts[0];
-  fromBPM = currentBPM;
 
   let beat = 0;
+  let measure = 0;
 
-  for(let y, i = fromTime; i < currentMidi.duration + 60 / bpm * (4 / ts[1]);) {
+  for(let y, i = 0; i < currentMidi.duration + 60 / bpm * (4 / ts[1]);) {
     y = 0.9 * height - (i - preview.time) / preview.scale * height;
     if(y < height) {
       if(beat == 0) {
@@ -1104,6 +1094,9 @@ function drawLines(note) {
       }
     }
     beat = (beat + 1) % ts[0];
+    if(beat == 0){
+      measure++;
+    }
 
     let beatsLeft = 1;
 
@@ -1120,7 +1113,7 @@ function drawLines(note) {
 
     i += beatsLeft * (60 / bpm * (4 / ts[1]));
 
-    while(currentTS + 1 < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS + 1].time <= i) {
+    while(currentTS + 1 < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS + 1].measures <= measure) {
       currentTS++;
     }
     ts = currentMidi.header.timeSignatures[currentTS] ? [currentMidi.header.timeSignatures[currentTS].timeSignature[0], currentMidi.header.timeSignatures[currentTS].timeSignature[1]] : [4, 4];
@@ -1173,7 +1166,7 @@ function myDraw() {
     currentFrameTime = Date.now();
   }
 
-  drawLines(0);
+  drawLines();
 
   noStroke();
   fill(255);

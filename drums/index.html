@@ -1,257 +1,282 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>MIDI-CH Drums</title>
-    <link href="../favicon.ico" rel="shortcut icon" type="image/x-icon" />
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <style media="screen">
-#FileDrop{
-  position: relative;
-  left:0;
-  width: 75%;
-  height: 100px;
-  border: 2px dashed black;
-  color: black;
-  margin: 20px auto;
-}
-#FileDrop.Hover{
-  background-color: black;
-  color: white;
-}
-#FileDrop input {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  left: 0px;
-  top: 0px;
-}
-#FileDrop #Text {
-  position: absolute;
-  width: 100%;
-  height: 20px;
-  line-height: 20px;
-  left: 0px;
-  top: 50%;
-  transform: translate(0, -50%);
-  text-align: center;
-}
-textarea {
-  font-family: monospace;
-  height: 300px;
-  width: 100%;
-  display: inline-block;
-  position: relative;
-  float: left;
-}
-#Results {
-  position: relative;
-  width: 100%;
-  margin: 10px auto;
-}
 
-#container{
-  position:fixed;
-  width:75%;
-  left:0;
-  top:0;
-  height:100%;
-  overflow-y:scroll;
-}
+<head>
+  <meta charset="utf-8">
+  <title>MIDI-CH Drums</title>
+  <link href="../favicon.ico" rel="shortcut icon" type="image/x-icon" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <style media="screen">
+    #FileDrop {
+      position: relative;
+      left: 0;
+      width: 75%;
+      height: 100px;
+      border: 2px dashed black;
+      color: black;
+      margin: 20px auto;
+    }
 
-button{
-  margin-bottom: 0.2em;
-}
+    #FileDrop.Hover {
+      background-color: black;
+      color: white;
+    }
 
-canvas{
-  position:fixed;
-  top:0;
-  right:0;
-}
+    #FileDrop input {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      left: 0px;
+      top: 0px;
+    }
 
-.notesPreview{
-  position:relative;
-}
+    #FileDrop #Text {
+      position: absolute;
+      width: 100%;
+      height: 20px;
+      line-height: 20px;
+      left: 0px;
+      top: 50%;
+      transform: translate(0, -50%);
+      text-align: center;
+    }
 
-.custom-control.custom-checkbox .custom-control.custom-checkbox{
-  display: inline;
-  padding: 0;
-  margin: 0.5em;
-}
+    textarea {
+      font-family: monospace;
+      height: 300px;
+      width: 100%;
+      display: inline-block;
+      position: relative;
+      float: left;
+    }
 
+    #Results {
+      position: relative;
+      width: 100%;
+      margin: 10px auto;
+    }
 
-.custom-checkbox .d2:checked ~ .custom-control-label::after,
-.custom-checkbox .d4:checked ~ .custom-control-label::after,
-.custom-checkbox .d6:checked ~ .custom-control-label::after,
-.custom-checkbox .d11:checked ~ .custom-control-label::after {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fffa' d='M8 0l-8 0L0 8 8 8z'/%3e%3c/svg%3e");
-}
+    #container {
+      position: fixed;
+      width: 75%;
+      left: 0;
+      top: 0;
+      height: 100%;
+      overflow-y: scroll;
+    }
 
-.custom-checkbox .d1:checked ~ .custom-control-label::after,
-.custom-checkbox .d3:checked ~ .custom-control-label::after,
-.custom-checkbox .d5:checked ~ .custom-control-label::after,
-.custom-checkbox .d7:checked ~ .custom-control-label::after {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%230008' d='M8 0l-8 0L0 8 8 8z'/%3e%3c/svg%3e");
-}
+    button {
+      margin-bottom: 0.2em;
+    }
 
-.custom-checkbox .d8:checked ~ .custom-control-label::after {
-  background-image: none;
-}
+    canvas {
+      position: fixed;
+      top: 0;
+      right: 0;
+    }
 
-.custom-checkbox .d1:checked ~ .custom-control-label::before {
-  background-color: red;
-  border-color:red;
-}
-.custom-checkbox .d1:checked:focus ~ .custom-control-label::before {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
-}
-.custom-checkbox .d1:focus ~ .custom-control-label::before {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
-  border-color:red;
-}
-.custom-checkbox .d1:active ~ .custom-control-label::before {
-  background-color: red;
-}
+    .notesPreview {
+      position: relative;
+    }
 
-.custom-checkbox .d2:checked ~ .custom-control-label::before,
-.custom-checkbox .d3:checked ~ .custom-control-label::before {
-  background-color: rgb(220,220,0);
-  border-color:rgb(220,220,0);
-}
-.custom-checkbox .d2:checked:focus ~ .custom-control-label::before,
-.custom-checkbox .d3:checked:focus ~ .custom-control-label::before, {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(220, 220, 0, 0.25);
-}
-.custom-checkbox .d2:focus ~ .custom-control-label::before,
-.custom-checkbox .d3:focus ~ .custom-control-label::before {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(220, 220, 0, 0.25);
-  border-color:rgb(220,220,0);
-}
-.custom-checkbox .d2:active ~ .custom-control-label::before,
-.custom-checkbox .d3:active ~ .custom-control-label::before {
-  background-color: rgb(220,220,0);
-}
+    .custom-control.custom-checkbox .custom-control.custom-checkbox {
+      display: inline;
+      padding: 0;
+      margin: 0.5em;
+    }
 
 
-.custom-checkbox .d4:checked ~ .custom-control-label::before,
-.custom-checkbox .d5:checked ~ .custom-control-label::before {
-  background-color: rgb(50,80,255);
-  border-color: rgb(50,80,255);
-}
-.custom-checkbox .d4:checked:focus ~ .custom-control-label::before,
-.custom-checkbox .d5:checked:focus ~ .custom-control-label::before, {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(50, 80, 255, 0.25);
-}
-.custom-checkbox .d4:focus ~ .custom-control-label::before,
-.custom-checkbox .d5:focus ~ .custom-control-label::before {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(50, 80, 255, 0.25);
-  border-color: rgb(50,80,255);
-}
-.custom-checkbox .d4:active ~ .custom-control-label::before,
-.custom-checkbox .d5:active ~ .custom-control-label::before {
-  background-color: rgb(50,80,255);
-}
+    .custom-checkbox .d2:checked~.custom-control-label::after,
+    .custom-checkbox .d4:checked~.custom-control-label::after,
+    .custom-checkbox .d6:checked~.custom-control-label::after,
+    .custom-checkbox .d11:checked~.custom-control-label::after {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fffa' d='M8 0l-8 0L0 8 8 8z'/%3e%3c/svg%3e");
+    }
 
-.custom-checkbox .d6:checked ~ .custom-control-label::before,
-.custom-checkbox .d7:checked ~ .custom-control-label::before {
-  background-color: rgb(0,200,0);
-  border-color:rgb(0,200,0);
-}
-.custom-checkbox .d6:checked:focus ~ .custom-control-label::before,
-.custom-checkbox .d7:checked:focus ~ .custom-control-label::before, {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(0, 200, 0, 0.25);
-}
-.custom-checkbox .d6:focus ~ .custom-control-label::before,
-.custom-checkbox .d7:focus ~ .custom-control-label::before {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(0, 200, 0, 0.25);
-  border-color:rgb(0,200,0);
-}
-.custom-checkbox .d6:active ~ .custom-control-label::before,
-.custom-checkbox .d7:active ~ .custom-control-label::before {
-  background-color: rgb(0,200,0);
-}
+    .custom-checkbox .d1:checked~.custom-control-label::after,
+    .custom-checkbox .d3:checked~.custom-control-label::after,
+    .custom-checkbox .d5:checked~.custom-control-label::after,
+    .custom-checkbox .d7:checked~.custom-control-label::after {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%230008' d='M8 0l-8 0L0 8 8 8z'/%3e%3c/svg%3e");
+    }
+
+    .custom-checkbox .d8:checked~.custom-control-label::after {
+      background-image: none;
+    }
+
+    .custom-checkbox .d1:checked~.custom-control-label::before {
+      background-color: red;
+      border-color: red;
+    }
+
+    .custom-checkbox .d1:checked:focus~.custom-control-label::before {
+      box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
+    }
+
+    .custom-checkbox .d1:focus~.custom-control-label::before {
+      box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
+      border-color: red;
+    }
+
+    .custom-checkbox .d1:active~.custom-control-label::before {
+      background-color: red;
+    }
+
+    .custom-checkbox .d2:checked~.custom-control-label::before,
+    .custom-checkbox .d3:checked~.custom-control-label::before {
+      background-color: rgb(220, 220, 0);
+      border-color: rgb(220, 220, 0);
+    }
+
+    .custom-checkbox .d2:checked:focus~.custom-control-label::before,
+    .custom-checkbox .d3:checked:focus~.custom-control-label::before,
+      {
+      box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(220, 220, 0, 0.25);
+    }
+
+    .custom-checkbox .d2:focus~.custom-control-label::before,
+    .custom-checkbox .d3:focus~.custom-control-label::before {
+      box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(220, 220, 0, 0.25);
+      border-color: rgb(220, 220, 0);
+    }
+
+    .custom-checkbox .d2:active~.custom-control-label::before,
+    .custom-checkbox .d3:active~.custom-control-label::before {
+      background-color: rgb(220, 220, 0);
+    }
 
 
-.custom-checkbox .d8:checked ~ .custom-control-label::before,
-.custom-checkbox .d11:checked ~ .custom-control-label::before {
-  background-color: orange;
-  border-color:orange;
-}
-.custom-checkbox .d8:checked:focus ~ .custom-control-label::before,
-.custom-checkbox .d11:checked:focus ~ .custom-control-label::before {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(255, 128, 0, 0.25);
-}
-.custom-checkbox .d8:focus ~ .custom-control-label::before,
-.custom-checkbox .d11:focus ~ .custom-control-label::before {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(255, 128, 0, 0.25);
-  border-color:orange;
-}
-.custom-checkbox .d8:active ~ .custom-control-label::before,
-.custom-checkbox .d11:active ~ .custom-control-label::before {
-  background-color: orange;
-}
+    .custom-checkbox .d4:checked~.custom-control-label::before,
+    .custom-checkbox .d5:checked~.custom-control-label::before {
+      background-color: rgb(50, 80, 255);
+      border-color: rgb(50, 80, 255);
+    }
+
+    .custom-checkbox .d4:checked:focus~.custom-control-label::before,
+    .custom-checkbox .d5:checked:focus~.custom-control-label::before,
+      {
+      box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(50, 80, 255, 0.25);
+    }
+
+    .custom-checkbox .d4:focus~.custom-control-label::before,
+    .custom-checkbox .d5:focus~.custom-control-label::before {
+      box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(50, 80, 255, 0.25);
+      border-color: rgb(50, 80, 255);
+    }
+
+    .custom-checkbox .d4:active~.custom-control-label::before,
+    .custom-checkbox .d5:active~.custom-control-label::before {
+      background-color: rgb(50, 80, 255);
+    }
+
+    .custom-checkbox .d6:checked~.custom-control-label::before,
+    .custom-checkbox .d7:checked~.custom-control-label::before {
+      background-color: rgb(0, 200, 0);
+      border-color: rgb(0, 200, 0);
+    }
+
+    .custom-checkbox .d6:checked:focus~.custom-control-label::before,
+    .custom-checkbox .d7:checked:focus~.custom-control-label::before,
+      {
+      box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(0, 200, 0, 0.25);
+    }
+
+    .custom-checkbox .d6:focus~.custom-control-label::before,
+    .custom-checkbox .d7:focus~.custom-control-label::before {
+      box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(0, 200, 0, 0.25);
+      border-color: rgb(0, 200, 0);
+    }
+
+    .custom-checkbox .d6:active~.custom-control-label::before,
+    .custom-checkbox .d7:active~.custom-control-label::before {
+      background-color: rgb(0, 200, 0);
+    }
 
 
-.custom-checkbox .d9:checked ~ .custom-control-label::before {
-  background-color: black;
-  border-color:black;
-}
-.custom-checkbox .d9:checked:focus ~ .custom-control-label::before {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(0, 0, 0, 0.25);
-}
-.custom-checkbox .d9:focus ~ .custom-control-label::before {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(0, 0, 0, 0.25);
-  border-color:black;
-}
-.custom-checkbox .d9:active ~ .custom-control-label::before {
-  background-color: black;
-}
+    .custom-checkbox .d8:checked~.custom-control-label::before,
+    .custom-checkbox .d11:checked~.custom-control-label::before {
+      background-color: orange;
+      border-color: orange;
+    }
 
-#help{
-  padding-left: 1em;
-  font-size: 1.2em;
-  position: absolute;
-  top:1em;
-}
+    .custom-checkbox .d8:checked:focus~.custom-control-label::before,
+    .custom-checkbox .d11:checked:focus~.custom-control-label::before {
+      box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(255, 128, 0, 0.25);
+    }
 
-    </style>
-  </head>
-  <body>
-    <script
-  src="https://code.jquery.com/jquery-3.4.1.min.js"
-  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-  crossorigin="anonymous"></script>
+    .custom-checkbox .d8:focus~.custom-control-label::before,
+    .custom-checkbox .d11:focus~.custom-control-label::before {
+      box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(255, 128, 0, 0.25);
+      border-color: orange;
+    }
+
+    .custom-checkbox .d8:active~.custom-control-label::before,
+    .custom-checkbox .d11:active~.custom-control-label::before {
+      background-color: orange;
+    }
+
+
+    .custom-checkbox .d9:checked~.custom-control-label::before {
+      background-color: black;
+      border-color: black;
+    }
+
+    .custom-checkbox .d9:checked:focus~.custom-control-label::before {
+      box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(0, 0, 0, 0.25);
+    }
+
+    .custom-checkbox .d9:focus~.custom-control-label::before {
+      box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(0, 0, 0, 0.25);
+      border-color: black;
+    }
+
+    .custom-checkbox .d9:active~.custom-control-label::before {
+      background-color: black;
+    }
+
+    #help {
+      padding-left: 1em;
+      font-size: 1.2em;
+      position: absolute;
+      top: 1em;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tone/13.0.1/Tone.min.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/@tonejs/midi"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.2.2/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
-    <div id='container'>
-      <div id='help'><a target="_blank" href='https://github.com/efhiii/midi-ch/tree/master/drums/'><b>Help</b></a><br><a target="_blank" href='https://efhiii.github.io/midi-ch/'><b>Guitar</b></a></div>
-      <div id="FileDrop">
-        <div id="Text">
-          Drop a midi file here
-        </div>
-        <input type="file" accept="audio/midi">
+  <script type="text/javascript" src="https://unpkg.com/@tonejs/midi"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.2.2/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
+  <div id='container'>
+    <div id='help'><a target="_blank" href='https://github.com/efhiii/midi-ch/tree/master/drums/'><b>Help</b></a><br><a target="_blank" href='https://efhiii.github.io/midi-ch/'><b>Guitar</b></a></div>
+    <div id="FileDrop">
+      <div id="Text">
+        Drop a midi file here
       </div>
-      <div id='htmlContent' class='container'></div>
+      <input type="file" accept="audio/midi">
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.0/dist/howler.min.js"></script>
-    <!--p5.js code-->
-    <script>
-      let MINIMAL = false;
-      // run this ASAP to improve user experience (sets form fields based on URL parameters)
-      (new URL(window.location.href)).searchParams.forEach((x, y) =>
-        y === 'minimal' ? MINIMAL = true : '')
-      //if(MINIMAL){
-      //  document.getElementById('help').innerHTML+="<br><a href='?'><b>Normal</b>";
-      //}
-      //else{
-      //  document.getElementById('help').innerHTML+="<br><a href='?minimal'><b>Minimal</b>";
-      //}
-    </script>
-    <script src="loadSounds.js" type="text/javascript"></script>
-    <script src="script.js" type="text/javascript"></script>
-  </body>
+    <div id='htmlContent' class='container'></div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.0/dist/howler.min.js"></script>
+  <!--p5.js code-->
+  <script>
+    let MINIMAL = false;
+    // run this ASAP to improve user experience (sets form fields based on URL parameters)
+    (new URL(window.location.href)).searchParams.forEach((x, y) =>
+      y === 'minimal' ? MINIMAL = true : '')
+    //if(MINIMAL){
+    //  document.getElementById('help').innerHTML+="<br><a href='?'><b>Normal</b>";
+    //}
+    //else{
+    //  document.getElementById('help').innerHTML+="<br><a href='?minimal'><b>Minimal</b>";
+    //}
+  </script>
+  <script src="loadSounds.js" type="text/javascript"></script>
+  <script src="script.js" type="text/javascript"></script>
+</body>
+
 </html>

@@ -35,10 +35,10 @@ function parseFile(file) {
     currentMidi.duration = midi.duration;
     currentMidi.durationTicks = midi.durationTicks;
     currentMidi.name = midi.name;
-    for(let temp in currentMidi.header.tempos){
+    for(let temp in currentMidi.header.tempos) {
       currentMidi.header.tempos[temp].time = midi.header.tempos[temp].time;
     }
-    for(let track in currentMidi.tracks){
+    for(let track in currentMidi.tracks) {
       currentMidi.tracks[track].instrument.percussion = midi.tracks[track].instrument.percussion;
     }
     loadHTMLcontent();
@@ -58,23 +58,27 @@ let maxBPS = 30;
 let noteMap;
 
 function renderNoteMap() {
-  if(!currentMidi) { return; }
+  if(!currentMidi) {
+    return;
+  }
   background(0);
-  if(MINIMAL){
+  if(MINIMAL) {
     noteMap = get(0, 0, 16, height);
     return;
   }
   let note = 0;
   while(note < chartedNotes.length) {
     let currentNote = unChartedNotes[note];
-    if(chartedNotes[note]%100 === 0 || chartedNotes[note]%100>9){note++;continue;}
-    let cn = (chartedNotes[note]%100)/2>>0;
-    if(cn > 3){
+    if(chartedNotes[note] % 100 === 0 || chartedNotes[note] % 100 > 9) {
+      note++;
+      continue;
+    }
+    let cn = (chartedNotes[note] % 100) / 2 >> 0;
+    if(cn > 3) {
       strokeWeight(1);
       stroke(cn < 0 ? color(255, 0, 255) : colors[cn]);
-      line(0, height - (currentNote[3] / currentMidi.duration) * height, 15 , height - (currentNote[3] / currentMidi.duration) * height);
-    }
-    else{
+      line(0, height - (currentNote[3] / currentMidi.duration) * height, 15, height - (currentNote[3] / currentMidi.duration) * height);
+    } else {
       strokeWeight(5);
       stroke(cn < 0 ? color(255, 0, 255) : colors[cn]);
       point(3 + cn * 3, height - (currentNote[3] / currentMidi.duration) * height);
@@ -110,7 +114,11 @@ function findInGroups(note) {
 function getTempo(t) {
   let temp = 240;
   for(let i = 0; i < currentMidi.header.tempos.length; i++) {
-    if(currentMidi.header.tempos[i].time <= t) { temp = currentMidi.header.tempos[i].bpm; } else { i = Infinity; }
+    if(currentMidi.header.tempos[i].time <= t) {
+      temp = currentMidi.header.tempos[i].bpm;
+    } else {
+      i = Infinity;
+    }
   }
   return temp;
 }
@@ -118,10 +126,14 @@ function getTempo(t) {
 function loadSettings() {
   undeletedNotes = [];
   maxBPS = document.getElementById("maxBPS").value * 1;
-  if(maxBPS <= 0) { maxBPS = Infinity; }
+  if(maxBPS <= 0) {
+    maxBPS = Infinity;
+  }
   preview.scale = document.getElementById("previewScale").value * 1;
   preview.leadingSeconds = ((document.getElementById("leadingSeconds").value * 1) >> 0) * 2;
-  if(preview.scale <= 0) { preview.scale = 4000; }
+  if(preview.scale <= 0) {
+    preview.scale = 4000;
+  }
   let old_element = document.getElementById("blob");
   let new_element = old_element.cloneNode(true);
   old_element.parentNode.replaceChild(new_element, old_element);
@@ -170,8 +182,8 @@ function loadSettings() {
       for(let note = 0; note < currentMidi.tracks[i].notes.length; note++) {
 
         let kit = 'standard';
-        for(let k in drumNames){
-          if(currentMidi.tracks[i].instrument.name.indexOf(k) >= 0){
+        for(let k in drumNames) {
+          if(currentMidi.tracks[i].instrument.name.indexOf(k) >= 0) {
             kit = k;
           }
         }
@@ -200,8 +212,8 @@ function loadSettings() {
             document.getElementById(`midi${i}-${currentMidi.tracks[i].notes[note].midi}-11`).checked,
             document.getElementById(`midi${i}-${currentMidi.tracks[i].notes[note].midi}-9`).checked,
             document.getElementById(`midi${i}-${currentMidi.tracks[i].notes[note].midi}-10`).checked,
-          ],//11
-          drumNames[kit][currentMidi.tracks[i].notes[note].midi].split(' ').join('_')//12
+          ], //11
+          drumNames[kit][currentMidi.tracks[i].notes[note].midi].split(' ').join('_') //12
         ]);
         if(currentMidi.tracks[i].notes[note].ticks > songLength) {
           songLength = currentMidi.tracks[i].notes[note].ticks;
@@ -221,7 +233,7 @@ function loadSettings() {
 
   if(maxBPS > 0) {
     for(let i = 1; i < unChartedNotes.length; i++) {
-      if(unChartedNotes[i][8] == unChartedNotes[i-1][8] && unChartedNotes[i][3] - unChartedNotes[i - 1][3] > 0 && unChartedNotes[i][3] - unChartedNotes[i - 1][3] < 1 / maxBPS) {
+      if(unChartedNotes[i][8] == unChartedNotes[i - 1][8] && unChartedNotes[i][3] - unChartedNotes[i - 1][3] > 0 && unChartedNotes[i][3] - unChartedNotes[i - 1][3] < 1 / maxBPS) {
         unChartedNotes.splice(i, 1);
         i--;
       }
@@ -243,9 +255,9 @@ function loadSettings() {
 
   /*-- Start KA Import --*/
 
-  for(let i=0;i<unChartedNotes.length;i++){
-    let v = unChartedNotes[i][11].indexOf(true)+1;
-    chartedNotes.push((v>0&&v<10?v:0)+unChartedNotes[i][11][9]*100+unChartedNotes[i][11][10]*200);
+  for(let i = 0; i < unChartedNotes.length; i++) {
+    let v = unChartedNotes[i][11].indexOf(true) + 1;
+    chartedNotes.push((v > 0 && v < 10 ? v : 0) + unChartedNotes[i][11][9] * 100 + unChartedNotes[i][11][10] * 200);
   }
 
   /*-- End KA Import --*/
@@ -256,54 +268,56 @@ function loadSettings() {
 
   let lastTick = 0;
   for(let i = 0; i < chartedNotes.length; i++) {
-    if(chartedNotes[i]%100 === 0){continue;}
+    if(chartedNotes[i] % 100 === 0) {
+      continue;
+    }
 
-    if(unChartedNotes[i][8]){
+    if(unChartedNotes[i][8]) {
       //notesString += `  ${(twoSec + unChartedNotes[i][0])} = N 33 0\n`;//accent
     }
 
-    if(chartedNotes[i] === 9){
+    if(chartedNotes[i] === 9) {
       notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = N 32 ' + 0 + '\n';
-    }
-    else{
-      notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = N ' + (((chartedNotes[i]+2)%100)/2>>0) + ' ' + 0 + '\n';
-      if(chartedNotes[i]%100 === 2 || chartedNotes[i]%100 === 4 || chartedNotes[i]%100 === 6){
+    } else {
+      notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = N ' + (((chartedNotes[i] + 2) % 100) / 2 >> 0) + ' ' + 0 + '\n';
+      if(chartedNotes[i] % 100 === 2 || chartedNotes[i] % 100 === 4 || chartedNotes[i] % 100 === 6) {
         notesString += `  ${(twoSec + unChartedNotes[i][0])} = N ${65+((chartedNotes[i]%100)/2>>0)} 0\n`;
       }
     }
 
-    if(unChartedNotes[i][11][10]){
+    if(unChartedNotes[i][11][10]) {
       notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ` = E ${unChartedNotes[i][12]}\n`;
     }
 
     //events
     let myLastNote = i;
-    while(myLastNote > 0 && unChartedNotes[myLastNote][0] == unChartedNotes[i][0]) { myLastNote--; }
+    while(myLastNote > 0 && unChartedNotes[myLastNote][0] == unChartedNotes[i][0]) {
+      myLastNote--;
+    }
     let lastT = unChartedNotes[myLastNote][0];
     //if(findInGroups(i)[1] === 0) {
     //  notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Section_Division\n';
     //}
     //while(myLastNote > 0 && unChartedNotes[myLastNote][0] == lastT) {
     while(myLastNote >= 0) {
-      if(chartedNotes[myLastNote] > 0 && unChartedNotes[myLastNote][8] !== unChartedNotes[i][8] && chartedNotes[myLastNote]%100 === chartedNotes[i]%100) {
+      if(chartedNotes[myLastNote] > 0 && unChartedNotes[myLastNote][8] !== unChartedNotes[i][8] && chartedNotes[myLastNote] % 100 === chartedNotes[i] % 100) {
         notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ` = E ${unChartedNotes[i][12]}\n`;
         break;
-      }
-      else if((chartedNotes[myLastNote]%100)/2>>0 === (chartedNotes[i]%100)/2>>0){
+      } else if((chartedNotes[myLastNote] % 100) / 2 >> 0 === (chartedNotes[i] % 100) / 2 >> 0) {
         break;
       }
-    //  if(myLastNote > 0 && unChartedNotes[myLastNote][1] == unChartedNotes[i][1] && chartedNotes[myLastNote] != chartedNotes[i]) {
-    //    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Different_Fret\n';
-    //  } else if(myLastNote > 0 && unChartedNotes[myLastNote][1] < unChartedNotes[i][1] && chartedNotes[myLastNote] >= chartedNotes[i]) {
-    //    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Too_Low\n';
-    //  } else if(myLastNote > 0 && unChartedNotes[myLastNote][1] > unChartedNotes[i][1] && chartedNotes[myLastNote] <= chartedNotes[i]) {
-    //    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Too_High\n';
-    //  } else if(myLastNote > 0 && unChartedNotes[myLastNote][1] != unChartedNotes[i][1] && chartedNotes[i] == chartedNotes[myLastNote]) {
-    //    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Same_Fret\n';
-    //  }
+      //  if(myLastNote > 0 && unChartedNotes[myLastNote][1] == unChartedNotes[i][1] && chartedNotes[myLastNote] != chartedNotes[i]) {
+      //    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Different_Fret\n';
+      //  } else if(myLastNote > 0 && unChartedNotes[myLastNote][1] < unChartedNotes[i][1] && chartedNotes[myLastNote] >= chartedNotes[i]) {
+      //    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Too_Low\n';
+      //  } else if(myLastNote > 0 && unChartedNotes[myLastNote][1] > unChartedNotes[i][1] && chartedNotes[myLastNote] <= chartedNotes[i]) {
+      //    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Too_High\n';
+      //  } else if(myLastNote > 0 && unChartedNotes[myLastNote][1] != unChartedNotes[i][1] && chartedNotes[i] == chartedNotes[myLastNote]) {
+      //    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Same_Fret\n';
+      //  }
       myLastNote--;
     }
-    if(myLastNote < 0 || i === 0){
+    if(myLastNote < 0 || i === 0) {
       notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ` = E ${unChartedNotes[i][12]}\n`;
     }
     lastTick = (twoSec + unChartedNotes[i][0]);
@@ -311,7 +325,9 @@ function loadSettings() {
   }
 
   let zip = new JSZip();
-  zip.file("album.png", albumpng, { base64: true });
+  zip.file("album.png", albumpng, {
+    base64: true
+  });
   zip.file("song.ini", `[Song]
 name = ` + currentMidi.name + `
 artist = ` + (currentMidi.header.meta.filter(e => e.type.toLowerCase() === "artist").length ? currentMidi.header.meta.filter(e => e.type.toLowerCase() === "artist")[0].text : 'Unknown') + `
@@ -357,7 +373,9 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
 `);
 
   document.getElementById("blob").addEventListener("click", function() {
-    zip.generateAsync({ type: "blob" }).then(function(blob) { // 1) generate the zip file
+    zip.generateAsync({
+      type: "blob"
+    }).then(function(blob) { // 1) generate the zip file
       saveAs(blob, currentMidi.name + ".zip"); // 2) trigger the download
     }, function(err) {
       jQuery("#blob").text(err);
@@ -367,17 +385,17 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
 }
 
 const drumNames = {
-  "standard":[,,,,,,,,,,,,,,,,,,,,,,,,,,,"High Q","Slap","Scratch Push","Scratch Pull","Sticks","Square Click","Metronome Click","Metronome Bell","Kick Drum 2","Kick Drum 1","Side Stick","Snare Drum 1","Hand Clap","Snare Drum 2","Low Tom 2","Closed Hi-Hat","Low Tom 1","Pedal Hi-Hat","Mid Tom 2","Open Hi-Hat","Mid Tom 1","High Tom 2","Crash Cymbal","High Tom 1","Ride Cymbal","Chinese Cymbal","Ride Bell","Tambourine","Splash Cymbal","Cowbell","Crash Cymbal 2","Vibra-Slap","Ride Cymbal 2","High Bongo","Low Bongo","Mute Hi Conga","Open Hi Conga","Low Conga","High Timbale","Low Timbale","High Agogo","Low Agogo","Cabasa","Maracas","Short Hi Whistle","Long Lo Whistle","Short Guiro","Long Guiro","Claves","High Woodblock","Low Woodblock","Mute Cuica","Open Cuica","Mute Triangle","Open Triangle","Shaker","Jingle Bell","Belltree","Castanets","Mute Surdo","Open Surdo"],
-  "room":[,,,,,,,,,,,,,,,,,,,,,,,,,,,"High Q","Slap","Scratch Push","Scratch Pull","Sticks","Square Click","Metronome Click","Metronome Bell","Kick Drum 2","Kick Drum 1","Side Stick","Snare Drum 1","Hand Clap","Snare Drum 2","Room Lo Tom 2","Closed Hi-Hat","Room Lo Tom 1","Pedal Hi-Hat","Room Mid Tom 2","Open Hi-Hat","Room Mid Tom 1","Room Hi Tom 2","Crash Cymbal","Room Hi Tom 1","Ride Cymbal","Chinese Cymbal","Ride Bell","Tambourine","Splash Cymbal","Cowbell","Crash Cymbal 2","Vibra-Slap","Ride Cymbal 2","High Bongo","Low Bongo","Mute Hi Conga","Open Hi Conga","Low Conga","High Timbale","Low Timbale","High Agogo","Low Agogo","Cabasa","Maracas","Short Hi Whistle","Long Lo Whistle","Short Guiro","Long Guiro","Claves","High Woodblock","Low Woodblock","Mute Cuica","Open Cuica","Mute Triangle","Open Triangle","Shaker","Jingle Bell","Belltree","Castanets","Mute Surdo","Open Surdo"],
-  "power":[,,,,,,,,,,,,,,,,,,,,,,,,,,,"High Q","Slap","Scratch Push","Scratch Pull","Sticks","Square Click","Metronome Click","Metronome Bell","Kick Drum 2","Mondo Kick","Side Stick","Gated SD","Hand Clap","Snare Drum 2","Room Lo Tom 2","Closed Hi-Hat","Room Lo Tom 1","Pedal Hi-Hat","Room Mid Tom 2","Open Hi-Hat","Room Mid Tom 1","Room Hi Tom 2","Crash Cymbal","Room Hi Tom 1","Ride Cymbal","Chinese Cymbal","Ride Bell","Tambourine","Splash Cymbal","Cowbell","Crash Cymbal 2","Vibra-Slap","Ride Cymbal 2","High Bongo","Low Bongo","Mute Hi Conga","Open Hi Conga","Low Conga","High Timbale","Low Timbale","High Agogo","Low Agogo","Cabasa","Maracas","Short Hi Whistle","Long Lo Whistle","Short Guiro","Long Guiro","Claves","High Woodblock","Low Woodblock","Mute Cuica","Open Cuica","Mute Triangle","Open Triangle","Shaker","Jingle Bell","Belltree","Castanets","Mute Surdo","Open Surdo"],
-  "electric":[,,,,,,,,,,,,,,,,,,,,,,,,,,,"High Q","Slap","Scratch Push","Scratch Pull","Sticks","Square Click","Metronome Click","Metronome Bell","Kick Drum 2","Elec BD","Side Stick","Elec SD","Hand Clap","Gated SD","Elec Lo Tom 2","Closed Hi-Hat","Elec Lo Tom 1","Pedal Hi-Hat","Elec Mid Tom 2","Open Hi-Hat","Elec Mid Tom 1","Elec Hi Tom 2","Crash Cymbal","Elec Hi Tom 1","Ride Cymbal","Reverse Cymbal","Ride Bell","Tambourine","Splash Cymbal","Cowbell","Crash Cymbal 2","Vibra-Slap","Ride Cymbal 2","High Bongo","Low Bongo","Mute Hi Conga","Open Hi Conga","Low Conga","High Timbale","Low Timbale","High Agogo","Low Agogo","Cabasa","Maracas","Short Hi Whistle","Long Lo Whistle","Short Guiro","Long Guiro","Claves","High Woodblock","Low Woodblock","Mute Cuica","Open Cuica","Mute Triangle","Open Triangle","Shaker","Jingle Bell","Belltree","Castanets","Mute Surdo","Open Surdo"],
-  "808":[,,,,,,,,,,,,,,,,,,,,,,,,,,,"High Q","Slap","Scratch Push","Scratch Pull","Sticks","Square Click","Metronome Click","Metronome Bell","Kick Drum 2","808 Bass Drum","808 Rim Shot","808 Snare Drum","Hand Clap","Snare Drum 2","808 Low Tom 2","808 Closed Hi-Hat","808 Low Tom 1","808 Closed Hi-Hat","808 Mid Tom 2","808 Closed Hi-Hat","808 Mid Tom 1","808 High Tom 2","808 Cymbal","808 High Tom 1","Ride Cymbal","Reverse Cymbal","Ride Bell","Tambourine","Splash Cymbal","808 Cowbell","Crash Cymbal 2","Vibra-Slap","Ride Cymbal 2","High Bongo","Low Bongo","808 High Conga","808 Mid Conga","808 Low Conga","High Timbale","Low Timbale","High Agogo","Low Agogo","Cabasa","808 Maracas","Short Hi Whistle","Long Lo Whistle","Short Guiro","Long Guiro","808 Claves","High Woodblock","Low Woodblock","Mute Cuica","Open Cuica","Mute Triangle","Open Triangle","Shaker","Jingle Bell","Belltree","Castanets","Mute Surdo","Open Surdo"],
-  "jazz":[,,,,,,,,,,,,,,,,,,,,,,,,,,,"High Q","Slap","Scratch Push","Scratch Pull","Sticks","Square Click","Metronome Click","Metronome Bell","Jazz BD 2","Jazz BD 1","Side Stick","Snare Drum 1","Hand Clap","Snare Drum 2","Low Tom 2","Closed Hi-Hat","Low Tom 1","Pedal Hi-Hat","Mid Tom 2","Open Hi-Hat","Mid Tom 1","High Tom 2","Crash Cymbal","High Tom 1","Ride Cymbal","Chinese Cymbal","Ride Bell","Tambourine","Splash Cymbal","Cowbell","Crash Cymbal 2","Vibra-Slap","Ride Cymbal 2","High Bongo","Low Bongo","Mute Hi Conga","Open Hi Conga","Low Conga","High Timbale","Low Timbale","High Agogo","Low Agogo","Cabasa","Maracas","Short Hi Whistle","Long Lo Whistle","Short Guiro","Long Guiro","Claves","High Woodblock","Low Woodblock","Mute Cuica","Open Cuica","Mute Triangle","Open Triangle","Shaker","Jingle Bell","Belltree","Castanets","Mute Surdo","Open Surdo","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-  "brush":[,,,,,,,,,,,,,,,,,,,,,,,,,,,"High Q","Slap","Scratch Push","Scratch Pull","Sticks","Square Click","Metronome Click","Metronome Bell","Jazz BD 2","Jazz BD 1","Side Stick","Brush Tap","Brush Slap","Brush Swirl","Low Tom 2","Closed Hi-Hat","Low Tom 1","Pedal Hi-Hat","Mid Tom 2","Open Hi-Hat","Mid Tom 1","High Tom 2","Crash Cymbal","High Tom 1","Ride Cymbal","Chinese Cymbal","Ride Bell","Tambourine","Splash Cymbal","Cowbell","Crash Cymbal 2","Vibra-Slap","Ride Cymbal 2","High Bongo","Low Bongo","Mute Hi Conga","Open Hi Conga","Low Conga","High Timbale","Low Timbale","High Agogo","Low Agogo","Cabasa","Maracas","Short Hi Whistle","Long Lo Whistle","Short Guiro","Long Guiro","Claves","High Woodblock","Low Woodblock","Mute Cuica","Open Cuica","Mute Triangle","Open Triangle","Shaker","Jingle Bell","Belltree","Castanets","Mute Surdo","Open Surdo","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-  "orchestra":[,,,,,,,,,,,,,,,,,,,,,,,,,,,"Closed Hi-Hat","Pedal Hi-Hat","Open Hi-Hat","Ride Cymbal","Sticks","Square Click","Metronome Click","Metronome Bell","Concert BD 2","Concert BD 1","Side Stick","Concert SD","Castanets","Concert SD","Tympani F","Tympani F#","Tympani G","Tympani G#","Tympani A","Tympani A#","Tympani B","Tympani C","Tympani C#","Tympani D","Tympani D#","Tympani E","Tympani F","Tambourine","Splash Cymbal","Cowbell","Concert Cymbal 2","Vibra-Slap","Concert Cymbal 1","High Bongo","Low Bongo","Mute Hi Conga","Open Hi Conga","Low Conga","High Timbale","Low Timbale","High Agogo","Low Agogo","Cabasa","Maracas","Short Hi Whistle","Long Lo Whistle","Short Guiro","Long Guiro","Claves","High Woodblock","Low Woodblock","Mute Cuica","Open Cuica","Mute Triangle","Open Triangle","Shaker","Jingle Bell","Belltree","Castanets","Mute Surdo","Open Surdo","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-  "fx":[,,,,,,,,,,,,,,,,,,,,,,,,,,,"-","-","-","-","-","-","-","-","-","-","-","-","High Q","Slap","Scratch Push","Scratch Pull","Sticks","Square Click","Metronome Click","Metronome Bell","Guitar Fret Noise","Guitar Cut Noise Up","Guitar Cut Noise Down","Double Bass String Slap","Flute Key Click","Laughing","Screaming","Punch","Heartbeat","Footsteps 1","Footsteps 2","Applause","Door Creaking","Door Closing","Scratch","Wind Chimes","Car Engine","Car Brakes","Car Passing","Car Crash","Siren","Train","Jet Plane","Helicopter","Starship","Gun Shot","Machine Gun","Laser Gun","Explosion","Dog Bark","Horse Gallop","Birds Tweet","Rain","Thunder","Wind","Seashore","Stream","Bubble","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-  "64":[,,,,,,,,,,,,,,,,,,,,,,,,,,,"-","-","-","-","-","-","-","-","Acoustic Bass Drum","Acoustic Bass Drum","Rim Shot","Acoustic Snare Drum","Hand Clap","Electronic Snare Drum","Acoustic Low Tom","Closed Hi-Hat","Acoustic Low Tom","Open Hi-Hat 1","Acoustic Mid Tom","Open Hi-Hat 2","Acoustic Mid Tom","Acoustic Hi Tom","Crash Cymbal","Acoustic Hi Tom","Ride Cymbal","-","-","Tambourine","-","Cowbell","-","-","-","High Bongo","Low Bongo","Mute Hi Conga","High Conga","Low Conga","High Timbale","Low Timbale","High Agogo","Low Agogo","Cabasa","Maracas","Short Whistle","Long Whistle","Quijada","-","Claves","Laughing","Screaming","Punch","Heartbeat","Footsteps 1","Footsteps 2","Applause","Door Creaking","Door Closing","Scratch","Wind Chimes","Car Engine","Car Brakes","Car Passing","Car Crash","Siren","Train","Jet Plane","Helicopter","Starship","Gun Shot","Machine Gun","Laser Gun","Explosion","Dog Bark","Horse Gallop","Birds Tweet","Rain","Thunder","Wind","Seashore","Stream","Bubble"],
-  "32":[,,,,,,,,,,,,,,,,,,,,,,,,,,,"-","-","-","-","-","-","-","-","Acoustic Bass Drum","Acoustic Bass Drum","Rim Shot","Acoustic Snare Drum","Hand Clap","Electronic Snare Drum","Acoustic Low Tom","Closed Hi-Hat","Acoustic Low Tom","Open Hi-Hat 1","Acoustic Mid Tom","Open Hi-Hat 2","Acoustic Mid Tom","Acoustic Hi Tom","Crash Cymbal","Acoustic Hi Tom","Ride Cymbal","-","-","Tambourine","-","Cowbell","-","-","-","High Bongo","Low Bongo","Mute Hi Conga","High Conga","Low Conga","High Timbale","Low Timbale","High Agogo","Low Agogo","Cabasa","Maracas","Short Whistle","Long Whistle","Quijada","-","Claves","Laughing","Screaming","Punch","Heartbeat","Footsteps 1","Footsteps 2","Applause","Door Creaking","Door Closing","Scratch","Wind Chimes","Car Engine","Car Brakes","Car Passing","Car Crash","Siren","Train","Jet Plane","Helicopter","Starship","Gun Shot","Machine Gun","Laser Gun","Explosion","Dog Bark","Horse Gallop","Birds Tweet","Rain","Thunder","Wind","Seashore","Stream","Bubble"],
+  "standard": [, , , , , , , , , , , , , , , , , , , , , , , , , , , "High Q", "Slap", "Scratch Push", "Scratch Pull", "Sticks", "Square Click", "Metronome Click", "Metronome Bell", "Kick Drum 2", "Kick Drum 1", "Side Stick", "Snare Drum 1", "Hand Clap", "Snare Drum 2", "Low Tom 2", "Closed Hi-Hat", "Low Tom 1", "Pedal Hi-Hat", "Mid Tom 2", "Open Hi-Hat", "Mid Tom 1", "High Tom 2", "Crash Cymbal", "High Tom 1", "Ride Cymbal", "Chinese Cymbal", "Ride Bell", "Tambourine", "Splash Cymbal", "Cowbell", "Crash Cymbal 2", "Vibra-Slap", "Ride Cymbal 2", "High Bongo", "Low Bongo", "Mute Hi Conga", "Open Hi Conga", "Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo", "Cabasa", "Maracas", "Short Hi Whistle", "Long Lo Whistle", "Short Guiro", "Long Guiro", "Claves", "High Woodblock", "Low Woodblock", "Mute Cuica", "Open Cuica", "Mute Triangle", "Open Triangle", "Shaker", "Jingle Bell", "Belltree", "Castanets", "Mute Surdo", "Open Surdo"],
+  "room": [, , , , , , , , , , , , , , , , , , , , , , , , , , , "High Q", "Slap", "Scratch Push", "Scratch Pull", "Sticks", "Square Click", "Metronome Click", "Metronome Bell", "Kick Drum 2", "Kick Drum 1", "Side Stick", "Snare Drum 1", "Hand Clap", "Snare Drum 2", "Room Lo Tom 2", "Closed Hi-Hat", "Room Lo Tom 1", "Pedal Hi-Hat", "Room Mid Tom 2", "Open Hi-Hat", "Room Mid Tom 1", "Room Hi Tom 2", "Crash Cymbal", "Room Hi Tom 1", "Ride Cymbal", "Chinese Cymbal", "Ride Bell", "Tambourine", "Splash Cymbal", "Cowbell", "Crash Cymbal 2", "Vibra-Slap", "Ride Cymbal 2", "High Bongo", "Low Bongo", "Mute Hi Conga", "Open Hi Conga", "Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo", "Cabasa", "Maracas", "Short Hi Whistle", "Long Lo Whistle", "Short Guiro", "Long Guiro", "Claves", "High Woodblock", "Low Woodblock", "Mute Cuica", "Open Cuica", "Mute Triangle", "Open Triangle", "Shaker", "Jingle Bell", "Belltree", "Castanets", "Mute Surdo", "Open Surdo"],
+  "power": [, , , , , , , , , , , , , , , , , , , , , , , , , , , "High Q", "Slap", "Scratch Push", "Scratch Pull", "Sticks", "Square Click", "Metronome Click", "Metronome Bell", "Kick Drum 2", "Mondo Kick", "Side Stick", "Gated SD", "Hand Clap", "Snare Drum 2", "Room Lo Tom 2", "Closed Hi-Hat", "Room Lo Tom 1", "Pedal Hi-Hat", "Room Mid Tom 2", "Open Hi-Hat", "Room Mid Tom 1", "Room Hi Tom 2", "Crash Cymbal", "Room Hi Tom 1", "Ride Cymbal", "Chinese Cymbal", "Ride Bell", "Tambourine", "Splash Cymbal", "Cowbell", "Crash Cymbal 2", "Vibra-Slap", "Ride Cymbal 2", "High Bongo", "Low Bongo", "Mute Hi Conga", "Open Hi Conga", "Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo", "Cabasa", "Maracas", "Short Hi Whistle", "Long Lo Whistle", "Short Guiro", "Long Guiro", "Claves", "High Woodblock", "Low Woodblock", "Mute Cuica", "Open Cuica", "Mute Triangle", "Open Triangle", "Shaker", "Jingle Bell", "Belltree", "Castanets", "Mute Surdo", "Open Surdo"],
+  "electric": [, , , , , , , , , , , , , , , , , , , , , , , , , , , "High Q", "Slap", "Scratch Push", "Scratch Pull", "Sticks", "Square Click", "Metronome Click", "Metronome Bell", "Kick Drum 2", "Elec BD", "Side Stick", "Elec SD", "Hand Clap", "Gated SD", "Elec Lo Tom 2", "Closed Hi-Hat", "Elec Lo Tom 1", "Pedal Hi-Hat", "Elec Mid Tom 2", "Open Hi-Hat", "Elec Mid Tom 1", "Elec Hi Tom 2", "Crash Cymbal", "Elec Hi Tom 1", "Ride Cymbal", "Reverse Cymbal", "Ride Bell", "Tambourine", "Splash Cymbal", "Cowbell", "Crash Cymbal 2", "Vibra-Slap", "Ride Cymbal 2", "High Bongo", "Low Bongo", "Mute Hi Conga", "Open Hi Conga", "Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo", "Cabasa", "Maracas", "Short Hi Whistle", "Long Lo Whistle", "Short Guiro", "Long Guiro", "Claves", "High Woodblock", "Low Woodblock", "Mute Cuica", "Open Cuica", "Mute Triangle", "Open Triangle", "Shaker", "Jingle Bell", "Belltree", "Castanets", "Mute Surdo", "Open Surdo"],
+  "808": [, , , , , , , , , , , , , , , , , , , , , , , , , , , "High Q", "Slap", "Scratch Push", "Scratch Pull", "Sticks", "Square Click", "Metronome Click", "Metronome Bell", "Kick Drum 2", "808 Bass Drum", "808 Rim Shot", "808 Snare Drum", "Hand Clap", "Snare Drum 2", "808 Low Tom 2", "808 Closed Hi-Hat", "808 Low Tom 1", "808 Closed Hi-Hat", "808 Mid Tom 2", "808 Closed Hi-Hat", "808 Mid Tom 1", "808 High Tom 2", "808 Cymbal", "808 High Tom 1", "Ride Cymbal", "Reverse Cymbal", "Ride Bell", "Tambourine", "Splash Cymbal", "808 Cowbell", "Crash Cymbal 2", "Vibra-Slap", "Ride Cymbal 2", "High Bongo", "Low Bongo", "808 High Conga", "808 Mid Conga", "808 Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo", "Cabasa", "808 Maracas", "Short Hi Whistle", "Long Lo Whistle", "Short Guiro", "Long Guiro", "808 Claves", "High Woodblock", "Low Woodblock", "Mute Cuica", "Open Cuica", "Mute Triangle", "Open Triangle", "Shaker", "Jingle Bell", "Belltree", "Castanets", "Mute Surdo", "Open Surdo"],
+  "jazz": [, , , , , , , , , , , , , , , , , , , , , , , , , , , "High Q", "Slap", "Scratch Push", "Scratch Pull", "Sticks", "Square Click", "Metronome Click", "Metronome Bell", "Jazz BD 2", "Jazz BD 1", "Side Stick", "Snare Drum 1", "Hand Clap", "Snare Drum 2", "Low Tom 2", "Closed Hi-Hat", "Low Tom 1", "Pedal Hi-Hat", "Mid Tom 2", "Open Hi-Hat", "Mid Tom 1", "High Tom 2", "Crash Cymbal", "High Tom 1", "Ride Cymbal", "Chinese Cymbal", "Ride Bell", "Tambourine", "Splash Cymbal", "Cowbell", "Crash Cymbal 2", "Vibra-Slap", "Ride Cymbal 2", "High Bongo", "Low Bongo", "Mute Hi Conga", "Open Hi Conga", "Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo", "Cabasa", "Maracas", "Short Hi Whistle", "Long Lo Whistle", "Short Guiro", "Long Guiro", "Claves", "High Woodblock", "Low Woodblock", "Mute Cuica", "Open Cuica", "Mute Triangle", "Open Triangle", "Shaker", "Jingle Bell", "Belltree", "Castanets", "Mute Surdo", "Open Surdo", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+  "brush": [, , , , , , , , , , , , , , , , , , , , , , , , , , , "High Q", "Slap", "Scratch Push", "Scratch Pull", "Sticks", "Square Click", "Metronome Click", "Metronome Bell", "Jazz BD 2", "Jazz BD 1", "Side Stick", "Brush Tap", "Brush Slap", "Brush Swirl", "Low Tom 2", "Closed Hi-Hat", "Low Tom 1", "Pedal Hi-Hat", "Mid Tom 2", "Open Hi-Hat", "Mid Tom 1", "High Tom 2", "Crash Cymbal", "High Tom 1", "Ride Cymbal", "Chinese Cymbal", "Ride Bell", "Tambourine", "Splash Cymbal", "Cowbell", "Crash Cymbal 2", "Vibra-Slap", "Ride Cymbal 2", "High Bongo", "Low Bongo", "Mute Hi Conga", "Open Hi Conga", "Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo", "Cabasa", "Maracas", "Short Hi Whistle", "Long Lo Whistle", "Short Guiro", "Long Guiro", "Claves", "High Woodblock", "Low Woodblock", "Mute Cuica", "Open Cuica", "Mute Triangle", "Open Triangle", "Shaker", "Jingle Bell", "Belltree", "Castanets", "Mute Surdo", "Open Surdo", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+  "orchestra": [, , , , , , , , , , , , , , , , , , , , , , , , , , , "Closed Hi-Hat", "Pedal Hi-Hat", "Open Hi-Hat", "Ride Cymbal", "Sticks", "Square Click", "Metronome Click", "Metronome Bell", "Concert BD 2", "Concert BD 1", "Side Stick", "Concert SD", "Castanets", "Concert SD", "Tympani F", "Tympani F#", "Tympani G", "Tympani G#", "Tympani A", "Tympani A#", "Tympani B", "Tympani C", "Tympani C#", "Tympani D", "Tympani D#", "Tympani E", "Tympani F", "Tambourine", "Splash Cymbal", "Cowbell", "Concert Cymbal 2", "Vibra-Slap", "Concert Cymbal 1", "High Bongo", "Low Bongo", "Mute Hi Conga", "Open Hi Conga", "Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo", "Cabasa", "Maracas", "Short Hi Whistle", "Long Lo Whistle", "Short Guiro", "Long Guiro", "Claves", "High Woodblock", "Low Woodblock", "Mute Cuica", "Open Cuica", "Mute Triangle", "Open Triangle", "Shaker", "Jingle Bell", "Belltree", "Castanets", "Mute Surdo", "Open Surdo", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+  "fx": [, , , , , , , , , , , , , , , , , , , , , , , , , , , "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "High Q", "Slap", "Scratch Push", "Scratch Pull", "Sticks", "Square Click", "Metronome Click", "Metronome Bell", "Guitar Fret Noise", "Guitar Cut Noise Up", "Guitar Cut Noise Down", "Double Bass String Slap", "Flute Key Click", "Laughing", "Screaming", "Punch", "Heartbeat", "Footsteps 1", "Footsteps 2", "Applause", "Door Creaking", "Door Closing", "Scratch", "Wind Chimes", "Car Engine", "Car Brakes", "Car Passing", "Car Crash", "Siren", "Train", "Jet Plane", "Helicopter", "Starship", "Gun Shot", "Machine Gun", "Laser Gun", "Explosion", "Dog Bark", "Horse Gallop", "Birds Tweet", "Rain", "Thunder", "Wind", "Seashore", "Stream", "Bubble", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+  "64": [, , , , , , , , , , , , , , , , , , , , , , , , , , , "-", "-", "-", "-", "-", "-", "-", "-", "Acoustic Bass Drum", "Acoustic Bass Drum", "Rim Shot", "Acoustic Snare Drum", "Hand Clap", "Electronic Snare Drum", "Acoustic Low Tom", "Closed Hi-Hat", "Acoustic Low Tom", "Open Hi-Hat 1", "Acoustic Mid Tom", "Open Hi-Hat 2", "Acoustic Mid Tom", "Acoustic Hi Tom", "Crash Cymbal", "Acoustic Hi Tom", "Ride Cymbal", "-", "-", "Tambourine", "-", "Cowbell", "-", "-", "-", "High Bongo", "Low Bongo", "Mute Hi Conga", "High Conga", "Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo", "Cabasa", "Maracas", "Short Whistle", "Long Whistle", "Quijada", "-", "Claves", "Laughing", "Screaming", "Punch", "Heartbeat", "Footsteps 1", "Footsteps 2", "Applause", "Door Creaking", "Door Closing", "Scratch", "Wind Chimes", "Car Engine", "Car Brakes", "Car Passing", "Car Crash", "Siren", "Train", "Jet Plane", "Helicopter", "Starship", "Gun Shot", "Machine Gun", "Laser Gun", "Explosion", "Dog Bark", "Horse Gallop", "Birds Tweet", "Rain", "Thunder", "Wind", "Seashore", "Stream", "Bubble"],
+  "32": [, , , , , , , , , , , , , , , , , , , , , , , , , , , "-", "-", "-", "-", "-", "-", "-", "-", "Acoustic Bass Drum", "Acoustic Bass Drum", "Rim Shot", "Acoustic Snare Drum", "Hand Clap", "Electronic Snare Drum", "Acoustic Low Tom", "Closed Hi-Hat", "Acoustic Low Tom", "Open Hi-Hat 1", "Acoustic Mid Tom", "Open Hi-Hat 2", "Acoustic Mid Tom", "Acoustic Hi Tom", "Crash Cymbal", "Acoustic Hi Tom", "Ride Cymbal", "-", "-", "Tambourine", "-", "Cowbell", "-", "-", "-", "High Bongo", "Low Bongo", "Mute Hi Conga", "High Conga", "Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo", "Cabasa", "Maracas", "Short Whistle", "Long Whistle", "Quijada", "-", "Claves", "Laughing", "Screaming", "Punch", "Heartbeat", "Footsteps 1", "Footsteps 2", "Applause", "Door Creaking", "Door Closing", "Scratch", "Wind Chimes", "Car Engine", "Car Brakes", "Car Passing", "Car Crash", "Siren", "Train", "Jet Plane", "Helicopter", "Starship", "Gun Shot", "Machine Gun", "Laser Gun", "Explosion", "Dog Bark", "Horse Gallop", "Birds Tweet", "Rain", "Thunder", "Wind", "Seashore", "Stream", "Bubble"],
 };
 
 function loadHTMLcontent() {
@@ -404,10 +422,10 @@ function loadHTMLcontent() {
   settings = {
     tracks: []
   };
-  for(let i = currentMidi.tracks.length-1;i>=0; i--) {
+  for(let i = currentMidi.tracks.length - 1; i >= 0; i--) {
     // check if the instrument is empty
     if(currentMidi.tracks[i].notes.length == 0 ||
-      !currentMidi.tracks[i].instrument.percussion){
+      !currentMidi.tracks[i].instrument.percussion) {
       currentMidi.tracks.splice(i, 1);
     }
   }
@@ -420,50 +438,50 @@ function loadHTMLcontent() {
     }
     let usedDrumsTxt = '';
     let used = new Array(88).fill(false);
-    for(let j = currentMidi.tracks[i].notes.length - 1; j >= 0; j--){
+    for(let j = currentMidi.tracks[i].notes.length - 1; j >= 0; j--) {
       used[currentMidi.tracks[i].notes[j].midi] = true;
     }
     let kit = 'standard';
-    for(let k in drumNames){
-      if(currentMidi.tracks[i].instrument.name.indexOf(k) >= 0){
+    for(let k in drumNames) {
+      if(currentMidi.tracks[i].instrument.name.indexOf(k) >= 0) {
         kit = k;
       }
     }
-    usedDrumsTxt+=`<div style="line-height:0.75em">`;
-    for(let j = used.length - 1; j >= 0; j--){
-      if(used[j]){
-        usedDrumsTxt+=``+
-        /*
-        `<div style="display:flex"><div style="line-height:1em"><span style='display:inline-flex;width:0.5em'></span><input class="d2" type="checkbox" ${j==42||j==44||j==46?'checked':''} id="midi${i}-${j}-2">`+
-        ` <input class="d4" type="checkbox" ${j==51||j==59?'checked':''} id="midi${i}-${j}-4">`+
-        ` <input class="d6" type="checkbox" ${j==49||j==57?'checked':''} id="midi${i}-${j}-6"><br>`+
-        ` <input class="d1" type="checkbox" ${j==38||j==40?'checked':''} id="midi${i}-${j}-1">`+
-        ` <input class="d3" type="checkbox" ${j==48||j==50?'checked':''} id="midi${i}-${j}-3">`+
-        ` <input class="d5" type="checkbox" ${j==45||j==47?'checked':''} id="midi${i}-${j}-5">`+
-        ` <input class="d7" type="checkbox" ${j==41||j==43?'checked':''} id="midi${i}-${j}-7"></div><div style="height:2em;padding-top:0.25em">&nbsp;`+
-        `<input class="d8" type="checkbox" ${j==35||j==36?'checked':''} id="midi${i}-${j}-8"> `+
-        ` <input class="d9" type="checkbox" ${j==46?'checked':''} id="midi${i}-${j}-9">`+
-        ` ${drumNames[kit][j]?drumNames[kit][j]:`MIDI ${j}`}</div></div><br>`;
-        /*/
+    usedDrumsTxt += `<div style="line-height:0.75em">`;
+    for(let j = used.length - 1; j >= 0; j--) {
+      if(used[j]) {
+        usedDrumsTxt += `` +
+          /*
+          `<div style="display:flex"><div style="line-height:1em"><span style='display:inline-flex;width:0.5em'></span><input class="d2" type="checkbox" ${j==42||j==44||j==46?'checked':''} id="midi${i}-${j}-2">`+
+          ` <input class="d4" type="checkbox" ${j==51||j==59?'checked':''} id="midi${i}-${j}-4">`+
+          ` <input class="d6" type="checkbox" ${j==49||j==57?'checked':''} id="midi${i}-${j}-6"><br>`+
+          ` <input class="d1" type="checkbox" ${j==38||j==40?'checked':''} id="midi${i}-${j}-1">`+
+          ` <input class="d3" type="checkbox" ${j==48||j==50?'checked':''} id="midi${i}-${j}-3">`+
+          ` <input class="d5" type="checkbox" ${j==45||j==47?'checked':''} id="midi${i}-${j}-5">`+
+          ` <input class="d7" type="checkbox" ${j==41||j==43?'checked':''} id="midi${i}-${j}-7"></div><div style="height:2em;padding-top:0.25em">&nbsp;`+
+          `<input class="d8" type="checkbox" ${j==35||j==36?'checked':''} id="midi${i}-${j}-8"> `+
+          ` <input class="d9" type="checkbox" ${j==46?'checked':''} id="midi${i}-${j}-9">`+
+          ` ${drumNames[kit][j]?drumNames[kit][j]:`MIDI ${j}`}</div></div><br>`;
+          /*/
 
-        `<div style="display:flex"><div style="line-height:1.2em"><span style='display:inline-flex;width:0.6em'></span><div class="custom-control custom-checkbox"><input class="d2 custom-control-input" type="checkbox" ${j==42||j==46?'checked':''} id="midi${i}-${j}-2">`+
-        `<label class="d1 custom-control-label" for="midi${i}-${j}-2"></label></div><div class="custom-control custom-checkbox"> <input class="d4 custom-control-input" type="checkbox" ${j==51||j==52||j==53||j==55||j==59||j==80||j==81?'checked':''} id="midi${i}-${j}-4">`+
-        `<label class="d2 custom-control-label" for="midi${i}-${j}-4"></label></div><div class="custom-control custom-checkbox"> <input class="d6 custom-control-input" type="checkbox" ${j==49||j==57?'checked':''} id="midi${i}-${j}-6">`+
-        `<label class="d3 custom-control-label" for="midi${i}-${j}-6"></label></div><br><div class="custom-control custom-checkbox"> <input class="d1 custom-control-input" type="checkbox" ${j==37||j==38||j==40?'checked':''} id="midi${i}-${j}-1">`+
-        `<label class="d4 custom-control-label" for="midi${i}-${j}-1"></label></div><div class="custom-control custom-checkbox"> <input class="d3 custom-control-input" type="checkbox" ${j==48||j==50?'checked':''} id="midi${i}-${j}-3">`+
-        `<label class="d5 custom-control-label" for="midi${i}-${j}-3"></label></div><div class="custom-control custom-checkbox"> <input class="d5 custom-control-input" type="checkbox" ${j==45||j==47?'checked':''} id="midi${i}-${j}-5">`+
-        `<label class="d6 custom-control-label" for="midi${i}-${j}-5"></label></div><div class="custom-control custom-checkbox"> <input class="d7 custom-control-input" type="checkbox" ${j==41||j==43?'checked':''} id="midi${i}-${j}-7">`+
-        `<label class="d7 custom-control-label" for="midi${i}-${j}-7"></label></div></div><div style="height:2em;padding-top:0.6em">&nbsp;`+
-                                                                                `<div class="custom-control custom-checkbox"><input class="d8 custom-control-input" type="checkbox" ${j==35?'checked':''} id="midi${i}-${j}-8"> `+
-        `<label class="d8 custom-control-label" for="midi${i}-${j}-8"></label></div><div class="custom-control custom-checkbox"><input class="d11 custom-control-input" type="checkbox" ${j==36?'checked':''} id="midi${i}-${j}-11"> `+
-        `<label class="d11 custom-control-label" for="midi${i}-${j}-11"></label></div><div class="custom-control custom-checkbox"><input class="d9 custom-control-input" type="checkbox" id="midi${i}-${j}-9"> `+
-        `<label class="d9 custom-control-label" for="midi${i}-${j}-9"></label></div><div class="custom-control custom-checkbox"> <input class="d10 custom-control-input" type="checkbox" id="midi${i}-${j}-10">`+
-        `<label class="d10 custom-control-label" for="midi${i}-${j}-10"><span style="position:relative;top:0.35em">${drumNames[kit][j]?drumNames[kit][j]:`MIDI ${j}`}</span></label></div></div></div><hr>`;
+          `<div style="display:flex"><div style="line-height:1.2em"><span style='display:inline-flex;width:0.6em'></span><div class="custom-control custom-checkbox"><input class="d2 custom-control-input" type="checkbox" ${j==42||j==46?'checked':''} id="midi${i}-${j}-2">` +
+          `<label class="d1 custom-control-label" for="midi${i}-${j}-2"></label></div><div class="custom-control custom-checkbox"> <input class="d4 custom-control-input" type="checkbox" ${j==51||j==52||j==53||j==55||j==59||j==80||j==81?'checked':''} id="midi${i}-${j}-4">` +
+          `<label class="d2 custom-control-label" for="midi${i}-${j}-4"></label></div><div class="custom-control custom-checkbox"> <input class="d6 custom-control-input" type="checkbox" ${j==49||j==57?'checked':''} id="midi${i}-${j}-6">` +
+          `<label class="d3 custom-control-label" for="midi${i}-${j}-6"></label></div><br><div class="custom-control custom-checkbox"> <input class="d1 custom-control-input" type="checkbox" ${j==37||j==38||j==40?'checked':''} id="midi${i}-${j}-1">` +
+          `<label class="d4 custom-control-label" for="midi${i}-${j}-1"></label></div><div class="custom-control custom-checkbox"> <input class="d3 custom-control-input" type="checkbox" ${j==48||j==50?'checked':''} id="midi${i}-${j}-3">` +
+          `<label class="d5 custom-control-label" for="midi${i}-${j}-3"></label></div><div class="custom-control custom-checkbox"> <input class="d5 custom-control-input" type="checkbox" ${j==45||j==47?'checked':''} id="midi${i}-${j}-5">` +
+          `<label class="d6 custom-control-label" for="midi${i}-${j}-5"></label></div><div class="custom-control custom-checkbox"> <input class="d7 custom-control-input" type="checkbox" ${j==41||j==43?'checked':''} id="midi${i}-${j}-7">` +
+          `<label class="d7 custom-control-label" for="midi${i}-${j}-7"></label></div></div><div style="height:2em;padding-top:0.6em">&nbsp;` +
+          `<div class="custom-control custom-checkbox"><input class="d8 custom-control-input" type="checkbox" ${j==35?'checked':''} id="midi${i}-${j}-8"> ` +
+          `<label class="d8 custom-control-label" for="midi${i}-${j}-8"></label></div><div class="custom-control custom-checkbox"><input class="d11 custom-control-input" type="checkbox" ${j==36?'checked':''} id="midi${i}-${j}-11"> ` +
+          `<label class="d11 custom-control-label" for="midi${i}-${j}-11"></label></div><div class="custom-control custom-checkbox"><input class="d9 custom-control-input" type="checkbox" id="midi${i}-${j}-9"> ` +
+          `<label class="d9 custom-control-label" for="midi${i}-${j}-9"></label></div><div class="custom-control custom-checkbox"> <input class="d10 custom-control-input" type="checkbox" id="midi${i}-${j}-10">` +
+          `<label class="d10 custom-control-label" for="midi${i}-${j}-10"><span style="position:relative;top:0.35em">${drumNames[kit][j]?drumNames[kit][j]:`MIDI ${j}`}</span></label></div></div></div><hr>`;
 
         //*/
       }
     }
-    usedDrumsTxt+=`</div>`;
+    usedDrumsTxt += `</div>`;
     htmlContent.innerHTML += `<div class="custom-control custom-checkbox">
       <input type="checkbox" ` + (settings.tracks[i] ? 'checked="true"' : '') + ` class="custom-control-input" onClick="toggleTrack(` + i + `)" id='customCheck` + i + `'>
       <label class="custom-control-label" for="customCheck` + i + `">` + currentMidi.tracks[i].name + ' - ' + currentMidi.tracks[i].instrument.family + ': ' + currentMidi.tracks[i].instrument.name + `</label><br>
@@ -497,24 +515,28 @@ function setup() {
 }
 
 function drawNote(cn, y) {
-  if(cn%100 === 0 || cn%100>9){return;}
-  let type='';
+  if(cn % 100 === 0 || cn % 100 > 9) {
+    return;
+  }
+  let type = '';
   let cymbal = false;
-  if(cn%100 === 2 || cn%100 === 4 || cn%100 === 6){
+  if(cn % 100 === 2 || cn % 100 === 4 || cn % 100 === 6) {
     cymbal = true;
   }
-  if(cn >= 10 && cn < 20 || cn >= 30){type = 'hopo';}
-  let note = (cn%100)/2>>0;
+  if(cn >= 10 && cn < 20 || cn >= 30) {
+    type = 'hopo';
+  }
+  let note = (cn % 100) / 2 >> 0;
 
   if(note < 0) {
     return;
   }
   noStroke();
 
-  colors[note%5].setAlpha(150);
-  fill(colors[note%5]);
-  colors[note%5].setAlpha(255);
-  fill(colors[note%5]);
+  colors[note % 5].setAlpha(150);
+  fill(colors[note % 5]);
+  colors[note % 5].setAlpha(255);
+  fill(colors[note % 5]);
   switch (type) {
     //case ('hopo'):
     //  strokeWeight(width / 32);
@@ -524,41 +546,38 @@ function drawNote(cn, y) {
     //  ellipse(note * width / 5 + width / 5, y, width / 16, width / 16);
     //  break;
     default:
-      if(cn%100 < 8){
+      if(cn % 100 < 8) {
         ellipse(note * width / 5 + width / 5, y, width / 8, width / 8);
         stroke(0);
         fill(255);
         strokeWeight(width / 96);
-        if(type === 'hopo'){
+        if(type === 'hopo') {
           strokeWeight(width / 192);
         }
-        if(cymbal){
+        if(cymbal) {
           ellipse(note * width / 5 + width / 5, y, width / 20, width / 20);
-        }
-        else{
+        } else {
           ellipse(note * width / 5 + width / 5, y, width / 11, width / 11);
-          if(type === 'hopo'){
-            fill(255,50);
+          if(type === 'hopo') {
+            fill(255, 50);
             noStroke();
             ellipse(note * width / 5 + width / 5, y, width / 8, width / 8);
           }
         }
-      }
-      else{
-        rect(0, y-2, width,4);
-        if(cn%100 > 8){
+      } else {
+        rect(0, y - 2, width, 4);
+        if(cn % 100 > 8) {
           fill(255);
-          rect(width/3, y-2, width/3,4);
+          rect(width / 3, y - 2, width / 3, 4);
         }
       }
   }
 
-  if(cymbal){
-    if(type=='hopo'){
+  if(cymbal) {
+    if(type == 'hopo') {
       fill(255, 150);
-    }
-    else{
-      fill(0,100);
+    } else {
+      fill(0, 100);
     }
     noStroke();
     arc(note * width / 5 + width / 5, y, width / 8, width / 8, Math.PI / 6, Math.PI * 5 / 6);
@@ -579,13 +598,19 @@ function findNotes(from, to) {
   let at = interval * 2;
   let pls = 2;
   while(interval >= 1 && pls && unChartedNotes[at][3] != from) {
-    if(interval == 1) { pls--; }
+    if(interval == 1) {
+      pls--;
+    }
     if(unChartedNotes[at][3] >= from) {
       at -= interval;
-      if(at < 0) { at = 0; }
+      if(at < 0) {
+        at = 0;
+      }
     } else {
       at += interval;
-      if(at > chartedNotes.length - 1) { at = chartedNotes.length - 1; }
+      if(at > chartedNotes.length - 1) {
+        at = chartedNotes.length - 1;
+      }
     }
     interval = Math.ceil(interval / 2);
   }
@@ -620,7 +645,9 @@ function unshiftNotes(from, track) {
 }
 
 function undoDeleted() {
-  if(deletedNotes.length < 1) { return }
+  if(deletedNotes.length < 1) {
+    return
+  }
   let data = deletedNotes.pop();
   currentMidi.tracks[data.unCharted[9]].notes.splice(data.unCharted[10], 0, data.track);
   unshiftNotes(data.note, data.unCharted[9]);
@@ -668,7 +695,9 @@ function delTop(from, to) {
   let lastTime = -1;
   while(note < chartedNotes.length && currentNote[3] < to) {
     if(currentNote[3] != lastTime && currentNotes.length > 0) {
-      currentNotes.sort((a, b) => { return b[0][8] - a[0][8] });
+      currentNotes.sort((a, b) => {
+        return b[0][8] - a[0][8]
+      });
       deleteNote(currentNotes[0][1]);
       currentNotes = [];
       note--;
@@ -679,7 +708,9 @@ function delTop(from, to) {
     currentNote = unChartedNotes[note];
   }
   if(currentNotes.length > 0) {
-    currentNotes.sort((a, b) => { return b[0][8] - a[0][8] });
+    currentNotes.sort((a, b) => {
+      return b[0][8] - a[0][8]
+    });
     deleteNote(currentNotes[0][1]);
   }
 }
@@ -695,7 +726,9 @@ function delBot(from, to) {
   let lastTime = -1;
   while(note < chartedNotes.length && currentNote[3] < to) {
     if(currentNote[3] != lastTime && currentNotes.length > 0) {
-      currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
+      currentNotes.sort((a, b) => {
+        return a[0][8] - b[0][8]
+      });
       deleteNote(currentNotes[0][1]);
       currentNotes = [];
       note--;
@@ -706,7 +739,9 @@ function delBot(from, to) {
     currentNote = unChartedNotes[note];
   }
   if(currentNotes.length > 0) {
-    currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
+    currentNotes.sort((a, b) => {
+      return a[0][8] - b[0][8]
+    });
     deleteNote(currentNotes[0][1]);
   }
 }
@@ -753,7 +788,9 @@ function stripLeft(from, to) {
   let lastTime = -1;
   while(note < chartedNotes.length && currentNote[3] < to) {
     if(currentNote[3] != lastTime && currentNotes.length > 0) {
-      currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
+      currentNotes.sort((a, b) => {
+        return a[0][8] - b[0][8]
+      });
       for(let i = 0; i < currentNotes.length - 1; i++) {
         deleteNote(currentNotes[i][1]);
         note--;
@@ -766,7 +803,9 @@ function stripLeft(from, to) {
     currentNote = unChartedNotes[note];
   }
   if(currentNotes.length > 0) {
-    currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
+    currentNotes.sort((a, b) => {
+      return a[0][8] - b[0][8]
+    });
     for(let i = 0; i < currentNotes.length - 1; i++) {
       deleteNote(currentNotes[i][1]);
       note--;
@@ -775,7 +814,7 @@ function stripLeft(from, to) {
 }
 
 function drawLines(note) {
-  if(MINIMAL){
+  if(MINIMAL) {
     return;
   }
   stroke(128);
@@ -792,17 +831,25 @@ function drawLines(note) {
   let currentTS = 0;
   let fromBPM = 0;
   let currentBPM = 0;
-  while(currentTS < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS].ticks <= fromTick) { currentTS++; }
+  while(currentTS < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS].ticks <= fromTick) {
+    currentTS++;
+  }
   currentTS--;
   ts = currentMidi.header.timeSignatures[currentTS] ? [currentMidi.header.timeSignatures[currentTS].timeSignature[0], currentMidi.header.timeSignatures[currentTS].timeSignature[1]] : [4, 4];
-  if(ts[0] <= 0) { ts[0] = 4; }
-  if(ts[1] <= 0) { ts[1] = 4; }
+  if(ts[0] <= 0) {
+    ts[0] = 4;
+  }
+  if(ts[1] <= 0) {
+    ts[1] = 4;
+  }
   while(currentBPM < currentMidi.header.tempos.length && currentMidi.header.tempos[currentBPM].ticks <= fromTick) {
     currentBPM++;
   }
   currentBPM--;
   bpm = currentMidi.header.tempos[currentBPM] ? currentMidi.header.tempos[currentBPM].bpm : 120;
-  if(bpm <= 0) { bpm = 1; }
+  if(bpm <= 0) {
+    bpm = 1;
+  }
   fromTime = currentMidi.header.tempos[currentBPM] ? currentMidi.header.tempos[currentBPM].time : 0;
 
   //while(fromTime <= from) {
@@ -815,28 +862,32 @@ function drawLines(note) {
 
   for(let y, i = fromTime; i < currentMidi.duration + 60 / bpm * 4 / ts[1];) {
     y = 0.9 * height - (i - preview.time) / preview.scale * height;
-    if(y < height){
-      if(beat == 0){
+    if(y < height) {
+      if(beat == 0) {
         stroke(255);
         line(0, y, width, y);
         stroke(128);
-      }
-      else{
+      } else {
         line(0, y, width, y);
       }
-      if(y < 0) { i = Infinity; continue;}
+      if(y < 0) {
+        i = Infinity;
+        continue;
+      }
     }
-    beat = (beat+1)%ts[0];
+    beat = (beat + 1) % ts[0];
 
     let beatsLeft = 1;
 
     while(currentBPM + 1 < currentMidi.header.tempos.length && currentMidi.header.tempos[currentBPM + 1].time <= i + beatsLeft * (60 / bpm * 4 / ts[1])) {
       currentBPM++;
-      beatsLeft -= (currentMidi.header.tempos[currentBPM].time-i) / (60 / bpm * 4 / ts[1]);
+      beatsLeft -= (currentMidi.header.tempos[currentBPM].time - i) / (60 / bpm * 4 / ts[1]);
       i = currentMidi.header.tempos[currentBPM].time;
 
       bpm = currentMidi.header.tempos[currentBPM] ? currentMidi.header.tempos[currentBPM].bpm : 120;
-      if(bpm <= 0) { bpm = 1; }
+      if(bpm <= 0) {
+        bpm = 1;
+      }
     }
 
     i += beatsLeft * (60 / bpm * 4 / ts[1]);
@@ -846,14 +897,18 @@ function drawLines(note) {
   for(let i = fromTime; i < currentMidi.duration; i += 60 / bpm * ts[0]) {
     y = 0.9 * height - (i - preview.time) / preview.scale * height;
     line(0, y, width, y);
-    if(y < 0) { i = Infinity; }
+    if(y < 0) {
+      i = Infinity;
+    }
 
     while(currentBPM + 1 < currentMidi.header.tempos.length && currentMidi.header.tempos[currentBPM + 1].time <= i) {
       currentBPM++;
       i = currentMidi.header.tempos[currentBPM].time;
     }
     bpm = currentMidi.header.tempos[currentBPM] ? currentMidi.header.tempos[currentBPM].bpm : 120;
-    if(bpm <= 0) { bpm = 1; }
+    if(bpm <= 0) {
+      bpm = 1;
+    }
   }
 }
 
@@ -910,20 +965,29 @@ function myDraw() {
     fill(50);
   }
   rect(0, height / 2, width, 2);
-  if(keyIsDown(BACKSPACE)) { delTop(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
-  if(keyIsDown(68)) { delBot(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
-  if(keyIsDown(DELETE)) { delAll(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
+  if(keyIsDown(BACKSPACE)) {
+    delTop(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+  }
+  if(keyIsDown(68)) {
+    delBot(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+  }
+  if(keyIsDown(DELETE)) {
+    delAll(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+  }
 
-  if(keyIsDown(LEFT_ARROW)) { stripLeft(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
+  if(keyIsDown(LEFT_ARROW)) {
+    stripLeft(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+  }
 
   let note = 0;
 
-  while(note < chartedNotes.length && unChartedNotes[note][3]-preview.time < -10){
+  while(note < chartedNotes.length && unChartedNotes[note][3] - preview.time < -10) {
     note++;
   }
 
   let currentNote = unChartedNotes[note];
-  let lines = false, Y;
+  let lines = false,
+    Y;
   if(unChartedNotes.length <= 0) {
     window.requestAnimationFrame(myDraw);
     return;
@@ -931,8 +995,8 @@ function myDraw() {
   while(note < chartedNotes.length && preview.time + preview.scale + 1 - currentNote[3] > 0) {
     currentNote = unChartedNotes[note];
     if(currentNote[3] - preview.time <= 0 && currentNote[3] - (preview.time - frameLength) > 0) {
-      if(currentNote[8]-26 > 0 && currentNote[8]-26 < 62 && chartedNotes[note]%100 !== 0 && chartedNotes[note]%100<10){
-        sound.play(currentNote[8]-26+'');
+      if(currentNote[8] - 26 > 0 && currentNote[8] - 26 < 62 && chartedNotes[note] % 100 !== 0 && chartedNotes[note] % 100 < 10) {
+        sound.play(currentNote[8] - 26 + '');
       }
       lastLen = (currentNote[6] < 0 || currentNote > 5) ? lastLen : currentNote[6];
       OS = (OS + 1) % 10;
@@ -952,7 +1016,9 @@ function myDraw() {
       noStroke();
       //test
       let myLastNote = note;
-      while(myLastNote > 0 && unChartedNotes[myLastNote][0] == currentNote[0]) { myLastNote--; }
+      while(myLastNote > 0 && unChartedNotes[myLastNote][0] == currentNote[0]) {
+        myLastNote--;
+      }
       let lastT = unChartedNotes[myLastNote][0];
       while(myLastNote > 0 && unChartedNotes[myLastNote][0] == lastT) {
         if(note > 0 && unChartedNotes[myLastNote][1] == currentNote[1] && chartedNotes[note] != chartedNotes[myLastNote]) {
@@ -966,7 +1032,7 @@ function myDraw() {
       }
       //end test
     }
-    if(currentNote[3]-preview.time > preview.scale){
+    if(currentNote[3] - preview.time > preview.scale) {
       note = chartedNotes.length;
     }
     note++;
@@ -1004,22 +1070,38 @@ function keyPressed() {
     paused = !paused;
   }
   if(keyCode === UP_ARROW) {
-    if(keyIsDown(BACKSPACE)) { delTop(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4) }
-    if(keyIsDown(68)) { delBot(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4) }
-    if(keyIsDown(DELETE)) { delAll(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4) }
+    if(keyIsDown(BACKSPACE)) {
+      delTop(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4)
+    }
+    if(keyIsDown(68)) {
+      delBot(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4)
+    }
+    if(keyIsDown(DELETE)) {
+      delAll(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4)
+    }
 
-    if(keyIsDown(LEFT_ARROW)) { stripLeft(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4) }
+    if(keyIsDown(LEFT_ARROW)) {
+      stripLeft(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4)
+    }
     preview.time += 0.2 * tv;
     frameLength = 0;
     lastFrameTime = Date.now();
     currentFrameTime = Date.now();
   }
   if(keyCode === DOWN_ARROW) {
-    if(keyIsDown(BACKSPACE)) { preview.time - 0.2 * tv + preview.scale * 0.4, delTop(preview.time + preview.scale * 0.4) }
-    if(keyIsDown(68)) { delBot(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
-    if(keyIsDown(DELETE)) { delBot(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
+    if(keyIsDown(BACKSPACE)) {
+      preview.time - 0.2 * tv + preview.scale * 0.4, delTop(preview.time + preview.scale * 0.4)
+    }
+    if(keyIsDown(68)) {
+      delBot(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+    }
+    if(keyIsDown(DELETE)) {
+      delBot(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+    }
 
-    if(keyIsDown(LEFT_ARROW)) { stripLeft(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
+    if(keyIsDown(LEFT_ARROW)) {
+      stripLeft(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+    }
     preview.time -= 0.2 * tv;
     frameLength = 0;
     lastFrameTime = Date.now();
@@ -1109,7 +1191,9 @@ drawNotesPreview.prototype.draw = function() {
     for(let i = 0; i < this.track.notes.length; i++) {
       if(!at && this.track.notes[i].time / currentMidi.duration * this.w < myTime) {
         this.at = i + 1;
-      } else { at = true; }
+      } else {
+        at = true;
+      }
       this.ctx.fillRect(this.track.notes[i].time / currentMidi.duration * this.w, this.h - this.track.notes[i].midi / 88 * this.h, 1, 1);
     }
   } else {
@@ -1121,7 +1205,7 @@ drawNotesPreview.prototype.draw = function() {
       this.ctx.fillRect(this.track.notes[i].time / currentMidi.duration * this.w, this.h - this.track.notes[i].midi / 88 * this.h, 1, 1);
     }
   }
-  if(MINIMAL){
+  if(MINIMAL) {
     return;
   }
   this.ctx.fillStyle = "#f008";

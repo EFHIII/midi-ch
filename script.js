@@ -47,7 +47,7 @@ function parseFile(file) {
     currentMidi.duration = midi.duration;
     currentMidi.durationTicks = midi.durationTicks;
     currentMidi.name = midi.name;
-    for(let temp in currentMidi.header.tempos){
+    for(let temp in currentMidi.header.tempos) {
       currentMidi.header.tempos[temp].time = midi.header.tempos[temp].time;
     }
     loadHTMLcontent();
@@ -76,9 +76,11 @@ let noteTolerance = 20;
 let noteMap;
 
 function renderNoteMap() {
-  if(!currentMidi) { return; }
+  if(!currentMidi) {
+    return;
+  }
   background(0);
-  if(MINIMAL){
+  if(MINIMAL) {
     noteMap = get(0, 0, 16, height);
     return;
   }
@@ -128,14 +130,20 @@ function mergable(a, b) {
       distinct.push(unChartedNotes[b[i]][1]);
     }
   }
-  if(distinct.length > frets + openNotes) { return false; }
+  if(distinct.length > frets + openNotes) {
+    return false;
+  }
   return true;
 };
 
 function getTempo(t) {
   let temp = 240;
   for(let i = 0; i < currentMidi.header.tempos.length; i++) {
-    if(currentMidi.header.tempos[i].time <= t) { temp = currentMidi.header.tempos[i].bpm; } else { i = Infinity; }
+    if(currentMidi.header.tempos[i].time <= t) {
+      temp = currentMidi.header.tempos[i].bpm;
+    } else {
+      i = Infinity;
+    }
   }
   return temp;
 }
@@ -145,11 +153,15 @@ function loadSettings() {
   minimumSustain = document.getElementById("minimumSustain").value * 1;
   ignoreGap = document.getElementById("ignoreGap").value * 1;
   maxBPS = document.getElementById("maxBPS").value * 1;
-  if(maxBPS <= 0) { maxBPS = Infinity; }
+  if(maxBPS <= 0) {
+    maxBPS = Infinity;
+  }
   document.getElementById("frets").value = Math.max(0, Math.min(5, document.getElementById("frets").value));
   frets = document.getElementById("frets").value * 1;
   stripSustain = document.getElementById("stripSustain").value * 1;
-  if(stripSustain < 0) { stripSustain = 0; }
+  if(stripSustain < 0) {
+    stripSustain = 0;
+  }
   maxNotes = document.getElementById("maxNotes").value * 1;
   if(maxNotes < 1) {
     maxNotes = 1;
@@ -159,7 +171,9 @@ function loadSettings() {
   }
   preview.scale = document.getElementById("previewScale").value * 1;
   preview.leadingSeconds = ((document.getElementById("leadingSeconds").value * 1) >> 0) * 2;
-  if(preview.scale <= 0) { preview.scale = 4000; }
+  if(preview.scale <= 0) {
+    preview.scale = 4000;
+  }
   openSkipGap = 1 / document.getElementById("openSkipGap").value * preview.ppq;
   openNotes = document.getElementById("openNotes").checked ? 1 : 0;
   extendedSustains = document.getElementById("extendedSustains").checked ? 1 : 0;
@@ -278,7 +292,9 @@ function loadSettings() {
       notes.sort((a, b) => b[0] - a[0]);
       for(let j = 0; j < notes.length; j++) {
         unChartedNotes.splice(notes[j][0], 1);
-        if(notes[j][0] <= i) { i--; }
+        if(notes[j][0] <= i) {
+          i--;
+        }
       }
     }
   }
@@ -456,7 +472,27 @@ function loadSettings() {
       let cTempo = getTempo(unChartedNotes[i][3] + unChartedNotes[i][6]) / 60;
       stripAmount = 1;
 
-      if(cTempo >= 16) { stripAmount = 1; } else if(cTempo >= 8) { stripAmount = 1 / 2; } else if(cTempo >= 5) { stripAmount = 1 / 4; } else if(cTempo >= 3) { stripAmount = 1 / 8; } else if(cTempo >= 2.5) { stripAmount = 1 / 12; } else if(cTempo >= 1.8) { stripAmount = 1 / 16; } else if(cTempo >= 0.8) { stripAmount = 1 / 32; } else if(cTempo >= 0.4) { stripAmount = 1 / 64; } else if(cTempo >= 0.2) { stripAmount = 1 / 128; } else if(cTempo >= 0.1) { stripAmount = 1 / 256; }
+      if(cTempo >= 16) {
+        stripAmount = 1;
+      } else if(cTempo >= 8) {
+        stripAmount = 1 / 2;
+      } else if(cTempo >= 5) {
+        stripAmount = 1 / 4;
+      } else if(cTempo >= 3) {
+        stripAmount = 1 / 8;
+      } else if(cTempo >= 2.5) {
+        stripAmount = 1 / 12;
+      } else if(cTempo >= 1.8) {
+        stripAmount = 1 / 16;
+      } else if(cTempo >= 0.8) {
+        stripAmount = 1 / 32;
+      } else if(cTempo >= 0.4) {
+        stripAmount = 1 / 64;
+      } else if(cTempo >= 0.2) {
+        stripAmount = 1 / 128;
+      } else if(cTempo >= 0.1) {
+        stripAmount = 1 / 256;
+      }
       /*
       if(cTempo>=8){stripAmount=1/2;}
       else if(cTempo>=4){stripAmount=1/4;}
@@ -483,14 +519,18 @@ function loadSettings() {
       if(strip) {
         duration -= stripAmount * preview.ppq * cTempo;
       }
-      if(duration < minimumSustain * preview.ppq * cTempo) { duration = 0; }
+      if(duration < minimumSustain * preview.ppq * cTempo) {
+        duration = 0;
+      }
       unChartedNotes[i][2] = duration;
     }
     notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = N ' + (openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes) + ' ' + Math.round(duration) + '\n';
 
     //events
     let myLastNote = i;
-    while(myLastNote > 0 && unChartedNotes[myLastNote][0] == unChartedNotes[i][0]) { myLastNote--; }
+    while(myLastNote > 0 && unChartedNotes[myLastNote][0] == unChartedNotes[i][0]) {
+      myLastNote--;
+    }
     let lastT = unChartedNotes[myLastNote][0];
     if(findInGroups(i)[1] === 0) {
       notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Section_Division\n';
@@ -512,7 +552,9 @@ function loadSettings() {
   }
 
   let zip = new JSZip();
-  zip.file("album.png", albumpng, { base64: true });
+  zip.file("album.png", albumpng, {
+    base64: true
+  });
   zip.file("song.ini", `[Song]
 name = ` + currentMidi.name + `
 artist = ` + (currentMidi.header.meta.filter(e => e.type.toLowerCase() === "artist").length ? currentMidi.header.meta.filter(e => e.type.toLowerCase() === "artist")[0].text : 'Unknown') + `
@@ -558,7 +600,9 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
 `);
 
   document.getElementById("blob").addEventListener("click", function() {
-    zip.generateAsync({ type: "blob" }).then(function(blob) { // 1) generate the zip file
+    zip.generateAsync({
+      type: "blob"
+    }).then(function(blob) { // 1) generate the zip file
       saveAs(blob, currentMidi.name + ".zip"); // 2) trigger the download
     }, function(err) {
       jQuery("#blob").text(err);
@@ -629,9 +673,9 @@ function loadHTMLcontent() {
   settings = {
     tracks: []
   };
-  for(let i = currentMidi.tracks.length-1;i>=0; i--) {
+  for(let i = currentMidi.tracks.length - 1; i >= 0; i--) {
     // check if the instrument is empty
-    if(currentMidi.tracks[i].notes.length == 0){
+    if(currentMidi.tracks[i].notes.length == 0) {
       currentMidi.tracks.splice(i, 1);
     }
   }
@@ -748,13 +792,19 @@ function findNotes(from, to) {
   let at = interval * 2;
   let pls = 2;
   while(interval >= 1 && pls && unChartedNotes[at][3] != from) {
-    if(interval == 1) { pls--; }
+    if(interval == 1) {
+      pls--;
+    }
     if(unChartedNotes[at][3] >= from) {
       at -= interval;
-      if(at < 0) { at = 0; }
+      if(at < 0) {
+        at = 0;
+      }
     } else {
       at += interval;
-      if(at > chartedNotes.length - 1) { at = chartedNotes.length - 1; }
+      if(at > chartedNotes.length - 1) {
+        at = chartedNotes.length - 1;
+      }
     }
     interval = Math.ceil(interval / 2);
   }
@@ -789,7 +839,9 @@ function unshiftNotes(from, track) {
 }
 
 function undoDeleted() {
-  if(deletedNotes.length < 1) { return }
+  if(deletedNotes.length < 1) {
+    return
+  }
   let data = deletedNotes.pop();
   currentMidi.tracks[data.unCharted[9]].notes.splice(data.unCharted[10], 0, data.track);
   unshiftNotes(data.note, data.unCharted[9]);
@@ -837,7 +889,9 @@ function delTop(from, to) {
   let lastTime = -1;
   while(note < chartedNotes.length && currentNote[3] < to) {
     if(currentNote[3] != lastTime && currentNotes.length > 0) {
-      currentNotes.sort((a, b) => { return b[0][8] - a[0][8] });
+      currentNotes.sort((a, b) => {
+        return b[0][8] - a[0][8]
+      });
       deleteNote(currentNotes[0][1]);
       currentNotes = [];
       note--;
@@ -848,7 +902,9 @@ function delTop(from, to) {
     currentNote = unChartedNotes[note];
   }
   if(currentNotes.length > 0) {
-    currentNotes.sort((a, b) => { return b[0][8] - a[0][8] });
+    currentNotes.sort((a, b) => {
+      return b[0][8] - a[0][8]
+    });
     deleteNote(currentNotes[0][1]);
   }
 }
@@ -864,7 +920,9 @@ function delBot(from, to) {
   let lastTime = -1;
   while(note < chartedNotes.length && currentNote[3] < to) {
     if(currentNote[3] != lastTime && currentNotes.length > 0) {
-      currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
+      currentNotes.sort((a, b) => {
+        return a[0][8] - b[0][8]
+      });
       deleteNote(currentNotes[0][1]);
       currentNotes = [];
       note--;
@@ -875,7 +933,9 @@ function delBot(from, to) {
     currentNote = unChartedNotes[note];
   }
   if(currentNotes.length > 0) {
-    currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
+    currentNotes.sort((a, b) => {
+      return a[0][8] - b[0][8]
+    });
     deleteNote(currentNotes[0][1]);
   }
 }
@@ -922,7 +982,9 @@ function pushRight(from, to) {
   let lastTime = -1;
   while(note < chartedNotes.length && currentNote[3] < to) {
     if(currentNote[3] != lastTime && currentNotes.length > 0) {
-      currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
+      currentNotes.sort((a, b) => {
+        return a[0][8] - b[0][8]
+      });
       for(let i = 0; i < currentNotes.length - 1; i++) {
         pushNoteRight(currentNotes[i][1], currentNotes[currentNotes.length - 1][1], i + 1);
       }
@@ -934,7 +996,9 @@ function pushRight(from, to) {
     currentNote = unChartedNotes[note];
   }
   if(currentNotes.length > 0) {
-    currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
+    currentNotes.sort((a, b) => {
+      return a[0][8] - b[0][8]
+    });
     for(let i = 0; i < currentNotes.length - 1; i++) {
       pushNoteRight(currentNotes[i][1], currentNotes[currentNotes.length - 1][1], i + 1);
     }
@@ -952,7 +1016,9 @@ function stripLeft(from, to) {
   let lastTime = -1;
   while(note < chartedNotes.length && currentNote[3] < to) {
     if(currentNote[3] != lastTime && currentNotes.length > 0) {
-      currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
+      currentNotes.sort((a, b) => {
+        return a[0][8] - b[0][8]
+      });
       for(let i = 0; i < currentNotes.length - 1; i++) {
         deleteNote(currentNotes[i][1]);
         note--;
@@ -965,7 +1031,9 @@ function stripLeft(from, to) {
     currentNote = unChartedNotes[note];
   }
   if(currentNotes.length > 0) {
-    currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
+    currentNotes.sort((a, b) => {
+      return a[0][8] - b[0][8]
+    });
     for(let i = 0; i < currentNotes.length - 1; i++) {
       deleteNote(currentNotes[i][1]);
       note--;
@@ -974,7 +1042,7 @@ function stripLeft(from, to) {
 }
 
 function drawLines(note) {
-  if(MINIMAL){
+  if(MINIMAL) {
     return;
   }
   stroke(128);
@@ -991,17 +1059,25 @@ function drawLines(note) {
   let currentTS = 0;
   let fromBPM = 0;
   let currentBPM = 0;
-  while(currentTS < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS].ticks <= fromTick) { currentTS++; }
+  while(currentTS < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS].ticks <= fromTick) {
+    currentTS++;
+  }
   currentTS--;
   ts = currentMidi.header.timeSignatures[currentTS] ? [currentMidi.header.timeSignatures[currentTS].timeSignature[0], currentMidi.header.timeSignatures[currentTS].timeSignature[1]] : [4, 4];
-  if(ts[0] <= 0) { ts[0] = 4; }
-  if(ts[1] <= 0) { ts[1] = 4; }
+  if(ts[0] <= 0) {
+    ts[0] = 4;
+  }
+  if(ts[1] <= 0) {
+    ts[1] = 4;
+  }
   while(currentBPM < currentMidi.header.tempos.length && currentMidi.header.tempos[currentBPM].ticks <= fromTick) {
     currentBPM++;
   }
   currentBPM--;
   bpm = currentMidi.header.tempos[currentBPM] ? currentMidi.header.tempos[currentBPM].bpm : 120;
-  if(bpm <= 0) { bpm = 1; }
+  if(bpm <= 0) {
+    bpm = 1;
+  }
   fromTime = currentMidi.header.tempos[currentBPM] ? currentMidi.header.tempos[currentBPM].time : 0;
 
   //while(fromTime <= from) {
@@ -1012,38 +1088,48 @@ function drawLines(note) {
 
   let beat = 0;
 
-  for(let y, i = fromTime; i < currentMidi.duration + 60 / bpm * (4/ts[1]);) {
+  for(let y, i = fromTime; i < currentMidi.duration + 60 / bpm * (4 / ts[1]);) {
     y = 0.9 * height - (i - preview.time) / preview.scale * height;
-    if(y < height){
-      if(beat == 0){
+    if(y < height) {
+      if(beat == 0) {
         stroke(255);
         line(0, y, width, y);
         stroke(128);
-      }
-      else{
+      } else {
         line(0, y, width, y);
       }
-      if(y < 0) { i = Infinity; continue;}
+      if(y < 0) {
+        i = Infinity;
+        continue;
+      }
     }
-    beat = (beat+1)%ts[0];
+    beat = (beat + 1) % ts[0];
 
     let beatsLeft = 1;
 
-    while(currentBPM + 1 < currentMidi.header.tempos.length && currentMidi.header.tempos[currentBPM + 1].time <= i + beatsLeft*(60 / bpm * (4/ts[1]))) {
+    while(currentBPM + 1 < currentMidi.header.tempos.length && currentMidi.header.tempos[currentBPM + 1].time <= i + beatsLeft * (60 / bpm * (4 / ts[1]))) {
       currentBPM++;
-      beatsLeft -= (currentMidi.header.tempos[currentBPM].time-i) / (60 / bpm * (4/ts[1]));
+      beatsLeft -= (currentMidi.header.tempos[currentBPM].time - i) / (60 / bpm * (4 / ts[1]));
       i = currentMidi.header.tempos[currentBPM].time;
 
       bpm = currentMidi.header.tempos[currentBPM].bpm;
-      if(bpm <= 0) { bpm = 1; }
+      if(bpm <= 0) {
+        bpm = 1;
+      }
     }
 
-    i += beatsLeft*(60 / bpm * (4/ts[1]));
+    i += beatsLeft * (60 / bpm * (4 / ts[1]));
 
-    while(currentTS + 1 < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS + 1].time <= i) { currentTS++; }
+    while(currentTS + 1 < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS + 1].time <= i) {
+      currentTS++;
+    }
     ts = currentMidi.header.timeSignatures[currentTS] ? [currentMidi.header.timeSignatures[currentTS].timeSignature[0], currentMidi.header.timeSignatures[currentTS].timeSignature[1]] : [4, 4];
-    if(ts[0] <= 0) { ts[0] = 4; }
-    if(ts[1] <= 0) { ts[1] = 4; }
+    if(ts[0] <= 0) {
+      ts[0] = 4;
+    }
+    if(ts[1] <= 0) {
+      ts[1] = 4;
+    }
   }
 }
 
@@ -1100,21 +1186,31 @@ function myDraw() {
     fill(50);
   }
   rect(0, height / 2, width, 2);
-  if(keyIsDown(BACKSPACE)) { delTop(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
-  if(keyIsDown(68)) { delBot(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
-  if(keyIsDown(DELETE)) { delAll(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
+  if(keyIsDown(BACKSPACE)) {
+    delTop(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+  }
+  if(keyIsDown(68)) {
+    delBot(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+  }
+  if(keyIsDown(DELETE)) {
+    delAll(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+  }
 
-  if(keyIsDown(RIGHT_ARROW)) { pushRight(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
+  if(keyIsDown(RIGHT_ARROW)) {
+    pushRight(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+  }
 
-  if(keyIsDown(LEFT_ARROW)) { stripLeft(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
+  if(keyIsDown(LEFT_ARROW)) {
+    stripLeft(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+  }
 
   let note = 0;
-  while(note < chartedNotes.length && unChartedNotes[note][3]-preview.time < -10){
+  while(note < chartedNotes.length && unChartedNotes[note][3] - preview.time < -10) {
     note++;
   }
 
   let currentNote = unChartedNotes[note];
-  let lines = false, Y, sus;
+  let Y, sus;
   if(unChartedNotes.length <= 0) {
     window.requestAnimationFrame(myDraw);
     return;
@@ -1141,7 +1237,9 @@ function myDraw() {
       }
       //test
       let myLastNote = note;
-      while(myLastNote > 0 && unChartedNotes[myLastNote][0] == currentNote[0]) { myLastNote--; }
+      while(myLastNote > 0 && unChartedNotes[myLastNote][0] == currentNote[0]) {
+        myLastNote--;
+      }
       let lastT = unChartedNotes[myLastNote][0];
       while(myLastNote > 0 && unChartedNotes[myLastNote][0] == lastT) {
         if(note > 0 && unChartedNotes[myLastNote][1] == currentNote[1] && chartedNotes[note] != chartedNotes[myLastNote]) {
@@ -1160,7 +1258,7 @@ function myDraw() {
         drawSustain(chartedNotes[note] - openNotes, Y, '', sus / preview.scale * height);
       }
     }
-    if(currentNote[3]-preview.time > preview.scale){
+    if(currentNote[3] - preview.time > preview.scale) {
       note = chartedNotes.length;
     }
     note++;
@@ -1199,24 +1297,44 @@ function keyPressed() {
     paused = !paused;
   }
   if(keyCode === UP_ARROW) {
-    if(keyIsDown(BACKSPACE)) { delTop(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4) }
-    if(keyIsDown(68)) { delBot(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4) }
-    if(keyIsDown(DELETE)) { delAll(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4) }
+    if(keyIsDown(BACKSPACE)) {
+      delTop(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4)
+    }
+    if(keyIsDown(68)) {
+      delBot(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4)
+    }
+    if(keyIsDown(DELETE)) {
+      delAll(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4)
+    }
 
-    if(keyIsDown(RIGHT_ARROW)) { pushRight(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4) }
-    if(keyIsDown(LEFT_ARROW)) { stripLeft(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4) }
+    if(keyIsDown(RIGHT_ARROW)) {
+      pushRight(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4)
+    }
+    if(keyIsDown(LEFT_ARROW)) {
+      stripLeft(preview.time + preview.scale * 0.4, preview.time + 0.2 * tv + preview.scale * 0.4)
+    }
     preview.time += 0.2 * tv;
     frameLength = 0;
     lastFrameTime = Date.now();
     currentFrameTime = Date.now();
   }
   if(keyCode === DOWN_ARROW) {
-    if(keyIsDown(BACKSPACE)) { preview.time - 0.2 * tv + preview.scale * 0.4, delTop(preview.time + preview.scale * 0.4) }
-    if(keyIsDown(68)) { delBot(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
-    if(keyIsDown(DELETE)) { delBot(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
+    if(keyIsDown(BACKSPACE)) {
+      preview.time - 0.2 * tv + preview.scale * 0.4, delTop(preview.time + preview.scale * 0.4)
+    }
+    if(keyIsDown(68)) {
+      delBot(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+    }
+    if(keyIsDown(DELETE)) {
+      delBot(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+    }
 
-    if(keyIsDown(RIGHT_ARROW)) { pushRight(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
-    if(keyIsDown(LEFT_ARROW)) { stripLeft(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
+    if(keyIsDown(RIGHT_ARROW)) {
+      pushRight(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+    }
+    if(keyIsDown(LEFT_ARROW)) {
+      stripLeft(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+    }
     preview.time -= 0.2 * tv;
     frameLength = 0;
     lastFrameTime = Date.now();
@@ -1306,7 +1424,9 @@ drawNotesPreview.prototype.draw = function() {
     for(let i = 0; i < this.track.notes.length; i++) {
       if(!at && this.track.notes[i].time / currentMidi.duration * this.w < myTime) {
         this.at = i + 1;
-      } else { at = true; }
+      } else {
+        at = true;
+      }
       this.ctx.fillRect(this.track.notes[i].time / currentMidi.duration * this.w, this.h - this.track.notes[i].midi / 88 * this.h, 1, 1);
     }
   } else {
@@ -1318,7 +1438,7 @@ drawNotesPreview.prototype.draw = function() {
       this.ctx.fillRect(this.track.notes[i].time / currentMidi.duration * this.w, this.h - this.track.notes[i].midi / 88 * this.h, 1, 1);
     }
   }
-  if(MINIMAL){
+  if(MINIMAL) {
     return;
   }
   this.ctx.fillStyle = "#f008";

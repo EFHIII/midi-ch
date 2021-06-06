@@ -103,6 +103,18 @@ canvas{
       </div>
       <div id='htmlContent' class='container'></div>
     </div>
+    <script>
+      let MINIMAL = false;
+      // run this ASAP to improve user experience (sets form fields based on URL parameters)
+      (new URL(window.location.href)).searchParams.forEach((x, y) =>
+        y === 'minimal' ? MINIMAL = true : '')
+      //if(MINIMAL){
+      //  document.getElementById('help').innerHTML+="<br><a href='?'><b>Normal</b>";
+      //}
+      //else{
+      //  document.getElementById('help').innerHTML+="<br><a href='?minimal'><b>Minimal</b>";
+      //}
+    </script>
     <!--p5.js code-->
     <script src="script.js" type="text/javascript"></script>
   </body>

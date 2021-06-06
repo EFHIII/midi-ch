@@ -23,39 +23,52 @@ if(!(window.File && window.FileReader && window.FileList && window.Blob)) {
     }
   })
 }
-var currentMidi = null;
-var settings;
+let currentMidi = null;
+let settings;
 
 function parseFile(file) {
   //read the file
   const reader = new FileReader()
   reader.onload = function(e) {
-    const midi = new Midi(e.target.result)
-    currentMidi = midi;
+    const midi = new Midi(e.target.result);
+    currentMidi = midi.toJSON();
+    currentMidi.duration = midi.duration;
+    currentMidi.durationTicks = midi.durationTicks;
+    currentMidi.name = midi.name;
+    for(let temp in currentMidi.header.tempos){
+      currentMidi.header.tempos[temp].time = midi.header.tempos[temp].time;
+    }
+    for(let track in currentMidi.tracks){
+      currentMidi.tracks[track].instrument.percussion = midi.tracks[track].instrument.percussion;
+    }
     loadHTMLcontent();
   }
   reader.readAsArrayBuffer(file)
 }
-var htmlContent = document.getElementById('htmlContent');
-var unChartedNotes = [];
-var chartedNotes = [];
-var distinctNotes = [];
-var distinct = [];
-var measureShift = true;
-var quality = [0, 0, 0];
-var groups = [];
-var maxBPS = 30;
+let htmlContent = document.getElementById('htmlContent');
+let unChartedNotes = [];
+let chartedNotes = [];
+let distinctNotes = [];
+let distinct = [];
+let measureShift = true;
+let quality = [0, 0, 0];
+let groups = [];
+let maxBPS = 30;
 
-var noteMap;
+let noteMap;
 
 function renderNoteMap() {
   if(!currentMidi) { return; }
   background(0);
-  var note = 0;
+  if(MINIMAL){
+    noteMap = get(0, 0, 16, height);
+    return;
+  }
+  let note = 0;
   while(note < chartedNotes.length) {
-    var currentNote = unChartedNotes[note];
+    let currentNote = unChartedNotes[note];
     if(chartedNotes[note]%100 === 0 || chartedNotes[note]%100>9){note++;continue;}
-    var cn = (chartedNotes[note]%100)/2>>0;
+    let cn = (chartedNotes[note]%100)/2>>0;
     if(cn > 3){
       strokeWeight(1);
       stroke(cn < 0 ? color(255, 0, 255) : colors[cn]);
@@ -64,7 +77,7 @@ function renderNoteMap() {
     else{
       strokeWeight(5);
       stroke(cn < 0 ? color(255, 0, 255) : colors[cn]);
-      point(3 + cn * 2, height - (currentNote[3] / currentMidi.duration) * height);
+      point(3 + cn * 3, height - (currentNote[3] / currentMidi.duration) * height);
       strokeWeight(3);
       stroke(255);
       point(3 + cn * 3, height - (currentNote[3] / currentMidi.duration) * height);
@@ -84,8 +97,8 @@ function toggleMeasureShift() {
 
 
 function findInGroups(note) {
-  for(var i = 0; i < groups.length; i++) {
-    for(var j = 0; j < groups[i].length; j++) {
+  for(let i = 0; i < groups.length; i++) {
+    for(let j = 0; j < groups[i].length; j++) {
       if(groups[i][j] === note) {
         return [i, j];
       }
@@ -95,8 +108,8 @@ function findInGroups(note) {
 }
 
 function getTempo(t) {
-  var temp = 240;
-  for(var i = 0; i < currentMidi.header.tempos.length; i++) {
+  let temp = 240;
+  for(let i = 0; i < currentMidi.header.tempos.length; i++) {
     if(currentMidi.header.tempos[i].time <= t) { temp = currentMidi.header.tempos[i].bpm; } else { i = Infinity; }
   }
   return temp;
@@ -109,36 +122,36 @@ function loadSettings() {
   preview.scale = document.getElementById("previewScale").value * 1;
   preview.leadingSeconds = ((document.getElementById("leadingSeconds").value * 1) >> 0) * 2;
   if(preview.scale <= 0) { preview.scale = 4000; }
-  var old_element = document.getElementById("blob");
-  var new_element = old_element.cloneNode(true);
+  let old_element = document.getElementById("blob");
+  let new_element = old_element.cloneNode(true);
   old_element.parentNode.replaceChild(new_element, old_element);
 
-  var twoSec = preview.ppq * preview.leadingSeconds;
+  let twoSec = preview.ppq * preview.leadingSeconds;
   //sync track events
-  var syncTrackString = '';
-  var syncEvents = [
+  let syncTrackString = '';
+  let syncEvents = [
     [0, '  0 = TS 4\n'],
     [0, '  0 = B 120000\n']
   ];
-  for(var i = 0; i < currentMidi.header.timeSignatures.length; i++) {
+  for(let i = 0; i < currentMidi.header.timeSignatures.length; i++) {
     syncEvents.push([twoSec + currentMidi.header.timeSignatures[i].ticks, '  ' + (twoSec + currentMidi.header.timeSignatures[i].ticks) + ' = TS ' + (currentMidi.header.timeSignatures[i].timeSignature[0] * 4 / currentMidi.header.timeSignatures[i].timeSignature[1]) + '\n']);
   }
-  for(var i = 0; i < currentMidi.header.tempos.length; i++) {
+  for(let i = 0; i < currentMidi.header.tempos.length; i++) {
     syncEvents.push([twoSec + currentMidi.header.tempos[i].ticks, '  ' + (twoSec + currentMidi.header.tempos[i].ticks) + ' = B ' + (currentMidi.header.tempos[i].bpm * 1000 >> 0) + '\n']);
   }
   //sort in cronological order
   syncEvents.sort((a, b) => a[0] - b[0]);
   //add all to string
-  for(var i = 0; i < syncEvents.length; i++) {
+  for(let i = 0; i < syncEvents.length; i++) {
     syncTrackString += syncEvents[i][1];
   }
 
   distinctNotes = [];
-  var songLength = 0;
-  for(var i = 0; i < currentMidi.tracks.length; i++) {
+  let songLength = 0;
+  for(let i = 0; i < currentMidi.tracks.length; i++) {
     if(settings.tracks[i]) {
-      for(var note = 0; note < currentMidi.tracks[i].notes.length; note++) {
-        var midValue = currentMidi.tracks[i].notes[note].hasOwnProperty('altmidi') ? currentMidi.tracks[i].notes[note].altmidi : currentMidi.tracks[i].notes[note].midi;
+      for(let note = 0; note < currentMidi.tracks[i].notes.length; note++) {
+        let midValue = currentMidi.tracks[i].notes[note].hasOwnProperty('altmidi') ? currentMidi.tracks[i].notes[note].altmidi : currentMidi.tracks[i].notes[note].midi;
         if(distinctNotes.indexOf(midValue) < 0) {
           distinctNotes.push(midValue);
         }
@@ -151,10 +164,10 @@ function loadSettings() {
   distinctNotes.sort((a, b) => a - b);
 
   unChartedNotes = [];
-  var notesString = '';
-  for(var i = 0; i < currentMidi.tracks.length; i++) {
+  let notesString = '';
+  for(let i = 0; i < currentMidi.tracks.length; i++) {
     if(settings.tracks[i]) {
-      for(var note = 0; note < currentMidi.tracks[i].notes.length; note++) {
+      for(let note = 0; note < currentMidi.tracks[i].notes.length; note++) {
 
         let kit = 'standard';
         for(let k in drumNames){
@@ -198,7 +211,7 @@ function loadSettings() {
   }
 
   unChartedNotes.sort((a, b) => a[0] + a[8] / 128 - b[0] - b[8] / 128);
-  for(var i = 1; i < unChartedNotes.length; i++) {
+  for(let i = 1; i < unChartedNotes.length; i++) {
     if(unChartedNotes[i - 1][0] == unChartedNotes[i][0] && unChartedNotes[i - 1][8] == unChartedNotes[i][8]) {
       unChartedNotes[i - 1][5] = max(unChartedNotes[i - 1][5], unChartedNotes[i][5]);
       unChartedNotes.splice(i, 1);
@@ -207,7 +220,7 @@ function loadSettings() {
   }
 
   if(maxBPS > 0) {
-    for(var i = 1; i < unChartedNotes.length; i++) {
+    for(let i = 1; i < unChartedNotes.length; i++) {
       if(unChartedNotes[i][8] == unChartedNotes[i-1][8] && unChartedNotes[i][3] - unChartedNotes[i - 1][3] > 0 && unChartedNotes[i][3] - unChartedNotes[i - 1][3] < 1 / maxBPS) {
         unChartedNotes.splice(i, 1);
         i--;
@@ -217,7 +230,7 @@ function loadSettings() {
 
   chartedNotes = [];
 
-  for(var i = 0; i < unChartedNotes.length - 1; i++) {
+  for(let i = 0; i < unChartedNotes.length - 1; i++) {
     if(unChartedNotes[i][0] == unChartedNotes[i + 1][0] && unChartedNotes[i][1] == unChartedNotes[i + 1][1]) {
       if(unChartedNotes[i][1] < unChartedNotes[i + 1][1]) {
         unChartedNotes.splice(i, 1);
@@ -237,12 +250,12 @@ function loadSettings() {
 
   /*-- End KA Import --*/
 
-  for(var i = 0; i < groups.length; i++) {
+  for(let i = 0; i < groups.length; i++) {
     groups[i].sort((a, b) => a - b);
   }
 
-  var lastTick = 0;
-  for(var i = 0; i < chartedNotes.length; i++) {
+  let lastTick = 0;
+  for(let i = 0; i < chartedNotes.length; i++) {
     if(chartedNotes[i]%100 === 0){continue;}
 
     if(unChartedNotes[i][8]){
@@ -264,9 +277,9 @@ function loadSettings() {
     }
 
     //events
-    var myLastNote = i;
+    let myLastNote = i;
     while(myLastNote > 0 && unChartedNotes[myLastNote][0] == unChartedNotes[i][0]) { myLastNote--; }
-    var lastT = unChartedNotes[myLastNote][0];
+    let lastT = unChartedNotes[myLastNote][0];
     //if(findInGroups(i)[1] === 0) {
     //  notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Section_Division\n';
     //}
@@ -279,13 +292,13 @@ function loadSettings() {
       else if((chartedNotes[myLastNote]%100)/2>>0 === (chartedNotes[i]%100)/2>>0){
         break;
       }
-    //  if(note > 0 && unChartedNotes[myLastNote][1] == unChartedNotes[i][1] && chartedNotes[myLastNote] != chartedNotes[i]) {
+    //  if(myLastNote > 0 && unChartedNotes[myLastNote][1] == unChartedNotes[i][1] && chartedNotes[myLastNote] != chartedNotes[i]) {
     //    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Different_Fret\n';
-    //  } else if(note > 0 && unChartedNotes[myLastNote][1] < unChartedNotes[i][1] && chartedNotes[myLastNote] >= chartedNotes[i]) {
+    //  } else if(myLastNote > 0 && unChartedNotes[myLastNote][1] < unChartedNotes[i][1] && chartedNotes[myLastNote] >= chartedNotes[i]) {
     //    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Too_Low\n';
-    //  } else if(note > 0 && unChartedNotes[myLastNote][1] > unChartedNotes[i][1] && chartedNotes[myLastNote] <= chartedNotes[i]) {
+    //  } else if(myLastNote > 0 && unChartedNotes[myLastNote][1] > unChartedNotes[i][1] && chartedNotes[myLastNote] <= chartedNotes[i]) {
     //    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Too_High\n';
-    //  } else if(note > 0 && unChartedNotes[myLastNote][1] != unChartedNotes[i][1] && chartedNotes[i] == chartedNotes[myLastNote]) {
+    //  } else if(myLastNote > 0 && unChartedNotes[myLastNote][1] != unChartedNotes[i][1] && chartedNotes[i] == chartedNotes[myLastNote]) {
     //    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Same_Fret\n';
     //  }
       myLastNote--;
@@ -297,7 +310,7 @@ function loadSettings() {
     //end events
   }
 
-  var zip = new JSZip();
+  let zip = new JSZip();
   zip.file("album.png", albumpng, { base64: true });
   zip.file("song.ini", `[Song]
 name = ` + currentMidi.name + `
@@ -369,7 +382,7 @@ const drumNames = {
 
 function loadHTMLcontent() {
   previews = [];
-  for(var i = 0; i < myIntervals.length; i++) {
+  for(let i = 0; i < myIntervals.length; i++) {
     clearInterval(myIntervals[i]);
   }
   measureShift = true;
@@ -391,7 +404,7 @@ function loadHTMLcontent() {
   settings = {
     tracks: []
   };
-  for(var i = currentMidi.tracks.length-1;i>=0; i--) {
+  for(let i = currentMidi.tracks.length-1;i>=0; i--) {
     // check if the instrument is empty
     if(currentMidi.tracks[i].notes.length == 0 ||
       !currentMidi.tracks[i].instrument.percussion){
@@ -399,7 +412,7 @@ function loadHTMLcontent() {
     }
   }
 
-  for(var i = 0; i < currentMidi.tracks.length; i++) {
+  for(let i = 0; i < currentMidi.tracks.length; i++) {
     if(i == 0) {
       settings.tracks[i] = true;
     } else {
@@ -459,9 +472,9 @@ function loadHTMLcontent() {
     </div>`;
     //htmlContent.innerHTML+='<input type="checkbox" checked="true" onClick="toggleTrack('+i+')"><label>track '+currentMidi.tracks[i].name+'<br>'+currentMidi.tracks[i].instrument.family+': '+currentMidi.tracks[i].instrument.name+'</label><br>';
   }
-  for(var i = 0; i < currentMidi.tracks.length; i++) {
+  for(let i = 0; i < currentMidi.tracks.length; i++) {
     previews.push(new drawNotesPreview("canvasNumber" + i, currentMidi.tracks[i]));
-    myIntervals.push(setInterval(drawPreviewBuffer, 100, i));
+    MINIMAL ? drawPreviewBuffer(i) : myIntervals.push(setInterval(drawPreviewBuffer, 100, i));
   }
 
   preview.ppq = currentMidi.header.ppq;
@@ -475,22 +488,23 @@ function loadHTMLcontent() {
   loadSettings();
 }
 
-var colors;
+let colors;
 
 function setup() {
   createCanvas(windowWidth / 4, windowHeight);
   colors = [color(255, 0, 0), color(255, 255, 0), color(0, 50, 200), color(0, 200, 0), color(255, 128, 0)];
+  window.requestAnimationFrame(myDraw);
 }
 
 function drawNote(cn, y) {
   if(cn%100 === 0 || cn%100>9){return;}
-  var type='';
-  var cymbal = false;
+  let type='';
+  let cymbal = false;
   if(cn%100 === 2 || cn%100 === 4 || cn%100 === 6){
     cymbal = true;
   }
   if(cn >= 10 && cn < 20 || cn >= 30){type = 'hopo';}
-  var note = (cn%100)/2>>0;
+  let note = (cn%100)/2>>0;
 
   if(note < 0) {
     return;
@@ -552,7 +566,7 @@ function drawNote(cn, y) {
   }
 }
 
-var preview = {
+let preview = {
   scale: 2,
   speed: 30,
   ppq: 100,
@@ -561,9 +575,9 @@ var preview = {
 };
 
 function findNotes(from, to) {
-  var interval = Math.ceil(chartedNotes.length / 4);
-  var at = interval * 2;
-  var pls = 2;
+  let interval = Math.ceil(chartedNotes.length / 4);
+  let at = interval * 2;
+  let pls = 2;
   while(interval >= 1 && pls && unChartedNotes[at][3] != from) {
     if(interval == 1) { pls--; }
     if(unChartedNotes[at][3] >= from) {
@@ -575,30 +589,30 @@ function findNotes(from, to) {
     }
     interval = Math.ceil(interval / 2);
   }
-  var bottom = at - 10;
+  let bottom = at - 10;
   while(bottom > 0 && unChartedNotes[bottom - 1][3] >= from) {
     bottom--;
   }
   return bottom;
 }
 
-var lastFrameTime = Date.now();
-var currentFrameTime = Date.now();
-var paused = false;
-var OS = 0;
-var lastLen = 0.3;
+let lastFrameTime = Date.now();
+let currentFrameTime = Date.now();
+let paused = false;
+let OS = 0;
+let lastLen = 0.3;
 
-var deletedNotes = [];
-var undeletedNotes = [];
+let deletedNotes = [];
+let undeletedNotes = [];
 
 function unshiftNotes(from, track) {
-  var index = unChartedNotes[from][10];
-  for(var i = from; i < unChartedNotes.length; i++) {
+  let index = unChartedNotes[from][10];
+  for(let i = from; i < unChartedNotes.length; i++) {
     if(unChartedNotes[i][9] === track) {
       unChartedNotes[i][10]++;
     }
   }
-  for(var i = 0; i < deletedNotes.length; i++) {
+  for(let i = 0; i < deletedNotes.length; i++) {
     if(deletedNotes[i].unCharted[10] > index && deletedNotes[i].unCharted[9] === track) {
       deletedNotes[i].unCharted[10]++;
     }
@@ -607,7 +621,7 @@ function unshiftNotes(from, track) {
 
 function undoDeleted() {
   if(deletedNotes.length < 1) { return }
-  var data = deletedNotes.pop();
+  let data = deletedNotes.pop();
   currentMidi.tracks[data.unCharted[9]].notes.splice(data.unCharted[10], 0, data.track);
   unshiftNotes(data.note, data.unCharted[9]);
   unChartedNotes.splice(data.note, 0, data.unCharted);
@@ -616,13 +630,13 @@ function undoDeleted() {
 }
 
 function shiftNotes(from, track) {
-  var index = unChartedNotes[from][10];
-  for(var i = from; i < unChartedNotes.length; i++) {
+  let index = unChartedNotes[from][10];
+  for(let i = from; i < unChartedNotes.length; i++) {
     if(unChartedNotes[i][9] === track) {
       unChartedNotes[i][10]--;
     }
   }
-  for(var i = 0; i < deletedNotes.length; i++) {
+  for(let i = 0; i < deletedNotes.length; i++) {
     if(deletedNotes[i].unCharted[10] > index && deletedNotes[i].unCharted[9] === track) {
       deletedNotes[i].unCharted[10]--;
     }
@@ -644,14 +658,14 @@ function deleteNote(note) {
 }
 
 function delTop(from, to) {
-  var note = -1;
-  var currentNote = [0, 0, 0, 0];
+  let note = -1;
+  let currentNote = [0, 0, 0, 0];
   while(note < chartedNotes.length && currentNote[3] < from) {
     note++;
     currentNote = unChartedNotes[note];
   }
-  var currentNotes = [];
-  var lastTime = -1;
+  let currentNotes = [];
+  let lastTime = -1;
   while(note < chartedNotes.length && currentNote[3] < to) {
     if(currentNote[3] != lastTime && currentNotes.length > 0) {
       currentNotes.sort((a, b) => { return b[0][8] - a[0][8] });
@@ -671,14 +685,14 @@ function delTop(from, to) {
 }
 
 function delBot(from, to) {
-  var note = -1;
-  var currentNote = [0, 0, 0, 0];
+  let note = -1;
+  let currentNote = [0, 0, 0, 0];
   while(note < chartedNotes.length && currentNote[3] < from) {
     note++;
     currentNote = unChartedNotes[note];
   }
-  var currentNotes = [];
-  var lastTime = -1;
+  let currentNotes = [];
+  let lastTime = -1;
   while(note < chartedNotes.length && currentNote[3] < to) {
     if(currentNote[3] != lastTime && currentNotes.length > 0) {
       currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
@@ -698,8 +712,8 @@ function delBot(from, to) {
 }
 
 function delAll(from, to) {
-  var note = -1;
-  var currentNote = [0, 0, 0, 0];
+  let note = -1;
+  let currentNote = [0, 0, 0, 0];
   while(note < chartedNotes.length && currentNote[3] < from) {
     note++;
     currentNote = unChartedNotes[note];
@@ -713,10 +727,10 @@ function delAll(from, to) {
 function pushNoteRight(note, pushToNote, n) {
   currentNote = unChartedNotes[note];
   toNote = unChartedNotes[pushToNote];
-  var group = findInGroups(pushToNote)[0];
-  var target = toNote[1];
-  var closest = -1;
-  for(var i = 0; i < distinct[group].length; i++) {
+  let group = findInGroups(pushToNote)[0];
+  let target = toNote[1];
+  let closest = -1;
+  for(let i = 0; i < distinct[group].length; i++) {
     if(distinct[group][i] > closest && distinct[group][i] < target) {
       closest = distinct[group][i];
     }
@@ -729,18 +743,18 @@ function pushNoteRight(note, pushToNote, n) {
 }
 
 function stripLeft(from, to) {
-  var note = -1;
-  var currentNote = [0, 0, 0, 0];
+  let note = -1;
+  let currentNote = [0, 0, 0, 0];
   while(note < chartedNotes.length && currentNote[3] < from) {
     note++;
     currentNote = unChartedNotes[note];
   }
-  var currentNotes = [];
-  var lastTime = -1;
+  let currentNotes = [];
+  let lastTime = -1;
   while(note < chartedNotes.length && currentNote[3] < to) {
     if(currentNote[3] != lastTime && currentNotes.length > 0) {
       currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
-      for(var i = 0; i < currentNotes.length - 1; i++) {
+      for(let i = 0; i < currentNotes.length - 1; i++) {
         deleteNote(currentNotes[i][1]);
         note--;
       }
@@ -753,7 +767,7 @@ function stripLeft(from, to) {
   }
   if(currentNotes.length > 0) {
     currentNotes.sort((a, b) => { return a[0][8] - b[0][8] });
-    for(var i = 0; i < currentNotes.length - 1; i++) {
+    for(let i = 0; i < currentNotes.length - 1; i++) {
       deleteNote(currentNotes[i][1]);
       note--;
     }
@@ -761,18 +775,23 @@ function stripLeft(from, to) {
 }
 
 function drawLines(note) {
+  if(MINIMAL){
+    return;
+  }
   stroke(128);
-  var from = unChartedNotes[note][3];
-  var fromTick = unChartedNotes[note][0];
-  var fromTime = 0;
-  var bpm = 240;
-  var ts = [4, 4];
+  //let from = unChartedNotes[note][3];
+  from = 0;
+  //let fromTick = unChartedNotes[note][0];
+  fromTick = 0;
+  let fromTime = 0;
+  let bpm = 240;
+  let ts = [4, 4];
   if(currentMidi.header.timeSignatures.length) {
     ts = [currentMidi.header.timeSignatures[0].timeSignature[0], currentMidi.header.timeSignatures[0].timeSignature[1]];
   }
-  var currentTS = 0;
-  var fromBPM = 0;
-  var currentBPM = 0;
+  let currentTS = 0;
+  let fromBPM = 0;
+  let currentBPM = 0;
   while(currentTS < currentMidi.header.timeSignatures.length && currentMidi.header.timeSignatures[currentTS].ticks <= fromTick) { currentTS++; }
   currentTS--;
   ts = currentMidi.header.timeSignatures[currentTS] ? [currentMidi.header.timeSignatures[currentTS].timeSignature[0], currentMidi.header.timeSignatures[currentTS].timeSignature[1]] : [4, 4];
@@ -786,27 +805,45 @@ function drawLines(note) {
   if(bpm <= 0) { bpm = 1; }
   fromTime = currentMidi.header.tempos[currentBPM] ? currentMidi.header.tempos[currentBPM].time : 0;
 
-  while(fromTime <= from) {
-    fromTime += 60 / bpm * ts[0];
-  }
-  fromTime -= 120 / bpm * ts[0];
+  //while(fromTime <= from) {
+  //  fromTime += 60 / bpm * ts[0];
+  //}
+  //fromTime -= 120 / bpm * ts[0];
   fromBPM = currentBPM;
 
-  for(var i = fromTime; i < currentMidi.duration; i += 60 / bpm * ts[0] / ts[1]) {
-    y = 0.9 * height - (i - preview.time) / preview.scale * height;
-    line(0, y, width, y);
-    if(y < 0) { i = Infinity; }
+  let beat = 0;
 
-    while(currentBPM + 1 < currentMidi.header.tempos.length && currentMidi.header.tempos[currentBPM + 1].time <= i) {
-      currentBPM++;
-      i = currentMidi.header.tempos[currentBPM].time;
+  for(let y, i = fromTime; i < currentMidi.duration + 60 / bpm * 4 / ts[1];) {
+    y = 0.9 * height - (i - preview.time) / preview.scale * height;
+    if(y < height){
+      if(beat == 0){
+        stroke(255);
+        line(0, y, width, y);
+        stroke(128);
+      }
+      else{
+        line(0, y, width, y);
+      }
+      if(y < 0) { i = Infinity; continue;}
     }
-    bpm = currentMidi.header.tempos[currentBPM] ? currentMidi.header.tempos[currentBPM].bpm : 120;
-    if(bpm <= 0) { bpm = 1; }
+    beat = (beat+1)%ts[0];
+
+    let beatsLeft = 1;
+
+    while(currentBPM + 1 < currentMidi.header.tempos.length && currentMidi.header.tempos[currentBPM + 1].time <= i + beatsLeft * (60 / bpm * 4 / ts[1])) {
+      currentBPM++;
+      beatsLeft -= (currentMidi.header.tempos[currentBPM].time-i) / (60 / bpm * 4 / ts[1]);
+      i = currentMidi.header.tempos[currentBPM].time;
+
+      bpm = currentMidi.header.tempos[currentBPM] ? currentMidi.header.tempos[currentBPM].bpm : 120;
+      if(bpm <= 0) { bpm = 1; }
+    }
+
+    i += beatsLeft * (60 / bpm * 4 / ts[1]);
   }
   currentBPM = fromBPM;
   stroke(255);
-  for(var i = fromTime; i < currentMidi.duration; i += 60 / bpm * ts[0]) {
+  for(let i = fromTime; i < currentMidi.duration; i += 60 / bpm * ts[0]) {
     y = 0.9 * height - (i - preview.time) / preview.scale * height;
     line(0, y, width, y);
     if(y < 0) { i = Infinity; }
@@ -820,22 +857,23 @@ function drawLines(note) {
   }
 }
 
-function draw() {
+function myDraw() {
   background(0);
   stroke(150);
   strokeWeight(2);
-  for(var i = 0; i < 4; i++) {
+  for(let i = 0; i < 4; i++) {
     line(i * width / 5 + width / 5, 0, i * width / 5 + width / 5, height);
   }
   stroke(50, 150, 250);
   line(0, height * 0.9, width, height * 0.9);
   if(!currentMidi) {
+    window.requestAnimationFrame(myDraw);
     return;
   }
 
   lastFrameTime = currentFrameTime;
   currentFrameTime = Date.now();
-  var frameLength = (currentFrameTime - lastFrameTime) / 1000;
+  let frameLength = (currentFrameTime - lastFrameTime) / 1000;
   if(paused) {
     preview.time += frameLength;
   } else {
@@ -858,7 +896,8 @@ function draw() {
     lastFrameTime = Date.now();
     currentFrameTime = Date.now();
   }
-  var lastNote = 0;
+
+  drawLines(0);
 
   noStroke();
   fill(255);
@@ -877,11 +916,18 @@ function draw() {
 
   if(keyIsDown(LEFT_ARROW)) { stripLeft(preview.time - frameLength + preview.scale * 0.4, preview.time + preview.scale * 0.4) }
 
+  let note = 0;
 
-  var note = 0;
-  var currentNote = unChartedNotes[note];
-  var lines = false;
-  if(unChartedNotes.length <= 0) { return; }
+  while(note < chartedNotes.length && unChartedNotes[note][3]-preview.time < -10){
+    note++;
+  }
+
+  let currentNote = unChartedNotes[note];
+  let lines = false, Y;
+  if(unChartedNotes.length <= 0) {
+    window.requestAnimationFrame(myDraw);
+    return;
+  }
   while(note < chartedNotes.length && preview.time + preview.scale + 1 - currentNote[3] > 0) {
     currentNote = unChartedNotes[note];
     if(currentNote[3] - preview.time <= 0 && currentNote[3] - (preview.time - frameLength) > 0) {
@@ -892,9 +938,9 @@ function draw() {
       OS = (OS + 1) % 10;
     }
 
-    var Y = 0.9 * height - (currentNote[3] - preview.time) / preview.scale * height;
+    Y = 0.9 * height - (currentNote[3] - preview.time) / preview.scale * height;
 
-    if(Y > 0 && Y < 0.9 * height && (!lastNote[note] || note > lastNote[note])) {
+    if(Y > 0 && Y < 0.9 * height) {
       if(!lines) {
         lines = true;
         drawLines(note ? note - 1 : note);
@@ -905,9 +951,9 @@ function draw() {
       drawNote(chartedNotes[note], Y, '');
       noStroke();
       //test
-      var myLastNote = note;
+      let myLastNote = note;
       while(myLastNote > 0 && unChartedNotes[myLastNote][0] == currentNote[0]) { myLastNote--; }
-      var lastT = unChartedNotes[myLastNote][0];
+      let lastT = unChartedNotes[myLastNote][0];
       while(myLastNote > 0 && unChartedNotes[myLastNote][0] == lastT) {
         if(note > 0 && unChartedNotes[myLastNote][1] == currentNote[1] && chartedNotes[note] != chartedNotes[myLastNote]) {
           fill(255, 0, 0, 150);
@@ -919,14 +965,11 @@ function draw() {
         myLastNote--;
       }
       //end test
-      lastNote[i] = note;
-    } else if(Y >= 0.9 * height) {
-      var Y2 = 0.9 * height - (currentNote[3] - preview.time) / preview.scale * height;
+    }
+    if(currentNote[3]-preview.time > preview.scale){
+      note = chartedNotes.length;
     }
     note++;
-  }
-  if(!lines) {
-    drawLines(note ? (note - 1 ? note - 2 : note - 1) : note);
   }
   image(noteMap, 0, 0);
   fill(255, 255, 255, 150);
@@ -944,6 +987,7 @@ function draw() {
     fill(255, 255, 0);
     rect(width * quality[3] / quality[0], 0, width * quality[2] / quality[0], 10);
   }
+  window.requestAnimationFrame(myDraw);
 }
 
 window.addEventListener("keydown", function(e) {
@@ -953,7 +997,7 @@ window.addEventListener("keydown", function(e) {
   }
 }, false);
 
-var tv = 1;
+let tv = 1;
 
 function keyPressed() {
   if(keyCode === 32) {
@@ -981,7 +1025,7 @@ function keyPressed() {
     lastFrameTime = Date.now();
     currentFrameTime = Date.now();
 
-    for(var i = 0; i < previews.length; i++) {
+    for(let i = 0; i < previews.length; i++) {
       previews[i].drawn = false;
     }
   }
@@ -1007,7 +1051,7 @@ function keyPressed() {
 
 function mouseReleased() {
   if(mouseX > 0) {
-    for(var i = 0; i < previews.length; i++) {
+    for(let i = 0; i < previews.length; i++) {
       previews[i].drawn = false;
     }
   }
@@ -1026,8 +1070,8 @@ document.ontouchmove = function(event) {
   event.preventDefault();
 };
 
-var myIntervals = [];
-var previews = [];
+let myIntervals = [];
+let previews = [];
 
 function drawNotesPreview(canvasID, track) {
   this.canvas = document.getElementById(canvasID);
@@ -1046,10 +1090,12 @@ function drawPreviewBuffer(n) {
   previews[n].draw();
 }
 drawNotesPreview.prototype.draw = function() {
-  if(preview.time / currentMidi.duration * this.w < this.lastTime) { this.at = 0;
-    this.lastTime = 0; }
-  var myLastTime = this.lastTime;
-  var myTime = preview.time / currentMidi.duration * this.w;
+  if(preview.time / currentMidi.duration * this.w < this.lastTime) {
+    this.at = 0;
+    this.lastTime = 0;
+  }
+  let myLastTime = this.lastTime;
+  let myTime = preview.time / currentMidi.duration * this.w;
   if(!this.drawn || windowWidth * 7 / 11 >> 0 != this.canvas.width) {
     this.at = 0;
     this.ctx.fillStyle = "#000";
@@ -1059,8 +1105,8 @@ drawNotesPreview.prototype.draw = function() {
 
     this.ctx.fillRect(0, 0, this.w, this.h);
     this.ctx.fillStyle = "#fff";
-    var at = false;
-    for(var i = 0; i < this.track.notes.length; i++) {
+    let at = false;
+    for(let i = 0; i < this.track.notes.length; i++) {
       if(!at && this.track.notes[i].time / currentMidi.duration * this.w < myTime) {
         this.at = i + 1;
       } else { at = true; }
@@ -1070,10 +1116,13 @@ drawNotesPreview.prototype.draw = function() {
     this.ctx.fillStyle = "#000";
     this.ctx.fillRect((myLastTime >> 0) + 2, 0, ((myTime - myLastTime) >> 0) + 3, this.h);
     this.ctx.fillStyle = "#fff";
-    for(var i = this.at; i < this.track.notes.length && this.track.notes[i].time / currentMidi.duration * this.w < myTime; i++) {
+    for(let i = this.at; i < this.track.notes.length && this.track.notes[i].time / currentMidi.duration * this.w < myTime; i++) {
       this.at = i + 1;
       this.ctx.fillRect(this.track.notes[i].time / currentMidi.duration * this.w, this.h - this.track.notes[i].midi / 88 * this.h, 1, 1);
     }
+  }
+  if(MINIMAL){
+    return;
   }
   this.ctx.fillStyle = "#f008";
   this.ctx.fillRect(myTime + 2, 0, 1, this.h);

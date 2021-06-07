@@ -97,29 +97,40 @@ function mergable(a, b) {
       distinct.push(unChartedNotes[b[i]][1]);
     }
   }
-  if(distinct.length > frets + openNotes) { return false; }
+  if(distinct.length > frets + openNotes) {
+    return false;
+  }
   return true;
 };
 
 function getTempo(t) {
   var temp = 240;
   for(var i = 0; i < currentMidi.header.tempos.length; i++) {
-    if(currentMidi.header.tempos[i].time <= t) { temp = currentMidi.header.tempos[i].bpm; } else { i = Infinity; }
+    if(currentMidi.header.tempos[i].time <= t) {
+      temp = currentMidi.header.tempos[i].bpm;
+    } else {
+      i = Infinity;
+    }
   }
   return temp;
 }
 
 var notesString = '';
 var syncTrackString = '';
+
 function loadDataSettings() {
   undeletedNotes = [];
   minimumSustain = document.getElementById("minimumSustain").value * 1;
   ignoreGap = document.getElementById("ignoreGap").value * 1;
   maxBPS = document.getElementById("maxBPS").value * 1;
-  if(maxBPS <= 0) { maxBPS = Infinity; }
+  if(maxBPS <= 0) {
+    maxBPS = Infinity;
+  }
   frets = document.getElementById("frets").value * 1;
   stripSustain = document.getElementById("stripSustain").value * 1;
-  if(stripSustain < 0) { stripSustain = 0; }
+  if(stripSustain < 0) {
+    stripSustain = 0;
+  }
   maxNotes = document.getElementById("maxNotes").value * 1;
   if(maxNotes < 1) {
     maxNotes = 1;
@@ -129,7 +140,9 @@ function loadDataSettings() {
   }
   preview.scale = document.getElementById("previewScale").value * 1;
   preview.leadingSeconds = ((document.getElementById("leadingSeconds").value * 1) >> 0) * 2;
-  if(preview.scale <= 0) { preview.scale = 4000; }
+  if(preview.scale <= 0) {
+    preview.scale = 4000;
+  }
   openSkipGap = 1 / document.getElementById("openSkipGap").value * preview.ppq;
   openNotes = document.getElementById("openNotes").checked ? 1 : 0;
   extendedSustains = document.getElementById("extendedSustains").checked ? 1 : 0;
@@ -248,7 +261,9 @@ function loadDataSettings() {
       notes.sort((a, b) => b[0] - a[0]);
       for(var j = 0; j < notes.length; j++) {
         unChartedNotes.splice(notes[j][0], 1);
-        if(notes[j][0] <= i) { i--; }
+        if(notes[j][0] <= i) {
+          i--;
+        }
       }
     }
   }
@@ -425,7 +440,27 @@ function loadDataSettings() {
       var strip = false;
       var cTempo = getTempo(unChartedNotes[i][3] + unChartedNotes[i][6]) / 60;
       stripAmount = 1;
-      if(cTempo >= 8) { stripAmount = 2; } else if(cTempo >= 4) { stripAmount = 1 / 4; } else if(cTempo >= 2) { stripAmount = 1 / 8; } else if(cTempo >= 1) { stripAmount = 1 / 12; } else if(cTempo >= 0.5) { stripAmount = 1 / 16; } else if(cTempo >= 0.25) { stripAmount = 1 / 32; } else if(cTempo >= 0.12) { stripAmount = 1 / 64; } else if(cTempo >= 0.05) { stripAmount = 1 / 128; } else if(cTempo >= 0.02) { stripAmount = 1 / 256; } else if(cTempo >= 0.01) { stripAmount = 1 / 512; }
+      if(cTempo >= 8) {
+        stripAmount = 2;
+      } else if(cTempo >= 4) {
+        stripAmount = 1 / 4;
+      } else if(cTempo >= 2) {
+        stripAmount = 1 / 8;
+      } else if(cTempo >= 1) {
+        stripAmount = 1 / 12;
+      } else if(cTempo >= 0.5) {
+        stripAmount = 1 / 16;
+      } else if(cTempo >= 0.25) {
+        stripAmount = 1 / 32;
+      } else if(cTempo >= 0.12) {
+        stripAmount = 1 / 64;
+      } else if(cTempo >= 0.05) {
+        stripAmount = 1 / 128;
+      } else if(cTempo >= 0.02) {
+        stripAmount = 1 / 256;
+      } else if(cTempo >= 0.01) {
+        stripAmount = 1 / 512;
+      }
       stripAmount *= stripSustain;
       for(var j = 0; j < chartedNotes.length; j++) {
         if(unChartedNotes[i][0] != unChartedNotes[j][0] && unChartedNotes[j][0] - unChartedNotes[i][0] > 0 && unChartedNotes[i][0] + duration + stripAmount * preview.ppq * cTempo >= unChartedNotes[j][0]) {
@@ -439,14 +474,18 @@ function loadDataSettings() {
       if(strip) {
         duration -= stripAmount * preview.ppq * cTempo;
       }
-      if(duration < minimumSustain * preview.ppq * cTempo) { duration = 0; }
+      if(duration < minimumSustain * preview.ppq * cTempo) {
+        duration = 0;
+      }
       unChartedNotes[i][2] = duration;
     }
     notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = N ' + (openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes) + ' ' + Math.round(duration) + '\n';
 
     //events
     var myLastNote = i;
-    while(myLastNote > 0 && unChartedNotes[myLastNote][0] == unChartedNotes[i][0]) { myLastNote--; }
+    while(myLastNote > 0 && unChartedNotes[myLastNote][0] == unChartedNotes[i][0]) {
+      myLastNote--;
+    }
     var lastT = unChartedNotes[myLastNote][0];
     if(findInGroups(i)[1] === 0) {
       notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Section_Division\n';
@@ -471,7 +510,9 @@ function loadDataSettings() {
 function loadSettings() {
   loadDataSettings();
   var zip = new JSZip();
-  zip.file("album.png", albumpng, { base64: true });
+  zip.file("album.png", albumpng, {
+    base64: true
+  });
   zip.file("song.ini", `[Song]
 name = ` + currentMidi.name + `
 artist = ` + (currentMidi.header.meta.filter(e => e.type.toLowerCase() === "artist").length ? currentMidi.header.meta.filter(e => e.type.toLowerCase() === "artist")[0].text : 'Unknown') + `
@@ -508,43 +549,42 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
     'Medium',
     'Easy'
   ];
-  var difFrets=['5','5','4','3'];
-  var difBPS=['30','15','9','5'];
+  var difFrets = ['5', '5', '4', '3'];
+  var difBPS = ['30', '15', '9', '5'];
 
-  var realTracks=[];
+  var realTracks = [];
 
-  for(var i=0;i<currentMidi.tracks.length;i++){
-    if(currentMidi.tracks[i].notes.length>0){
+  for(var i = 0; i < currentMidi.tracks.length; i++) {
+    if(currentMidi.tracks[i].notes.length > 0) {
       realTracks.push(i);
     }
   }
 
-  var cnt = Math.min(16,realTracks.length);
-  if (realTracks.length<=4){
-    cnt*=4;
-    for(var j=0;j<4;j++){
-      settings.tracks[realTracks[j]]=true;
-      for(var i=0;i<4;i++){
-        if(cnt-->0){
-          document.getElementById('frets').value=difFrets[i];
-          document.getElementById('maxBPS').value=difBPS[i];
+  var cnt = Math.min(16, realTracks.length);
+  if(realTracks.length <= 4) {
+    cnt *= 4;
+    for(var j = 0; j < 4; j++) {
+      settings.tracks[realTracks[j]] = true;
+      for(var i = 0; i < 4; i++) {
+        if(cnt-- > 0) {
+          document.getElementById('frets').value = difFrets[i];
+          document.getElementById('maxBPS').value = difBPS[i];
 
           loadDataSettings();
-          tracksString+=`[${difNames[i]}${trackNames[j]}]\n{\n${notesString}}\n`;
+          tracksString += `[${difNames[i]}${trackNames[j]}]\n{\n${notesString}}\n`;
         }
       }
-      settings.tracks[realTracks[j]]=false;
+      settings.tracks[realTracks[j]] = false;
     }
-  }
-  else{
-    for(var i=0;i<4;i++){
-      for(var j=0;j<4;j++){
-        if(cnt-->0){
-          document.getElementById('frets').value='5';
-          settings.tracks[realTracks[j]]=true;
+  } else {
+    for(var i = 0; i < 4; i++) {
+      for(var j = 0; j < 4; j++) {
+        if(cnt-- > 0) {
+          document.getElementById('frets').value = '5';
+          settings.tracks[realTracks[j]] = true;
           loadDataSettings();
-          tracksString+=`[${difNames[i]}${trackNames[j]}]\n{\n${notesString}}\n`;
-          settings.tracks[realTracks[j]]=false;
+          tracksString += `[${difNames[i]}${trackNames[j]}]\n{\n${notesString}}\n`;
+          settings.tracks[realTracks[j]] = false;
         }
       }
     }
@@ -568,10 +608,12 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
 [SyncTrack]
 {
 ` + syncTrackString + `}
-` + tracksString );
+` + tracksString);
 
   document.getElementById("blob").addEventListener("click", function() {
-    zip.generateAsync({ type: "blob" }).then(function(blob) { // 1) generate the zip file
+    zip.generateAsync({
+      type: "blob"
+    }).then(function(blob) { // 1) generate the zip file
       saveAs(blob, currentMidi.name + ".zip"); // 2) trigger the download
     }, function(err) {
       jQuery("#blob").text(err);

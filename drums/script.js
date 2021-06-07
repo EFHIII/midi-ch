@@ -50,8 +50,6 @@ let htmlContent = document.getElementById('htmlContent');
 let unChartedNotes = [];
 let chartedNotes = [];
 let distinctNotes = [];
-let distinct = [];
-let measureShift = true;
 let quality = [0, 0, 0];
 let groups = [];
 let maxBPS = 30;
@@ -95,11 +93,6 @@ function renderNoteMap() {
 function toggleTrack(track) {
   settings.tracks[track] = !settings.tracks[track];
 }
-
-function toggleMeasureShift() {
-  measureShift = !measureShift;
-}
-
 
 function findInGroups(note) {
   for(let i = 0; i < groups.length; i++) {
@@ -404,7 +397,7 @@ function loadHTMLcontent() {
   for(let i = 0; i < myIntervals.length; i++) {
     clearInterval(myIntervals[i]);
   }
-  measureShift = true;
+
   htmlContent.innerHTML =
     `<button id="blob" class="btn btn-primary" style="width:100%">click to download</button><br>
   <button class="btn btn-primary" style="width:100%" onclick="loadSettings()"><span data-toggle="tooltip" title="Re-charts the song based on the new settings and any recently deleted notes">Load New Settings</button><br>
@@ -757,24 +750,6 @@ function delAll(from, to) {
   while(note < chartedNotes.length && currentNote[3] < to) {
     deleteNote(note);
     currentNote = unChartedNotes[note];
-  }
-}
-
-function pushNoteRight(note, pushToNote, n) {
-  currentNote = unChartedNotes[note];
-  toNote = unChartedNotes[pushToNote];
-  let group = findInGroups(pushToNote)[0];
-  let target = toNote[1];
-  let closest = -1;
-  for(let i = 0; i < distinct[group].length; i++) {
-    if(distinct[group][i] > closest && distinct[group][i] < target) {
-      closest = distinct[group][i];
-    }
-  }
-  if(closest >= 0) {
-    currentMidi.tracks[currentNote[9]].notes[currentNote[10]].altmidi = distinctNotes[closest];
-    console.log("moved from " + currentNote[1] + " to " + closest + " - " + target);
-    chartedNotes[note] = max(chartedNotes[pushToNote] - n, 0);
   }
 }
 

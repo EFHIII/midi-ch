@@ -968,11 +968,7 @@ function loadHTMLcontent() {
     tracks: []
   };
   for(let i = 0; i < currentMidi.tracks.length; i++) {
-    if(i == 0) {
-      settings.tracks[i] = true;
-    } else {
-      settings.tracks[i] = false;
-    }
+    settings.tracks[i] = false;
     htmlContent.innerHTML += `<div class="custom-control custom-checkbox">
       <input type="checkbox" ` + (settings.tracks[i] ? 'checked="true"' : '') + ` class="custom-control-input" onClick="toggleTrack(` + i + `)" id='customCheck` + i + `'>
       <label class="custom-control-label" for="customCheck` + i + `">` + currentMidi.tracks[i].name + ' - ' + currentMidi.tracks[i].instrument.family + ': ' + currentMidi.tracks[i].instrument.name + `</label><br>

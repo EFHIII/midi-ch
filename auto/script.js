@@ -599,20 +599,20 @@ function chartDrums(track) {
       0, //6
       0, //7
       currentMidi.tracks[track].notes[note].midi, //8
-      i, //9
+      track, //9
       note, //10
       [
-        document.getElementById(`midi${i}-${currentMidi.tracks[track].notes[note].midi}-1`).checked,
-        document.getElementById(`midi${i}-${currentMidi.tracks[track].notes[note].midi}-2`).checked,
-        document.getElementById(`midi${i}-${currentMidi.tracks[track].notes[note].midi}-3`).checked,
-        document.getElementById(`midi${i}-${currentMidi.tracks[track].notes[note].midi}-4`).checked,
-        document.getElementById(`midi${i}-${currentMidi.tracks[track].notes[note].midi}-5`).checked,
-        document.getElementById(`midi${i}-${currentMidi.tracks[track].notes[note].midi}-6`).checked,
-        document.getElementById(`midi${i}-${currentMidi.tracks[track].notes[note].midi}-7`).checked,
-        document.getElementById(`midi${i}-${currentMidi.tracks[track].notes[note].midi}-8`).checked,
-        document.getElementById(`midi${i}-${currentMidi.tracks[track].notes[note].midi}-11`).checked,
-        document.getElementById(`midi${i}-${currentMidi.tracks[track].notes[note].midi}-9`).checked,
-        document.getElementById(`midi${i}-${currentMidi.tracks[track].notes[note].midi}-10`).checked,
+        document.getElementById(`midi${track}-${currentMidi.tracks[track].notes[note].midi}-1`).checked,
+        document.getElementById(`midi${track}-${currentMidi.tracks[track].notes[note].midi}-2`).checked,
+        document.getElementById(`midi${track}-${currentMidi.tracks[track].notes[note].midi}-3`).checked,
+        document.getElementById(`midi${track}-${currentMidi.tracks[track].notes[note].midi}-4`).checked,
+        document.getElementById(`midi${track}-${currentMidi.tracks[track].notes[note].midi}-5`).checked,
+        document.getElementById(`midi${track}-${currentMidi.tracks[track].notes[note].midi}-6`).checked,
+        document.getElementById(`midi${track}-${currentMidi.tracks[track].notes[note].midi}-7`).checked,
+        document.getElementById(`midi${track}-${currentMidi.tracks[track].notes[note].midi}-8`).checked,
+        document.getElementById(`midi${track}-${currentMidi.tracks[track].notes[note].midi}-11`).checked,
+        document.getElementById(`midi${track}-${currentMidi.tracks[track].notes[note].midi}-9`).checked,
+        document.getElementById(`midi${track}-${currentMidi.tracks[track].notes[note].midi}-10`).checked,
       ], //11
       drumNames[kit][currentMidi.tracks[track].notes[note].midi].split(' ').join('_') //12
     ]);
@@ -831,6 +831,7 @@ loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.gi
       }
     }
     for(let i = 0; i < realTracks.length; i++) {
+      if(mapping[i] !== undefined){continue;}
       for(let j = 0; j < 4; j++) {
         if(instruments[j].length > 0) {
           mapping[i] = j;

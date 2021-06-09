@@ -50,6 +50,9 @@ function parseFile(file) {
     for(let temp in currentMidi.header.tempos) {
       currentMidi.header.tempos[temp].time = midi.header.tempos[temp].time;
     }
+    for(let track in currentMidi.tracks) {
+      currentMidi.tracks[track].instrument.percussion = midi.tracks[track].instrument.percussion;
+    }
     loadHTMLcontent();
   }
   reader.readAsArrayBuffer(file)
@@ -675,7 +678,8 @@ function loadHTMLcontent() {
   };
   for(let i = currentMidi.tracks.length - 1; i >= 0; i--) {
     // check if the instrument is empty
-    if(currentMidi.tracks[i].notes.length == 0) {
+    if(currentMidi.tracks[i].notes.length == 0 ||
+      currentMidi.tracks[i].instrument.percussion) {
       currentMidi.tracks.splice(i, 1);
     }
   }

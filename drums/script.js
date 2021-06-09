@@ -266,12 +266,14 @@ function loadSettings() {
       continue;
     }
 
-    if(unChartedNotes[i][8]) {
+    if(unChartedNotes[i][11][9]) {
       //notesString += `  ${(twoSec + unChartedNotes[i][0])} = N 33 0\n`;//accent
     }
 
-    if(chartedNotes[i] === 9) {
+    if(unChartedNotes[i][11][8]) {
       notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = N 32 ' + 0 + '\n';
+    } else if(unChartedNotes[i][11][7]) {
+      notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = N 0 ' + 0 + '\n';
     } else {
       notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = N ' + (((chartedNotes[i] + 2) % 100) / 2 >> 0) + ' ' + 0 + '\n';
       if(chartedNotes[i] % 100 === 2 || chartedNotes[i] % 100 === 4 || chartedNotes[i] % 100 === 6) {

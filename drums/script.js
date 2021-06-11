@@ -1060,7 +1060,7 @@ function keyPressed() {
       delBot(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4)
     }
     if(keyIsDown(DELETE)) {
-      delBot(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4)
+      delAll(preview.time - 0.2 * tv + preview.scale * 0.4, preview.time + preview.scale * 0.4)
     }
 
     if(keyIsDown(LEFT_ARROW)) {

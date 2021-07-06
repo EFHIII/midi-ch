@@ -624,7 +624,7 @@ function chartDrums(track) {
   unChartedNotes.sort((a, b) => a[0] + a[8] / 128 - b[0] - b[8] / 128);
   for(let i = 1; i < unChartedNotes.length; i++) {
     if(unChartedNotes[i - 1][0] == unChartedNotes[i][0] && unChartedNotes[i - 1][8] == unChartedNotes[i][8]) {
-      unChartedNotes[i - 1][5] = max(unChartedNotes[i - 1][5], unChartedNotes[i][5]);
+      unChartedNotes[i - 1][5] = Math.max(unChartedNotes[i - 1][5], unChartedNotes[i][5]);
       unChartedNotes.splice(i, 1);
       i--;
     }

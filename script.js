@@ -712,7 +712,7 @@ function loadHTMLcontent() {
       <label for="stripSustain"><span data-toggle="tooltip" title="Sustain gaps are managed automatically, but this will modify their size">Sustain Gap multiplier</span></label>
     </div>
     <div class="custom-control">
-      <input type="number" id="minimumSustain" value=0.5 min="0">
+      <input type="number" id="minimumSustain" value=1 min="0">
       <label for="minimumSustain"><span data-toggle="tooltip" title="Notes shorter than this many seconds get turned into non-sustains">Minimum Sustain</span></label>
     </div>
     <div class="custom-control">

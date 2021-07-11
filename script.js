@@ -481,7 +481,7 @@ function loadSettings() {
 
         bottomOut = false;
         topOut = false;
-        if(realChange === 0 && realChange < crntChange) {
+        if((realChange === 0 || crntChange === 0) && realChange < crntChange) {
           for(let j = 0; j < frets; j++) {
             if(chartedNotes[lastMax - j] === 0) {
               bottomOut = true;
@@ -507,7 +507,7 @@ function loadSettings() {
             }
           }
         }
-        if(realChange === 0 && realChange > crntChange) {
+        if((realChange === 0 || crntChange === 0) && realChange > crntChange) {
           for(let j = 0; j < frets; j++) {
             if(chartedNotes[lastMax - j] === frets - 1) {
               bottomOut = true;

@@ -477,10 +477,66 @@ function loadSettings() {
             }
           }
         }
+
+
+        bottomOut = false;
+        topOut = false;
+        if(realChange === 0 && realChange < crntChange) {
+          for(let j = 0; j < frets; j++) {
+            if(chartedNotes[lastMax - j] === 0) {
+              bottomOut = true;
+            }
+            if(chartedNotes[min + j] === frets - 1) {
+              topOut = true;
+            }
+            if(!bottomOut && lastMax - j >= 0 &&
+              chartedNotes[lastMax - j - 1] + 1 !== chartedNotes[lastMax - j] &&
+              chartedNotes[lastMax - j - 1] !== chartedNotes[lastMax - j]) {
+              for(let k = 0; k <= j; k++) {
+                chartedNotes[lastMax - k]--;
+              }
+              continue clean;
+            }
+            if(!topOut && min + j <= max &&
+              chartedNotes[min + j + 1] - 1 !== chartedNotes[min + j] &&
+              chartedNotes[min + j + 1] !== chartedNotes[min + j]) {
+              for(let k = 0; k <= j; k++) {
+                chartedNotes[min + k]++;
+              }
+              continue clean;
+            }
+          }
+        }
+        if(realChange === 0 && realChange > crntChange) {
+          for(let j = 0; j < frets; j++) {
+            if(chartedNotes[lastMax - j] === frets - 1) {
+              bottomOut = true;
+            }
+            if(chartedNotes[min + j] === 0) {
+              topOut = true;
+            }
+            if(!bottomOut && lastMax - j >= 0 &&
+              chartedNotes[lastMax - j - 1] - 1 !== chartedNotes[lastMax - j] &&
+              chartedNotes[lastMax - j - 1] !== chartedNotes[lastMax - j]) {
+              for(let k = 0; k <= j; k++) {
+                chartedNotes[lastMax - k]++;
+              }
+              continue clean;
+            }
+            if(!topOut && min + j <= max &&
+              chartedNotes[min + j + 1] + 1 !== chartedNotes[min + j] &&
+              chartedNotes[min + j + 1] !== chartedNotes[min + j]) {
+              for(let k = 0; k <= j; k++) {
+                chartedNotes[min + k]--;
+              }
+              continue clean;
+            }
+          }
+        }
         fixable = false;
       }
 
-    if(realChange !== crntChange){
+    if(realChange !== crntChange) {
       chartedNotes = JSON.parse(chartedNotesBuffer);
     }
 

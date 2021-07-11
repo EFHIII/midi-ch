@@ -95,9 +95,6 @@ Each instrument that is checked, upon loading the settings, that instrument will
 ## Custom Events
 When you save and download the resulting chart, custom chart specific events will be put in in the places where the auto-charter acknowledges that it may have done a poor job, which you can see if you open the chart in MoonScraper. This makes it easier to clean up parts that aren't auto charted well by telling you the spots that might need attention.
 
-### `Section_Division`
-The auto-charter divides the chart into manageable chunks, but there's not always a clean transition between these. As a result, there are a few events that may be added around these transitions. At every transition there's a `Section_Division` event in between the last note of one section and the first note of the next.
-
 ### `Bad_Different_Fret`
 If the first note of a section is the same note, but charted as a different fret as the last note of the previous section, then a `Bad_Different_Fret` event will be placed on that note.
 

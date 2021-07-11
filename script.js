@@ -394,6 +394,100 @@ function loadSettings() {
     }
   }
 
+  /*new stuff*/
+  groups.sort((a, b) => a[0] - b[0]);
+
+  let lastMin = 0;
+  let lastMax = Math.max(...groups[0]);
+
+  for(let i = 1; i < groups.length; i++) {
+    let min = lastMax + 1;
+    let max = Math.max(...groups[i]);
+
+    let realChange = Math.min(1, Math.max(-1, unChartedNotes[lastMax][1] - unChartedNotes[min][1]));
+    let crntChange = Math.min(1, Math.max(-1, chartedNotes[lastMax] - chartedNotes[min]));
+
+    let fixable = true;
+
+    let chartedNotesBuffer = JSON.stringify(chartedNotes);
+
+    clean:
+      while(realChange !== crntChange && fixable) {
+        realChange = Math.min(1, Math.max(-1, unChartedNotes[lastMax][1] - unChartedNotes[min][1]));
+        crntChange = Math.min(1, Math.max(-1, chartedNotes[lastMax] - chartedNotes[min]));
+        if(realChange == crntChange) {
+          continue clean;
+        }
+
+        let bottomOut = false;
+        let topOut = false;
+        if(realChange < crntChange) {
+          for(let j = 0; j < frets; j++) {
+            if(chartedNotes[lastMax - j] === 0) {
+              bottomOut = true;
+            }
+            if(chartedNotes[min + j] === frets - 1) {
+              topOut = true;
+            }
+            if(!bottomOut && lastMax - j >= 0 &&
+              chartedNotes[lastMax - j - 1] + 1 !== chartedNotes[lastMax - j] &&
+              chartedNotes[lastMax - j - 1] - 1 !== chartedNotes[lastMax - j] &&
+              chartedNotes[lastMax - j - 1] !== chartedNotes[lastMax - j]) {
+              for(let k = 0; k <= j; k++) {
+                chartedNotes[lastMax - k]--;
+              }
+              continue clean;
+            }
+            if(!topOut && min + j <= max &&
+              chartedNotes[min + j + 1] - 1 !== chartedNotes[min + j] &&
+              chartedNotes[min + j + 1] + 1 !== chartedNotes[min + j] &&
+              chartedNotes[min + j + 1] !== chartedNotes[min + j]) {
+              for(let k = 0; k <= j; k++) {
+                chartedNotes[min + k]++;
+              }
+              continue clean;
+            }
+          }
+        }
+        if(realChange > crntChange) {
+          for(let j = 0; j < frets; j++) {
+            if(chartedNotes[lastMax - j] === frets - 1) {
+              bottomOut = true;
+            }
+            if(chartedNotes[min + j] === 0) {
+              topOut = true;
+            }
+            if(!bottomOut && lastMax - j >= 0 &&
+              chartedNotes[lastMax - j - 1] - 1 !== chartedNotes[lastMax - j] &&
+              chartedNotes[lastMax - j - 1] + 1 !== chartedNotes[lastMax - j] &&
+              chartedNotes[lastMax - j - 1] !== chartedNotes[lastMax - j]) {
+              for(let k = 0; k <= j; k++) {
+                chartedNotes[lastMax - k]++;
+              }
+              continue clean;
+            }
+            if(!topOut && min + j <= max &&
+              chartedNotes[min + j + 1] + 1 !== chartedNotes[min + j] &&
+              chartedNotes[min + j + 1] - 1 !== chartedNotes[min + j] &&
+              chartedNotes[min + j + 1] !== chartedNotes[min + j]) {
+              for(let k = 0; k <= j; k++) {
+                chartedNotes[min + k]--;
+              }
+              continue clean;
+            }
+          }
+        }
+        fixable = false;
+      }
+
+    if(realChange !== crntChange){
+      chartedNotes = JSON.parse(chartedNotesBuffer);
+    }
+
+    lastMin = min;
+    lastMax = max;
+  }
+
   /*-- End KA Import --*/
 
   for(let i = 0; i < chartedNotes.length; i++) {
@@ -472,47 +566,14 @@ function loadSettings() {
     let duration = unChartedNotes[i][2];
     if(duration > 0) {
       let strip = false;
-      let cTempo = getTempo(unChartedNotes[i][3] + unChartedNotes[i][6]) / 60;
-      stripAmount = 1;
-
-      if(cTempo >= 16) {
-        stripAmount = 1;
-      } else if(cTempo >= 8) {
-        stripAmount = 1 / 2;
-      } else if(cTempo >= 5) {
-        stripAmount = 1 / 4;
-      } else if(cTempo >= 3) {
-        stripAmount = 1 / 8;
-      } else if(cTempo >= 2.5) {
-        stripAmount = 1 / 12;
-      } else if(cTempo >= 1.8) {
-        stripAmount = 1 / 16;
-      } else if(cTempo >= 0.8) {
-        stripAmount = 1 / 32;
-      } else if(cTempo >= 0.4) {
-        stripAmount = 1 / 64;
-      } else if(cTempo >= 0.2) {
-        stripAmount = 1 / 128;
-      } else if(cTempo >= 0.1) {
-        stripAmount = 1 / 256;
-      }
-      /*
-      if(cTempo>=8){stripAmount=1/2;}
-      else if(cTempo>=4){stripAmount=1/4;}
-      else if(cTempo>=2){stripAmount=1/8;}
-      else if(cTempo>=1){stripAmount=1/12;}
-      else if(cTempo>=0.5){stripAmount=1/16;}
-      else if(cTempo>=0.25){stripAmount=1/32;}
-      else if(cTempo>=0.12){stripAmount=1/64;}
-      else if(cTempo>=0.05){stripAmount=1/128;}
-      else if(cTempo>=0.02){stripAmount=1/256;}
-      else if(cTempo>=0.01){stripAmount=1/512;}
-      */
-
-      stripAmount *= stripSustain;
+      stripAmount = 0.5 * stripSustain;
       for(let j = 0; j < chartedNotes.length; j++) {
-        if(unChartedNotes[i][0] != unChartedNotes[j][0] && unChartedNotes[j][0] - unChartedNotes[i][0] > 0 && unChartedNotes[i][0] + duration + stripAmount * preview.ppq * cTempo >= unChartedNotes[j][0]) {
-          if(!extendedSustains || chartedNotes[i] == chartedNotes[j] || Math.abs(unChartedNotes[i][0] + duration - unChartedNotes[j][0]) < noteTolerance) {
+        if(unChartedNotes[i][0] != unChartedNotes[j][0] &&
+          unChartedNotes[j][0] - unChartedNotes[i][0] > 0 &&
+          unChartedNotes[i][0] + duration + stripAmount * preview.ppq >= unChartedNotes[j][0]) {
+          if(!extendedSustains ||
+            chartedNotes[i] == chartedNotes[j] ||
+            Math.abs(unChartedNotes[i][0] + duration - unChartedNotes[j][0]) < noteTolerance * preview.ppq) {
             duration = unChartedNotes[j][0] - unChartedNotes[i][0];
             strip = true;
             j = chartedNotes.length;
@@ -520,14 +581,14 @@ function loadSettings() {
         }
       }
       if(strip) {
-        duration -= stripAmount * preview.ppq * cTempo;
+        duration -= stripAmount * preview.ppq;
       }
-      if(duration < minimumSustain * preview.ppq * cTempo) {
+      if(duration < minimumSustain * preview.ppq) {
         duration = 0;
       }
       unChartedNotes[i][2] = duration;
     }
-    notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = N ' + (openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes) + ' ' + Math.round(duration) + '\n';
+    notesString += `  ${twoSec + unChartedNotes[i][0]} = N ${openNotes && chartedNotes[i] - openNotes === -1 ? 7 : chartedNotes[i] - openNotes} ${Math.round(duration)}\n`;
 
     //events
     let myLastNote = i;
@@ -535,17 +596,14 @@ function loadSettings() {
       myLastNote--;
     }
     let lastT = unChartedNotes[myLastNote][0];
-    if(findInGroups(i)[1] === 0) {
-      notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Section_Division\n';
-    }
     while(myLastNote > 0 && unChartedNotes[myLastNote][0] == lastT) {
-      if(myLastNote > 0 && unChartedNotes[myLastNote][1] == unChartedNotes[i][1] && chartedNotes[myLastNote] != chartedNotes[i]) {
+      if(unChartedNotes[myLastNote][1] == unChartedNotes[i][1] && chartedNotes[myLastNote] != chartedNotes[i]) {
         notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Different_Fret\n';
-      } else if(myLastNote > 0 && unChartedNotes[myLastNote][1] < unChartedNotes[i][1] && chartedNotes[myLastNote] >= chartedNotes[i]) {
+      } else if(unChartedNotes[myLastNote][1] < unChartedNotes[i][1] && chartedNotes[myLastNote] >= chartedNotes[i]) {
         notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Too_Low\n';
-      } else if(myLastNote > 0 && unChartedNotes[myLastNote][1] > unChartedNotes[i][1] && chartedNotes[myLastNote] <= chartedNotes[i]) {
+      } else if(unChartedNotes[myLastNote][1] > unChartedNotes[i][1] && chartedNotes[myLastNote] <= chartedNotes[i]) {
         notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Too_High\n';
-      } else if(myLastNote > 0 && unChartedNotes[myLastNote][1] != unChartedNotes[i][1] && chartedNotes[i] == chartedNotes[myLastNote]) {
+      } else if(unChartedNotes[myLastNote][1] != unChartedNotes[i][1] && chartedNotes[i] == chartedNotes[myLastNote]) {
         notesString += '  ' + (twoSec + unChartedNotes[i][0]) + ' = E Bad_Same_Fret\n';
       }
       myLastNote--;
@@ -678,8 +736,7 @@ function loadHTMLcontent() {
   };
   for(let i = currentMidi.tracks.length - 1; i >= 0; i--) {
     // check if the instrument is empty
-    if(currentMidi.tracks[i].notes.length == 0 ||
-      currentMidi.tracks[i].instrument.percussion) {
+    if(currentMidi.tracks[i].notes.length == 0) {
       currentMidi.tracks.splice(i, 1);
     }
   }
@@ -1228,10 +1285,6 @@ function myDraw() {
       ellipse(unChartedNotes[note][8] / 88 * width, Y, width / 88, width / 6);
       drawNote(chartedNotes[note] - openNotes, Y, '', (sus) / preview.scale * height);
       noStroke();
-      if(findInGroups(note)[1] === 0) {
-        fill(255, 0, 0, 200);
-        rect(0, Y - 4, width, 8);
-      }
       //test
       let myLastNote = note;
       while(myLastNote > 0 && unChartedNotes[myLastNote][0] == currentNote[0]) {

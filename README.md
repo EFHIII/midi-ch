@@ -96,10 +96,10 @@ Each instrument that is checked, upon loading the settings, that instrument will
 When you save and download the resulting chart, custom chart specific events will be put in in the places where the auto-charter acknowledges that it may have done a poor job, which you can see if you open the chart in MoonScraper. This makes it easier to clean up parts that aren't auto charted well by telling you the spots that might need attention.
 
 ### `Bad_Different_Fret`
-If the first note of a section is the same note, but charted as a different fret as the last note of the previous section, then a `Bad_Different_Fret` event will be placed on that note.
+If a note is the same note as the previous note, but is charted as a different fret, then a `Bad_Different_Fret` event will be placed on that note.
 
 ### `Bad_Too_low`
-If the first note of a section is a higher note than the last note of the previous section, but is charted as a lower fret, then a `Bad_Too_Low` event will be placed on that note.
+If a note is higher than the previous note, but is charted as a lower fret, then a `Bad_Too_Low` event will be placed on that note.
 
 ### `Bad_Too_High`
-If the first note of a section is a lower note than the last note of the previous section, but is charted as a higher fret, then a `Bad_Too_High` event will be placed on that note.
+If a note is lower than the previous note, but is charted as a higher fret, then a `Bad_Too_High` event will be placed on that note.

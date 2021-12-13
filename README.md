@@ -6,7 +6,7 @@ If you're lazy: https://efhiii.github.io/midi-ch/auto (automatically provides fu
 
 link: https://efhiii.github.io/midi-ch/
 
-example chart: https://youtu.be/Pv_2j9EDV_k
+Outdated example chart (the charting algorithm has been improved since then): https://youtu.be/Pv_2j9EDV_k
 
 Slightly outdated tutorial: https://youtu.be/qp49H-Ns2yg
 

@@ -422,13 +422,20 @@ function loadSettings() {
         let bottomOut = false;
         let topOut = false;
         if(realChange < crntChange) {
-          for(let j = 0; j < frets; j++) {
+          let extra = 0;
+          for(let j = 0; j < frets + extra; j++) {
             if(chartedNotes[lastMax - j] === 0) {
               bottomOut = true;
             }
             if(chartedNotes[min + j] === frets - 1) {
               topOut = true;
             }
+
+            if(chartedNotes[lastMax - j - 1] === chartedNotes[lastMax - j] ||
+              chartedNotes[lastMax + j + 1] === chartedNotes[lastMax + j]){
+              extra++;
+            }
+
             if(!bottomOut && lastMax - j >= 0 &&
               chartedNotes[lastMax - j - 1] + 1 !== chartedNotes[lastMax - j] &&
               chartedNotes[lastMax - j - 1] - 1 !== chartedNotes[lastMax - j] &&
@@ -538,6 +545,36 @@ function loadSettings() {
 
     if(realChange !== crntChange) {
       chartedNotes = JSON.parse(chartedNotesBuffer);
+      if(realChange === 0) {
+        let k = 1;
+        let diffs = [0, 0];
+        while(min + k < chartedNotes.length && chartedNotes[min + k] === chartedNotes[min]){
+          k++;
+        }
+        diffs[0] = Math.abs(chartedNotes[min] - chartedNotes[min + k]);
+
+        k = 0;
+        while(lastMax - k >= 0 && chartedNotes[lastMax - k] === chartedNotes[lastMax]){
+          k++;
+        }
+        diffs[1] = Math.abs(chartedNotes[lastMax] - chartedNotes[lastMax - k]);
+
+        k = 0;
+        if(diffs[0] < diffs[1]){
+          let val = chartedNotes[min];
+          while(min + k < chartedNotes.length && chartedNotes[min + k] === val){
+            chartedNotes[min + k] = chartedNotes[lastMax];
+            k++;
+          }
+        }
+        else{
+          let val = chartedNotes[lastMax];
+          while(lastMax - k >= 0 && chartedNotes[lastMax - k] === val){
+            chartedNotes[lastMax - k] = chartedNotes[min];
+            k++;
+          }
+        }
+      }
     }
 
     lastMin = min;

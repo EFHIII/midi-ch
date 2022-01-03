@@ -26,7 +26,7 @@ function parseFile(file) {
     currentDoc = parser.parseFromString(e.target.result, "text/xml");
     extractLyrics();
   }
-  reader.readAsText(file)
+  reader.readAsText(file);
 }
 
 let resolution = 480;
@@ -37,6 +37,7 @@ function extractLyrics() {
     document.getElementById('ans').value = `Provide a MusicXML file above`;
     return;
   }
+  doc = currentDoc;
 
   let parts = doc.getElementsByTagName('part');
 

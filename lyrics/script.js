@@ -16,12 +16,15 @@ if(!(window.File && window.FileReader && window.FileList && window.Blob)) {
   })
 }
 
+let currentDoc;
+
 function parseFile(file) {
   //read the file
   const reader = new FileReader()
   reader.onload = function(e) {
     parser = new DOMParser();
-    extractLyrics(parser.parseFromString(e.target.result, "text/xml"));
+    currentDoc = parser.parseFromString(e.target.result, "text/xml");
+    extractLyrics();
   }
   reader.readAsText(file)
 }
@@ -29,7 +32,12 @@ function parseFile(file) {
 let resolution = 480;
 let leadingMeasures = 1;
 
-function extractLyrics(doc) {
+function extractLyrics() {
+  if(!currentDoc){
+    document.getElementById('ans').value = `Provide a MusicXML file above`;
+    return;
+  }
+
   let parts = doc.getElementsByTagName('part');
 
   let code = [];
@@ -252,11 +260,13 @@ function copyToClipboard() {
 }
 
 let resHTML = document.getElementById('res');
-resHTML.addEventListener('onChange', _ => {
+resHTML.addEventListener('change', _ => {
   resolution = resHTML.value;
+  extractLyrics();
 });
 
 let silHTML = document.getElementById('sil');
-resHTML.addEventListener('onChange', _ => {
+silHTML.addEventListener('change', _ => {
   leadingMeasures = silHTML.value;
+  extractLyrics();
 });

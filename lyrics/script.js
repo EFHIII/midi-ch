@@ -33,7 +33,7 @@ let resolution = 480;
 let leadingMeasures = 1;
 
 function extractLyrics() {
-  if(!currentDoc){
+  if(!currentDoc) {
     document.getElementById('ans').value = `Provide a MusicXML file above`;
     return;
   }
@@ -51,15 +51,17 @@ function extractLyrics() {
     let timeSignature = [4, 4];
     let beatsPerMeasure = 4;
 
+    lastStart = 0;
+
     for(let measure of measures) {
       let times = measure.getElementsByTagName('time');
       for(let time of times) {
-        let beats = measure.getElementsByTagName('beat');
+        let beats = measure.getElementsByTagName('beats');
         for(let beat of beats) {
           timeSignature[0] = parseFloat(beat.innerHTML);
           beatsPerMeasure = timeSignature[0] * (4 / timeSignature[1]);
         }
-        let beatTypes = measure.getElementsByTagName('beatType');
+        let beatTypes = measure.getElementsByTagName('beat-type');
         for(let beatType of beatTypes) {
           timeSignature[1] = parseFloat(beatType.innerHTML);
           beatsPerMeasure = timeSignature[0] * (4 / timeSignature[1]);
@@ -72,7 +74,7 @@ function extractLyrics() {
       let measureTotal = 0;
       for(let note of notes) {
         let dur = note.getElementsByTagName('duration');
-        if(dur.length > 0) {
+        if(dur.length > 0 && note.getElementsByTagName('chord').length === 0) {
           measureTotal += parseFloat(dur[0].innerHTML);
         }
       }
@@ -83,7 +85,11 @@ function extractLyrics() {
         let syllabic = false;
         let space = 0;
         let endLine = false;
+        lyricsLoop:
         for(let lyric of lyrics) {
+          if(lyric.hasAttribute('number') && lyric.attributes.number.value !== '1'){
+            continue lyricsLoop;
+          }
           let children = lyric.children;
           for(let child of children) {
             switch (child.tagName) {
@@ -121,52 +127,43 @@ function extractLyrics() {
           if(syllabic) {
             txt += '-';
           }
-          if(!needsStart && (
+          let lastLyric = code[code.length - 1];
+          if(!needsStart && at-lastStart > 2 && (
+              at - lastLyric[0] > 2 ||
               txt[0].match(/[A-Z]/) ||
               (
                 code.length > 1 &&
                 (
-                at - code[code.length - 1][0] >= 4 ||
-                (code[code.length - 1][2] && code[code.length - 1][2].length > 0 && (
-                  code[code.length - 1][2][code[code.length - 1][2].length - 1] === ',' ||
-                  code[code.length - 1][2][code[code.length - 1][2].length - 1] === '.' ||
-                  code[code.length - 1][2][code[code.length - 1][2].length - 1] === ':' ||
-                  code[code.length - 1][2][code[code.length - 1][2].length - 1] === ';' ||
-                  code[code.length - 1][2][code[code.length - 1][2].length - 1] === '!' ||
-                  code[code.length - 1][2][code[code.length - 1][2].length - 1] === '?' ||
-                  code[code.length - 1][2][code[code.length - 1][2].length - 1] === '‽'
-                ))
-              )
+                  at - lastLyric[0] >= 4 ||
+                  (lastLyric[2] && lastLyric[2].length > 0 && (
+                    lastLyric[2][lastLyric[2].length - 1] === ',' ||
+                    lastLyric[2][lastLyric[2].length - 1] === '.' ||
+                    lastLyric[2][lastLyric[2].length - 1] === ':' ||
+                    lastLyric[2][lastLyric[2].length - 1] === ';' ||
+                    lastLyric[2][lastLyric[2].length - 1] === '!' ||
+                    lastLyric[2][lastLyric[2].length - 1] === '?' ||
+                    lastLyric[2][lastLyric[2].length - 1] === '‽'
+                  ))
+                )
               )
             )) {
+            lastLyric[2] = lastLyric[2].slice(0, lastLyric[2].length - 1) + lastLyric[2][lastLyric[2].length - 1].replace(/\,/, '');
             needsStart = true;
-            code.push([code[code.length - 1][0] + 0.001, 'phrase_end']);
+            code.push([lastLyric[0] + 0.001, 'phrase_end']);
           }
           if(needsStart) {
+            lastStart = at;
             code.push([at - 0.001, 'phrase_start']);
             needsStart = false;
+            txt = txt[0].toUpperCase() + txt.slice(1);
           }
-          code.push([at, 'lyric', txt]);
+          code.push([at, 'lyric', txt.replace(/\n.*/,'')]);
         }
 
         let dur = note.getElementsByTagName('duration');
-        if(dur.length > 0) {
+        if(dur.length > 0 && note.getElementsByTagName('chord').length === 0) {
           at += parseFloat(dur[0].innerHTML) / measureTotal * beatsPerMeasure;
         }
-/*
-        if(
-          txt.length > 0 && (
-            txt[txt.length - 1] === ',' ||
-            txt[txt.length - 1] === '.' ||
-            txt[txt.length - 1] === ':' ||
-            txt[txt.length - 1] === ';' ||
-            txt[txt.length - 1] === '!' ||
-            txt[txt.length - 1] === '?' ||
-            txt[txt.length - 1] === '‽'
-          )) {
-          code.push([at + 0.001, 'phrase_end']);
-          needsStart = true;
-        }*/
       }
     }
   }
@@ -174,6 +171,7 @@ function extractLyrics() {
   code.sort((a, b) => {
     return a[0] - b[0];
   });
+  code.push([code[code.length-1][0] + 0.001, 'phrase_end']);
 
   let ans = '';
 
@@ -183,18 +181,16 @@ function extractLyrics() {
     let c = code[i];
     let at = c[0];
     if(c[1] === 'phrase_start') {
-      if(at - 4 > lastThing) {
-        at -= 4;
-      } else if(at - 2 > lastThing) {
-        at -= 2;
-      } else if(at - 1 > lastThing) {
-        at -= 1;
-      } else if(at - 0.5 > lastThing) {
+      if(at - 0.5 > lastThing) {
         at -= 0.5;
       } else if(at - 0.25 > lastThing) {
         at -= 0.25;
       } else if(at - 0.125 > lastThing) {
         at -= 0.125;
+      } else if(at - 1/24 > lastThing) {
+        at -= 1/24;
+      } else if(at - 1/48 > lastThing) {
+        at -= 1/48;
       } else {
         at = (at + lastThing) / 2;
       }
@@ -204,9 +200,9 @@ function extractLyrics() {
         at += 4;
       } else {
         let nextThing = code[i + 1][0];
-        if(at + 8 < nextThing) {
+        if(at + 6 < nextThing) {
           at += 4;
-        } else if(at + 4 < nextThing) {
+        } else if(at + 3 < nextThing) {
           at += 2;
         } else if(at + 2 < nextThing) {
           at += 1;
@@ -216,6 +212,10 @@ function extractLyrics() {
           at += 0.25;
         } else if(at + 0.25 < nextThing) {
           at += 0.125;
+        } else if(at + 1/12 < nextThing) {
+          at += 1/24;
+        } else if(at + 1/24 < nextThing) {
+          at += 1/48;
         } else {
           at += (nextThing - at) / 3;
         }
@@ -225,11 +225,10 @@ function extractLyrics() {
     ans += `  ${Math.round((at + 4 * leadingMeasures) * resolution)} = E "${c[1]}${c[2]?' '+c[2]:''}"\n`;
   }
 
-  if(ans.length === 0){
-    if(doc.children[0].innerHTML.indexOf('parsererror') > 0){
+  if(ans.length === 0) {
+    if(doc.children[0].innerHTML.indexOf('parsererror') > 0) {
       ans = `Failed to read file, try changing the file extension to .zip, extracting and using the .xml file found in the extracted folder.`;
-    }
-    else{
+    } else {
       ans = `That file appears to contain no lyrics information.`;
     }
   }

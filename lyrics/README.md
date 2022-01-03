@@ -4,7 +4,7 @@
 link: https://efhiii.github.io/midi-ch/lyrics/
 
 ## How to use
-Select a MusicXML file (`.xml`, `.mxl`, or `.musicxml`). The Lyrics will be extracted, and you will be given back some code that goes into the `[Events]` part of your  `chart` file.
+Select a MusicXML file (`.xml`, `.mxl`, or `.musicxml`). The Lyrics will be extracted, and you will be given back some code that goes into the `[Events]` part of your  `.chart` file.
 
 This works best when the rest of the chart was generated with MIDI-CH already using a MIDI file that's synonymous with the MusicXML file, the reason for MusicXML is MIDI doesn't store lyrics information.
 

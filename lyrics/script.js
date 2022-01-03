@@ -216,6 +216,15 @@ function extractLyrics(doc) {
     ans += `  ${Math.round((at + 4 * leadingMeasures) * resolution)} = E "${c[1]}${c[2]?' '+c[2]:''}"\n`;
   }
 
+  if(ans.length === 0){
+    if(doc.children[0].innerHTML.indexOf('parsererror') > 0){
+      ans = `Failed to read file, try changing the file extension to .zip, extracting and using the .xml file found in the extracted folder.`;
+    }
+    else{
+      ans = `That file appears to contain no lyrics information.`;
+    }
+  }
+
   document.getElementById('ans').value = ans;
 }
 

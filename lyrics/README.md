@@ -1,4 +1,4 @@
-[![Discord Chat](https://img.shields.io/discord/631676095661342752.svg)](https://discord.gg/TkXTuhh)
+[![Discord Chat](https://img.shields.io/discord/631676095661342752.svg)](https://discord.gg/jepY2DkJkZ)
 # MusicXML Lyrics To Clone Hero
 
 link: https://efhiii.github.io/midi-ch/lyrics/

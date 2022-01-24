@@ -431,8 +431,8 @@ function loadSettings() {
               topOut = true;
             }
 
-            if(chartedNotes[lastMax - j - 1] === chartedNotes[lastMax - j] ||
-              chartedNotes[lastMax + j + 1] === chartedNotes[lastMax + j]){
+            if((lastMax - j > 0 && chartedNotes[lastMax - j - 1] === chartedNotes[lastMax - j]) ||
+              (lastMax + j + 1 < chartedNotes.length - 1 && chartedNotes[lastMax + j + 1] === chartedNotes[lastMax + j])){
               extra++;
             }
 

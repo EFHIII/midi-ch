@@ -3,7 +3,7 @@
 
 link: https://efhiii.github.io/midi-ch/drums/
 
-If you have questions, feel free to ask me on Discord: EFHIII#0462 or here: https://discord.gg/TkXTuhh
+If you have questions, feel free to ask me on Discord: https://discord.gg/jepY2DkJkZ
 
 # Keyboard shortcuts
 - SPACE

@@ -207,7 +207,7 @@ function loadSettings() {
             document.getElementById(`midi${i}-${currentMidi.tracks[i].notes[note].midi}-9`).checked,
             document.getElementById(`midi${i}-${currentMidi.tracks[i].notes[note].midi}-10`).checked,
           ], //11
-          drumNames[kit][currentMidi.tracks[i].notes[note].midi].split(' ').join('_') //12
+          drumNames[kit][currentMidi.tracks[i].notes[note].midi]?drumNames[kit][currentMidi.tracks[i].notes[note].midi].split(' ').join('_'):'MIDI '+currentMidi.tracks[i].notes[note].midi //12
         ]);
         if(currentMidi.tracks[i].notes[note].ticks > songLength) {
           songLength = currentMidi.tracks[i].notes[note].ticks;

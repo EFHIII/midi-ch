@@ -10,7 +10,7 @@ Outdated example chart (the charting algorithm has been improved since then): ht
 
 Slightly outdated tutorial: https://youtu.be/qp49H-Ns2yg
 
-If you have questions, feel free to ask me on Discord: @efhiii or here: https://discord.gg/CuXJx8vJ2y
+If you have questions, feel free to ask me on Discord @efhiii: https://discord.gg/CuXJx8vJ2y
 
 # Keyboard shortcuts
 - SPACE

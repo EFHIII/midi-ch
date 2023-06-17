@@ -1,9 +1,10 @@
+[![Discord Chat](https://img.shields.io/discord/934204308168261682.svg)](https://discord.gg/CuXJx8vJ2y)
 # .midi to Clone Hero
 .midi to [Clone Hero](https://clonehero.net/) converter
 
 link: https://efhiii.github.io/midi-ch/drums/
 
-If you have questions, feel free to ask me on Discord: https://discord.gg/jepY2DkJkZ
+If you have questions, feel free to ask me on Discord @efhiii: https://discord.gg/CuXJx8vJ2y
 
 # Keyboard shortcuts
 - SPACE

@@ -1,4 +1,4 @@
-[![Discord Chat](https://img.shields.io/discord/934204308168261682.svg)](https://discord.gg/jepY2DkJkZ)
+[![Discord Chat](https://img.shields.io/discord/934204308168261682.svg)](https://discord.gg/CuXJx8vJ2y)
 # .midi to Clone Hero
 .midi to [Clone Hero](https://clonehero.net/) converter
 
@@ -10,7 +10,7 @@ Outdated example chart (the charting algorithm has been improved since then): ht
 
 Slightly outdated tutorial: https://youtu.be/qp49H-Ns2yg
 
-If you have questions, feel free to ask me on Discord: EFHIII#4893 or here: https://discord.gg/CuXJx8vJ2y
+If you have questions, feel free to ask me on Discord: @efhiii or here: https://discord.gg/CuXJx8vJ2y
 
 # Keyboard shortcuts
 - SPACE

@@ -4,6 +4,8 @@
 
 link: https://efhiii.github.io/midi-ch/drums/
 
+To see all tracks, including melodic tracks (even though they don't chart well) use: https://efhiii.github.io/midi-ch/drums/?all-tracks=true
+
 If you have questions, feel free to ask me on Discord @efhiii: https://discord.gg/CuXJx8vJ2y
 
 # Keyboard shortcuts

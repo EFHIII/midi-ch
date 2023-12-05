@@ -27,6 +27,20 @@ if(!(window.File && window.FileReader && window.FileList && window.Blob)) {
 let currentMidi = null;
 let settings;
 
+FORCE_ALL_TRACKS = false;
+
+(new URL(window.location.href)).searchParams.forEach((value, name) => {
+  switch(name) {
+    case 'all-tracks':
+    case 'all':
+      if(value.toLowerCase() === 'true') {
+        FORCE_ALL_TRACKS = true;
+      }
+      break;
+  }
+});
+
+
 function parseFile(file) {
   //read the file
   const reader = new FileReader()
@@ -420,9 +434,16 @@ function loadHTMLcontent() {
   };
   for(let i = currentMidi.tracks.length - 1; i >= 0; i--) {
     // check if the instrument is empty
-    if(currentMidi.tracks[i].notes.length == 0 ||
-      !currentMidi.tracks[i].instrument.percussion) {
-      currentMidi.tracks.splice(i, 1);
+    if(FORCE_ALL_TRACKS) {
+      if(currentMidi.tracks[i].notes.length == 0) {
+        currentMidi.tracks.splice(i, 1);
+      }
+    }
+    else {
+      if(currentMidi.tracks[i].notes.length == 0 ||
+        !currentMidi.tracks[i].instrument.percussion) {
+        currentMidi.tracks.splice(i, 1);
+      }
     }
   }
 

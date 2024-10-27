@@ -725,15 +725,15 @@ diff_guitarghl = -1
 diff_bassghl = -1
 preview_start_time = ` + (1000 * preview.leadingSeconds >> 0) + `
 frets = 0
-charter = <color=#0064c8>Edward Haas</color>
+charter = <color=#0064c8>@EFHIII</color>
 icon = efhiii
-loading_phrase = Generated With Edward's midi-CH auto charter: https://efhiii.github.io/midi-ch/
+loading_phrase = Generated With @EFHIII's midi-CH auto charter: https://efhiii.github.io/midi-ch/
 
 `);
   zip.file("notes.chart", `[Song]
 {
   Name = "` + currentMidi.name + `"
-  Charter = "Edward Haas"
+  Charter = "@EFHIII"
   Year = "` + (currentMidi.header.meta.filter(e => e.type.toLowerCase() === "year").length ? currentMidi.header.meta.filter(e => e.type.toLowerCase() === "year")[0].text : 'Unknown') + `"
   Offset = 0
   Resolution = ` + preview.ppq + `

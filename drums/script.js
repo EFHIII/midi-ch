@@ -460,7 +460,7 @@ function loadHTMLcontent() {
     }
     let kit = 'standard';
     for(let k in drumNames) {
-      if(currentMidi.tracks[i].instrument.name.indexOf(k) >= 0) {
+      if(currentMidi.tracks[i].instrument.name && currentMidi.tracks[i].instrument.name.indexOf(k) >= 0) {
         kit = k;
       }
     }
